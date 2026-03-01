@@ -23,6 +23,16 @@ export default defineConfig(({ mode }) => {
       build: {
         outDir: 'dist',
         sourcemap: false,
+        chunkSizeWarningLimit: 700,
+        rollupOptions: {
+          output: {
+            manualChunks(id) {
+              if (id.includes('node_modules/recharts') || id.includes('node_modules/d3')) {
+                return 'charts';
+              }
+            },
+          },
+        },
       },
     };
 });
