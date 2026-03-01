@@ -1,0 +1,203 @@
+[
+  {
+    "id": "fulbright-vietnam",
+    "name": "Fulbright Vietnam",
+    "country": "USA",
+    "countryCode": "US",
+    "countryFlag": "🇺🇸",
+    "value": "100% học phí",
+    "level": "Thạc sĩ",
+    "deadline": "15/04/2026",
+    "image": "https://images.unsplash.com/photo-1569447891824-7a1758aa73a2?w=800&q=80",
+    "description": "Chương trình học bổng Fulbright là một trong những chương trình trao đổi giáo dục quốc tế lớn nhất thế giới, được tài trợ bởi Chính phủ Hoa Kỳ. Học bổng dành cho sinh viên Việt Nam theo học chương trình Thạc sĩ tại các trường đại học hàng đầu của Mỹ.",
+    "benefits": [
+      "Học phí toàn phần",
+      "Sinh hoạt phí hàng tháng",
+      "Bảo hiểm y tế",
+      "Vé máy bay khứ hồi",
+      "Hỗ trợ ổn định ban đầu"
+    ],
+    "requirements": [
+      "Tốt nghiệp Đại học loại Khá trở lên",
+      "TOEFL iBT >= 80 hoặc IELTS >= 6.5",
+      "Ít nhất 2 năm kinh nghiệm làm việc",
+      "Cam kết trở về Việt Nam sau khi hoàn thành"
+    ],
+    "fields": ["Chính sách công", "Giáo dục", "Kinh tế", "STEM", "Nghệ thuật"],
+    "applicationUrl": "https://vn.usembassy.gov/education-culture/fulbright",
+    "hostInstitution": "Các trường đại học Mỹ",
+    "duration": "2 năm",
+    "openDate": "01/02/2026",
+    "status": "Đang mở đơn",
+    "lastUpdated": "2026-01-15T10:00:00Z",
+    "updatedBy": "admin"
+  },
+  {
+    "id": "chevening-scholarship",
+    "name": "Chevening Scholarship",
+    "country": "UK",
+    "countryCode": "GB",
+    "countryFlag": "🇬🇧",
+    "value": "100% học phí",
+    "level": "Thạc sĩ",
+    "deadline": "01/11/2026",
+    "image": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80",
+    "description": "Chevening là chương trình học bổng toàn cầu của Chính phủ Anh, trao cơ hội cho các nhà lãnh đạo tương lai theo học chương trình Thạc sĩ 1 năm tại bất kỳ trường đại học nào ở Vương quốc Anh.",
+    "benefits": [
+      "Học phí toàn phần",
+      "Sinh hoạt phí hàng tháng",
+      "Vé máy bay khứ hồi",
+      "Trợ cấp đi lại & làm luận văn",
+      "Tham gia mạng lưới Chevening Alumni toàn cầu"
+    ],
+    "requirements": [
+      "Công dân Việt Nam",
+      "Có bằng Đại học tương đương UK 2:1",
+      "Ít nhất 2 năm kinh nghiệm làm việc",
+      "IELTS >= 6.5 (không band nào dưới 5.5)",
+      "Chọn 3 chương trình học tại UK"
+    ],
+    "fields": ["Chính sách công", "Luật", "Kinh tế", "Truyền thông", "Công nghệ"],
+    "applicationUrl": "https://www.chevening.org/scholarship/vietnam",
+    "hostInstitution": "Các trường đại học Anh Quốc",
+    "duration": "1 năm",
+    "openDate": "01/08/2026",
+    "status": "Sắp mở đơn",
+    "lastUpdated": "2026-01-20T08:30:00Z",
+    "updatedBy": "admin"
+  },
+  {
+    "id": "asean-scholarship",
+    "name": "ASEAN Scholarship",
+    "country": "Singapore",
+    "countryCode": "SG",
+    "countryFlag": "🇸🇬",
+    "value": "Toàn phần",
+    "level": "Đại học",
+    "deadline": "01/03/2026",
+    "image": "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&q=80",
+    "description": "Học bổng ASEAN do Bộ Giáo dục Singapore tài trợ, dành cho học sinh xuất sắc từ các nước ASEAN theo học tại các trường trung học và đại học hàng đầu Singapore.",
+    "benefits": [
+      "Miễn toàn bộ học phí",
+      "Trợ cấp sinh hoạt hàng năm",
+      "Trợ cấp nhà ở",
+      "Vé máy bay 1 lần/năm",
+      "Bảo hiểm y tế"
+    ],
+    "requirements": [
+      "Công dân các nước ASEAN",
+      "Thành tích học tập xuất sắc",
+      "Vượt qua kỳ thi tuyển chọn",
+      "Phỏng vấn trực tiếp tại Singapore"
+    ],
+    "fields": ["Kỹ thuật", "Khoa học", "Kinh doanh", "Nhân văn", "Nghệ thuật"],
+    "applicationUrl": "https://www.moe.gov.sg/financial-matters/awards-scholarships/asean-scholarships",
+    "hostInstitution": "Các trường đại học Singapore (NUS, NTU, SMU)",
+    "duration": "3-4 năm",
+    "openDate": "01/01/2026",
+    "status": "Đang mở đơn",
+    "lastUpdated": "2026-02-01T09:00:00Z",
+    "updatedBy": "admin"
+  },
+  {
+    "id": "mext-scholarship",
+    "name": "MEXT Scholarship",
+    "country": "Nhật Bản",
+    "countryCode": "JP",
+    "countryFlag": "🇯🇵",
+    "value": "Toàn phần",
+    "level": "Đại học",
+    "deadline": "15/04/2026",
+    "image": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80",
+    "description": "Học bổng MEXT (Monbukagakusho) do Chính phủ Nhật Bản tài trợ, là một trong những học bổng toàn phần uy tín nhất châu Á. Chương trình bao gồm 1 năm học tiếng Nhật trước khi vào chương trình chính.",
+    "benefits": [
+      "Miễn toàn bộ học phí",
+      "Sinh hoạt phí ~143,000 JPY/tháng",
+      "Vé máy bay khứ hồi",
+      "1 năm học tiếng Nhật miễn phí",
+      "Không cần hoàn trả"
+    ],
+    "requirements": [
+      "Dưới 25 tuổi (Đại học) hoặc 35 tuổi (Thạc sĩ)",
+      "GPA >= 2.30/3.00",
+      "Vượt qua kỳ thi viết và phỏng vấn",
+      "Sức khỏe tốt"
+    ],
+    "fields": ["Kỹ thuật", "Khoa học tự nhiên", "Nông nghiệp", "Y học", "Nhân văn"],
+    "applicationUrl": "https://www.vn.emb-japan.go.jp/itpr_ja/scholarship.html",
+    "hostInstitution": "Các trường đại học Nhật Bản",
+    "duration": "4-5 năm (bao gồm 1 năm tiếng Nhật)",
+    "openDate": "01/04/2026",
+    "status": "Sắp mở đơn",
+    "lastUpdated": "2026-02-10T14:00:00Z",
+    "updatedBy": "admin"
+  },
+  {
+    "id": "australia-awards",
+    "name": "Australia Awards",
+    "country": "Úc",
+    "countryCode": "AU",
+    "countryFlag": "🇦🇺",
+    "value": "100% học phí",
+    "level": "Thạc sĩ",
+    "deadline": "30/04/2026",
+    "image": "https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=800&q=80",
+    "description": "Australia Awards Scholarships là học bổng do Chính phủ Australia tài trợ cho công dân các nước đang phát triển, nhằm đóng góp vào nhu cầu phát triển của quốc gia đối tác.",
+    "benefits": [
+      "Học phí toàn phần",
+      "Sinh hoạt phí (CLE)",
+      "Vé máy bay khứ hồi",
+      "Bảo hiểm y tế (OSHC)",
+      "Trợ cấp sách vở & tài liệu",
+      "Khóa học tiếng Anh trước chương trình (nếu cần)"
+    ],
+    "requirements": [
+      "Công dân Việt Nam, đang sống tại Việt Nam",
+      "Không đang phục vụ quân đội",
+      "Có ít nhất 2 năm kinh nghiệm làm việc",
+      "IELTS >= 6.5 hoặc TOEFL iBT >= 79",
+      "Cam kết trở về Việt Nam ít nhất 2 năm"
+    ],
+    "fields": ["Phát triển bền vững", "Quản trị công", "Kinh tế", "Giáo dục", "Y tế"],
+    "applicationUrl": "https://www.dfat.gov.au/people-to-people/australia-awards",
+    "hostInstitution": "Các trường đại học Úc",
+    "duration": "1-2 năm",
+    "openDate": "01/02/2026",
+    "status": "Đang mở đơn",
+    "lastUpdated": "2026-02-15T11:00:00Z",
+    "updatedBy": "admin"
+  },
+  {
+    "id": "erasmus-mundus",
+    "name": "Erasmus Mundus",
+    "country": "Châu Âu",
+    "countryCode": "EU",
+    "countryFlag": "🇪🇺",
+    "value": "Toàn phần",
+    "level": "Thạc sĩ",
+    "deadline": "10/01/2026",
+    "image": "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80",
+    "description": "Erasmus Mundus Joint Master Degrees (EMJMD) là chương trình Thạc sĩ liên kết được tài trợ bởi Liên minh Châu Âu. Sinh viên sẽ học tại ít nhất 2 quốc gia Châu Âu khác nhau.",
+    "benefits": [
+      "Học phí toàn phần",
+      "Trợ cấp sinh hoạt €1,400/tháng",
+      "Chi phí đi lại & lắp đặt",
+      "Bảo hiểm y tế",
+      "Trải nghiệm đa văn hóa Châu Âu"
+    ],
+    "requirements": [
+      "Có bằng Đại học (Bachelor) liên quan",
+      "Trình độ tiếng Anh (IELTS >= 6.5 hoặc tương đương)",
+      "Chưa từng nhận học bổng Erasmus Mundus",
+      "Nộp đơn trực tiếp tại website chương trình cụ thể"
+    ],
+    "fields": ["STEM", "Khoa học xã hội", "Kinh doanh", "Nhân văn", "Luật"],
+    "applicationUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "hostInstitution": "Liên kết các trường đại học Châu Âu",
+    "duration": "1-2 năm",
+    "openDate": "01/10/2025",
+    "status": "Đã đóng đơn",
+    "lastUpdated": "2026-01-10T16:00:00Z",
+    "updatedBy": "admin"
+  }
+]
