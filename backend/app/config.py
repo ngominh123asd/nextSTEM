@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
-from pydantic import field_validator
+import json as _json
+
 from pydantic_settings import BaseSettings
+
+
+_DEFAULT_CORS = ["http://localhost:5173", "http://localhost:3000"]
 
 
 class Settings(BaseSettings):
@@ -25,27 +29,32 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ALGORITHM: str = "HS256"
 
-    # ── CORS ─────────────────────────────────────────────────
-    # Accepts a JSON array string or a comma-separated list
-    CORS_ORIGINS: list[str] = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-    ]
+    # ── AI Service (external) ──────────────────────────────
+    AI_SERVICE_URL: str = "https://nextstem-production.up.railway.app"
+    AI_API_KEY: str = ""  # leave empty if AI service has no key requirement
 
-    @field_validator("CORS_ORIGINS", mode="before")
-    @classmethod
-    def _parse_cors(cls, v: str | list[str]) -> list[str]:
-        """Allow comma-separated string in addition to JSON array."""
-        if isinstance(v, str):
-            import json
-            try:
-                parsed = json.loads(v)
-                if isinstance(parsed, list):
-                    return parsed
-            except (json.JSONDecodeError, TypeError):
-                pass
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
+    # ── CORS ─────────────────────────────────────────────────
+    # Stored as raw string to avoid pydantic-settings JSON parsing issues.
+    # Accepts: JSON array string, comma-separated URLs, or a single URL.
+    # Examples: '["https://a.com","https://b.com"]'  or  'https://a.com,https://b.com'
+    CORS_ORIGINS: str = ""
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Parse CORS_ORIGINS env var into a list of origin strings."""
+        v = self.CORS_ORIGINS
+        if not v or not v.strip():
+            return _DEFAULT_CORS
+        v = v.strip()
+        # Try JSON array first
+        try:
+            parsed = _json.loads(v)
+            if isinstance(parsed, list):
+                return [str(x).strip() for x in parsed if str(x).strip()]
+        except (_json.JSONDecodeError, TypeError):
+            pass
+        # Fall back to comma-separated
+        return [origin.strip() for origin in v.split(",") if origin.strip()]
 
     # Railway injects PORT automatically
     PORT: int = 8000
