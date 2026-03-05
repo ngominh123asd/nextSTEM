@@ -1,6 +1,7 @@
 """Alembic env.py – async migration runner."""
 
 import asyncio
+import ssl as _ssl
 from logging.config import fileConfig
 
 from alembic import context
@@ -17,6 +18,15 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+
+
+def _engine_kwargs() -> dict:
+    """Build engine kwargs matching database.py (SSL for production)."""
+    kwargs: dict = {}
+    if settings.is_production:
+        ssl_ctx = _ssl.create_default_context()
+        kwargs["connect_args"] = {"ssl": ssl_ctx}
+    return kwargs
 
 
 def run_migrations_offline() -> None:
@@ -37,7 +47,7 @@ def do_run_migrations(connection):
 
 
 async def run_migrations_online() -> None:
-    engine = create_async_engine(settings.DATABASE_URL)
+    engine = create_async_engine(settings.DATABASE_URL, **_engine_kwargs())
     async with engine.connect() as conn:
         await conn.run_sync(do_run_migrations)
     await engine.dispose()
