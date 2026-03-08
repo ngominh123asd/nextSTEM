@@ -23,6 +23,8 @@ async def init_redis() -> Redis | None:
     # Upstash uses rediss:// (TLS); create an SSL context
     if settings.REDIS_URL.startswith("rediss://"):
         ssl_ctx = _ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = _ssl.CERT_NONE
         kwargs["ssl"] = ssl_ctx
     try:
         redis = Redis.from_url(settings.REDIS_URL, **kwargs)
