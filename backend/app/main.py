@@ -1,5 +1,6 @@
 """FastAPI application factory."""
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -11,11 +12,16 @@ from app.api import auth, users, chat, portfolio, roadmap, documents, resources,
 from app.api.admin_resources import router as admin_resources_router
 from app.api.data_exchange import router as export_router, import_router
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup / shutdown hooks."""
+    logger.info("Starting up — ENVIRONMENT=%s", settings.ENVIRONMENT)
+    logger.info("CORS origins: %s", settings.cors_origins_list)
     await init_redis()
+    logger.info("Startup complete")
     yield
     await close_redis()
 
