@@ -11,8 +11,8 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 COPY . .
 
-# Make entrypoint executable
-RUN chmod +x entrypoint.sh
+# Fix line endings & make entrypoint executable
+RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
 
 # Railway injects $PORT; default to 8000 for local dev
 ENV PORT=8000
