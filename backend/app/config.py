@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     # ── Redis (Upstash in production, local in dev) ─────────
     # Upstash: rediss://default:[pw]@[endpoint].upstash.io:6379
-    REDIS_URL: str = "redis-cli --tls -u redis://default:AY1iAAIncDI5NmRiZmFmZjA5M2Y0OWZiOWE3ZDc0OTkyYmE0ZGY5OHAyMzYxOTQ@kind-mosquito-36194.upstash.io:6379"
+    REDIS_URL: str = "redis://localhost:6379/0"
 
     # ── JWT ──────────────────────────────────────────────────
     # REQUIRED — generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"
