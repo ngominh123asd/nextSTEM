@@ -62,8 +62,8 @@ export const CTACard = ({ icon, title, subtitle, desc }: { icon: string; title: 
   </div>
 );
 
-export const SocialIcon = ({ icon, color }: { icon: string; color: string }) => (
-  <a href="#" className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors">
+export const SocialIcon = ({ icon, color, href }: { icon: string; color: string; href?: string }) => (
+  <a href={href || "#"} target={href ? "_blank" : undefined} rel={href ? "noopener noreferrer" : undefined} className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors">
     <svg width="16" height="16" fill={color} viewBox="0 0 24 24">
       <path d={icon} />
     </svg>
