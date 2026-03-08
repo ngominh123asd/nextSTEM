@@ -15,5 +15,5 @@ COPY . .
 ENV PORT=8000
 EXPOSE $PORT
 
-# Migrations run via railway.json startCommand before uvicorn
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
+# Run migrations then start the server
+CMD ["sh", "-c", "alembic upgrade head || echo 'Alembic migration failed, starting anyway'; uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
