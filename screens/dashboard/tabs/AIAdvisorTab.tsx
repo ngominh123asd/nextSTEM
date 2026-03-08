@@ -1,13 +1,63 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import GlassSurface from '../../../components/GlassSurface';
 import { UserData, glass } from '../types';
 import { GlassCard, PageTitle } from '../components/SharedUI';
+import { apiCreateChatSession, apiChatAIStream, apiSaveChatAIMessage } from '../../../lib/api';
+
+type ThinkingStep = {
+  id: string;
+  label: string;
+  icon: string;
+  status: 'active' | 'done';
+  timestamp: number;
+};
+
+function mapEventToStep(event: string, data: any): { label: string; icon: string } | null {
+  switch (event) {
+    case 'start':
+      return { label: 'Đang kết nối...', icon: 'cloud_sync' };
+    case 'query_classified':
+      return { label: `Phân tích câu hỏi${data.complexity ? ` ${data.complexity}` : ''}`, icon: 'psychology' };
+    case 'planning':
+      return { label: 'Đang lập kế hoạch...', icon: 'event_note' };
+    case 'plan_created':
+      return { label: `Kế hoạch sẵn sàng (${data.total_agents || data.agents?.length || '?'} chuyên gia)`, icon: 'checklist' };
+    case 'executing':
+      return { label: 'Bắt đầu thực thi...', icon: 'play_circle' };
+    case 'agent_start':
+      return { label: `Gọi chuyên gia: ${data.agent_name || data.agent || 'agent'}`, icon: 'support_agent' };
+    case 'agent_stage':
+      return { label: `${data.agent_name || 'Agent'} đang xử lý...`, icon: 'pending' };
+    case 'agent_stage_result':
+      return { label: `${data.agent_name || 'Agent'}: hoàn thành bước`, icon: 'task_alt' };
+    case 'tool_call':
+      return { label: `${data.agent_name || 'Agent'}: ${data.tool_name || data.tool || 'tool'}`, icon: 'build' };
+    case 'tool_result':
+      return { label: `Kết quả công cụ${data.tool_name ? `: ${data.tool_name}` : ''}`, icon: 'inventory' };
+    case 'agent_completed':
+      return { label: `${data.agent_name || 'Chuyên gia'} hoàn thành`, icon: 'check_circle' };
+    case 'agent_error':
+      return { label: `${data.agent_name || 'Agent'}: lỗi`, icon: 'error' };
+    case 'synthesizing':
+      return { label: 'Đang tổng hợp câu trả lời...', icon: 'auto_awesome' };
+    default:
+      return null;
+  }
+}
+
+type ChatMessage = { role: 'user' | 'ai'; text: string; thinkingSteps?: ThinkingStep[] };
 
 export default function AIAdvisorTab({ userData }: { userData: UserData }) {
-  const [messages, setMessages] = useState<{ role: 'user' | 'ai'; text: string }[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
   const [activeMode, setActiveMode] = useState<'career' | 'university' | 'essay' | 'general'>('general');
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [thinkingSteps, setThinkingSteps] = useState<ThinkingStep[]>([]);
+  const [expandedThinking, setExpandedThinking] = useState<Set<number>>(new Set());
   const chatRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<{ abort: () => void } | null>(null);
+  const stepsRef = useRef<ThinkingStep[]>([]);
 
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
@@ -47,22 +97,151 @@ export default function AIAdvisorTab({ userData }: { userData: UserData }) {
     ],
   };
 
-  const handleSend = (text?: string) => {
-    const msg = text || input.trim();
-    if (!msg) return;
-    setMessages(prev => [...prev, { role: 'user', text: msg }]);
-    setInput('');
+  // Ensure a chat session exists for the current mode
+  const ensureSession = useCallback(async () => {
+    if (sessionId) return sessionId;
+    try {
+      const session = await apiCreateChatSession(activeMode, `AI Advisor - ${activeMode}`);
+      setSessionId(session.id);
+      return session.id;
+    } catch (e) {
+      console.error('Failed to create chat session', e);
+      return null;
+    }
+  }, [sessionId, activeMode]);
 
-    setTimeout(() => {
-      const modeResponses: Record<string, string> = {
-        general: `Dựa trên hồ sơ của ${userData.name?.split(' ').pop()}, đây là phân tích:\n\n📊 **Điểm mạnh:** Nền tảng STEM tốt, đa dạng hoạt động\n🎯 **Gợi ý:** Tập trung phát triển dự án nghiên cứu\n📋 **Tiếp theo:** Hoàn thiện portfolio & bắt đầu viết luận\n\nBạn muốn tìm hiểu sâu hơn về phần nào?`,
-        career: `Dựa trên sở thích ${userData.interests.slice(0, 2).join(', ')}:\n\n🔬 **Ngành phù hợp nhất:**\n1. Computer Science & AI\n2. Data Science\n3. Biomedical Engineering\n\n💡 **Lý do:** Kết hợp giữa năng lực kỹ thuật và xu hướng thị trường\n📈 **Mức lương trung bình:** $85,000 - $120,000/năm`,
-        university: `🏫 **Top 5 trường phù hợp cho bạn:**\n\n1. 🇺🇸 MIT — CS/AI, tỷ lệ 3.9%\n2. 🇸🇬 NUS — CS, học bổng ASEAN\n3. 🇬🇧 Imperial College — Engineering\n4. 🇨🇭 ETH Zurich — Miễn học phí\n5. 🇯🇵 U of Tokyo — MEXT scholarship\n\n📝 Xem chi tiết trường nào?`,
-        essay: `✍️ **Gợi ý cho Personal Statement:**\n\nMở bài nên bắt đầu bằng một khoảnh khắc cụ thể, đáng nhớ liên quan đến đam mê STEM của bạn.\n\n**Ví dụ:**\n_"Lúc 3 giờ sáng, dòng code cuối cùng chạy thành công — chatbot AI đầu tiên của tôi đã có thể trả lời câu hỏi..."_\n\n💡 Câu chuyện cá nhân + kết quả cụ thể = bài luận ấn tượng`,
-      };
-      setMessages(prev => [...prev, { role: 'ai', text: modeResponses[activeMode] || modeResponses.general }]);
-    }, 600);
-  };
+  // Reset session when mode changes
+  useEffect(() => {
+    setSessionId(null);
+  }, [activeMode]);
+
+  const handleSend = useCallback(async (text?: string) => {
+    const msg = text || input.trim();
+    if (!msg || isStreaming) return;
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', text: msg }]);
+    setIsStreaming(true);
+
+    const sid = await ensureSession();
+    if (!sid) {
+      setMessages(prev => [...prev, { role: 'ai', text: '❌ Không thể kết nối đến AI. Vui lòng thử lại.' }]);
+      setIsStreaming(false);
+      return;
+    }
+
+    // Add a placeholder AI message that we'll stream into
+    setMessages(prev => [...prev, { role: 'ai', text: '' }]);
+    setThinkingSteps([]);
+    stepsRef.current = [];
+    let fullText = '';
+
+    const stream = apiChatAIStream(
+      sid,
+      msg,
+      activeMode,
+      (event, data) => {
+        if (event === 'text_delta') {
+          const delta = data.delta || data.text || data.content || '';
+          fullText += delta;
+          setMessages(prev => {
+            const updated = [...prev];
+            updated[updated.length - 1] = { role: 'ai', text: fullText };
+            return updated;
+          });
+        } else if (event === 'final_result') {
+          const finalText = data.final_answer || data.text || data.result || data.response || fullText;
+          if (finalText && finalText !== fullText) {
+            fullText = finalText;
+            setMessages(prev => {
+              const updated = [...prev];
+              updated[updated.length - 1] = { role: 'ai', text: fullText };
+              return updated;
+            });
+          }
+          // Steps will be saved into message on stream done
+        } else if (event === 'error') {
+          const errMsg = data.message || data.error || 'Lỗi từ AI service';
+          fullText += `\n\n❌ ${errMsg}`;
+          setMessages(prev => {
+            const updated = [...prev];
+            updated[updated.length - 1] = { role: 'ai', text: fullText };
+            return updated;
+          });
+          setThinkingSteps([]);
+        } else {
+          // Map progress events to thinking steps
+          const step = mapEventToStep(event, data);
+          if (step) {
+            const newStep: ThinkingStep = {
+              id: `${event}-${Date.now()}`,
+              label: step.label,
+              icon: step.icon,
+              status: 'active' as const,
+              timestamp: Date.now(),
+            };
+            stepsRef.current = [
+              ...stepsRef.current.map(s => s.status === 'active' ? { ...s, status: 'done' as const } : s),
+              newStep,
+            ];
+            setThinkingSteps([...stepsRef.current]);
+          }
+        }
+      },
+      async () => {
+        // Stream done — save thinking steps into message then clear live state
+        const finalSteps = stepsRef.current.map(s => ({ ...s, status: 'done' as const }));
+        setMessages(prev => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last && last.role === 'ai' && finalSteps.length > 0) {
+            updated[updated.length - 1] = { ...last, thinkingSteps: finalSteps };
+          }
+          return updated;
+        });
+        setIsStreaming(false);
+        setThinkingSteps([]);
+        stepsRef.current = [];
+        abortRef.current = null;
+        if (fullText) {
+          try {
+            await apiSaveChatAIMessage(sid, fullText);
+          } catch (e) {
+            console.error('Failed to save AI message', e);
+          }
+        }
+      },
+      (err) => {
+        console.error('AI stream error', err);
+        const finalSteps = stepsRef.current.map(s => ({ ...s, status: 'done' as const }));
+        if (finalSteps.length > 0) {
+          setMessages(prev => {
+            const updated = [...prev];
+            const last = updated[updated.length - 1];
+            if (last && last.role === 'ai') {
+              updated[updated.length - 1] = { ...last, thinkingSteps: finalSteps };
+            }
+            return updated;
+          });
+        }
+        setIsStreaming(false);
+        setThinkingSteps([]);
+        stepsRef.current = [];
+        abortRef.current = null;
+        if (!fullText) {
+          setMessages(prev => {
+            const updated = [...prev];
+            updated[updated.length - 1] = {
+              role: 'ai',
+              text: '❌ Không thể kết nối đến AI. Vui lòng thử lại sau.',
+            };
+            return updated;
+          });
+        }
+      },
+    );
+
+    abortRef.current = stream;
+  }, [input, isStreaming, activeMode, ensureSession]);
 
   return (
     <>
@@ -73,7 +252,7 @@ export default function AIAdvisorTab({ userData }: { userData: UserData }) {
         {modes.map(m => (
           <button
             key={m.id}
-            onClick={() => { setActiveMode(m.id); setMessages([]); }}
+            onClick={() => { setActiveMode(m.id); setMessages([]); setThinkingSteps([]); if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; } setIsStreaming(false); }}
             className={`p-4 rounded-2xl text-left transition-all duration-300 border ${
               activeMode === m.id
                 ? 'bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border-blue-300/50 shadow-md shadow-blue-100/50'
@@ -99,8 +278,8 @@ export default function AIAdvisorTab({ userData }: { userData: UserData }) {
           <div>
             <h3 className="font-bold text-[#1E3A8A] text-sm">{modes.find(m => m.id === activeMode)?.label}</h3>
             <p className="text-xs text-slate-400 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              AI sẵn sàng tư vấn
+              <span className={`w-1.5 h-1.5 rounded-full ${isStreaming ? 'bg-amber-400' : 'bg-emerald-400'} animate-pulse`} />
+              {isStreaming ? 'Đang trả lời...' : 'AI sẵn sàng tư vấn'}
             </p>
           </div>
         </div>
@@ -146,15 +325,102 @@ export default function AIAdvisorTab({ userData }: { userData: UserData }) {
                   <span className="material-symbols-outlined text-white text-sm">auto_awesome</span>
                 </div>
               )}
-              <div className={`max-w-[75%] p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
+              <div className={`max-w-[75%] ${
                 m.role === 'user'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-md shadow-md'
-                  : 'bg-white/60 backdrop-blur-sm border border-white/60 text-slate-700 rounded-bl-md'
+                  ? 'p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-line bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-md shadow-md'
+                  : ''
               }`}>
-                {m.text}
+                {/* Collapsed thinking steps for completed AI messages */}
+                {m.role === 'ai' && m.thinkingSteps && m.thinkingSteps.length > 0 && (
+                  <div className="mb-1.5">
+                    <button
+                      onClick={() => setExpandedThinking(prev => {
+                        const next = new Set(prev);
+                        next.has(i) ? next.delete(i) : next.add(i);
+                        return next;
+                      })}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-blue-600 hover:bg-blue-50/60 transition-all duration-200 group"
+                    >
+                      <span className="material-symbols-outlined transition-transform duration-200 group-hover:text-blue-500" style={{ fontSize: '14px', transform: expandedThinking.has(i) ? 'rotate(90deg)' : 'rotate(0deg)' }}>chevron_right</span>
+                      <span className="material-symbols-outlined text-emerald-400" style={{ fontSize: '13px' }}>check_circle</span>
+                      Đã suy nghĩ ({m.thinkingSteps.length} bước)
+                    </button>
+                    {expandedThinking.has(i) && (
+                      <div className="mt-1.5 ml-1 relative pl-5" style={{ animation: 'fadeSlideIn 0.2s ease-out forwards' }}>
+                        <div className="absolute left-[7px] top-0 bottom-0 w-px bg-gradient-to-b from-slate-200 to-transparent" />
+                        {m.thinkingSteps.map((step) => (
+                          <div key={step.id} className="relative flex items-center gap-2 py-[2px]">
+                            <div className="absolute -left-5 top-1/2 -translate-y-1/2">
+                              <span className="material-symbols-outlined text-emerald-400" style={{ fontSize: '13px' }}>check_circle</span>
+                            </div>
+                            <span className="text-xs text-slate-400 leading-tight">{step.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {m.role === 'ai' ? (
+                  <div className="p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-line bg-white/60 backdrop-blur-sm border border-white/60 text-slate-700 rounded-bl-md">
+                    {m.text}
+                  </div>
+                ) : m.text}
               </div>
             </div>
           ))}
+
+          {/* Thinking Progress Steps — vertical timeline */}
+          {thinkingSteps.length > 0 && (
+            <div className="flex justify-start">
+              <div className="w-8 flex-shrink-0 mr-2" /> {/* spacer to align with AI avatar */}
+              <div className="max-w-[75%] py-2">
+                <div className="relative pl-5">
+                  {/* Vertical line */}
+                  <div className="absolute left-[7px] top-1 bottom-1 w-px bg-gradient-to-b from-blue-300 via-blue-200 to-transparent" />
+
+                  <div className="flex flex-col gap-0.5">
+                    {thinkingSteps.map((step, idx) => {
+                      const isLast = idx === thinkingSteps.length - 1;
+                      return (
+                        <div
+                          key={step.id}
+                          className="relative flex items-center gap-2 py-[3px]"
+                          style={{
+                            animation: 'fadeSlideIn 0.3s ease-out forwards',
+                            opacity: 0,
+                            animationDelay: `${idx * 40}ms`,
+                          }}
+                        >
+                          {/* Dot on timeline */}
+                          <div className="absolute -left-5 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                            {step.status === 'done' ? (
+                              <span className="material-symbols-outlined text-emerald-400" style={{ fontSize: '14px' }}>check_circle</span>
+                            ) : (
+                              <span className="w-[14px] h-[14px] rounded-full bg-blue-500 border-2 border-blue-200 animate-pulse shadow-sm shadow-blue-300" />
+                            )}
+                          </div>
+
+                          {/* Label */}
+                          <span className={`text-xs font-medium leading-tight ${
+                            step.status === 'active'
+                              ? 'text-blue-700'
+                              : 'text-slate-400'
+                          }`}>
+                            {step.label}
+                          </span>
+
+                          {/* Spinner for active */}
+                          {step.status === 'active' && isLast && (
+                            <span className="material-symbols-outlined text-blue-400 animate-spin" style={{ fontSize: '12px', animationDuration: '1.5s' }}>progress_activity</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Quick Actions */}
@@ -176,20 +442,34 @@ export default function AIAdvisorTab({ userData }: { userData: UserData }) {
             <div className="flex-1 relative">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">chat</span>
               <input value={input} onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleSend()}
-                placeholder={`Hỏi về ${modes.find(m => m.id === activeMode)?.label.toLowerCase()}...`}
-                className={`${glass.input} pl-13`} />
+                onKeyDown={e => e.key === 'Enter' && !isStreaming && handleSend()}
+                disabled={isStreaming}
+                placeholder={isStreaming ? 'Đang trả lời...' : `Hỏi về ${modes.find(m => m.id === activeMode)?.label.toLowerCase()}...`}
+                className={`${glass.input} pl-13 ${isStreaming ? 'opacity-50' : ''}`} />
             </div>
-            <GlassSurface
-              width={48}
-              height={48}
-              borderRadius={16}
-              className="cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)' }}
-              onClick={() => handleSend()}
-            >
-              <span className="material-symbols-outlined text-white text-lg">send</span>
-            </GlassSurface>
+            {isStreaming ? (
+              <GlassSurface
+                width={48}
+                height={48}
+                borderRadius={16}
+                className="cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #dc2626, #ef4444)' }}
+                onClick={() => { if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; } setIsStreaming(false); }}
+              >
+                <span className="material-symbols-outlined text-white text-lg">stop</span>
+              </GlassSurface>
+            ) : (
+              <GlassSurface
+                width={48}
+                height={48}
+                borderRadius={16}
+                className="cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)' }}
+                onClick={() => handleSend()}
+              >
+                <span className="material-symbols-outlined text-white text-lg">send</span>
+              </GlassSurface>
+            )}
           </div>
         </div>
       </GlassCard>

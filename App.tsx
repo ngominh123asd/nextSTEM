@@ -165,7 +165,7 @@ export default function App() {
   }
 
   if (screen === 'admin') {
-    return <AdminDashboard onBack={() => setScreen('dashboard')} onSwitchToUser={() => setScreen('dashboard')} userName={userData?.name} userEmail={userData?.email} />;
+    return <AdminDashboard onBack={handleLogout} onSwitchToUser={() => setScreen('dashboard')} userName={userData?.name} userEmail={userData?.email} />;
   }
 
   if (screen === 'dashboard' && userData) {

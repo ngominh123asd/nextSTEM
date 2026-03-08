@@ -8,7 +8,7 @@ interface HeroSectionProps {
 
 export default function HeroSection({ onStartDemo }: HeroSectionProps) {
   return (
-    <header className="relative overflow-hidden bg-slate-50 pt-12 pb-16 lg:pt-24 lg:pb-32">
+    <header className="relative overflow-x-clip bg-slate-50 pt-12 pb-16 lg:pt-24 lg:pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
           <div className="flex flex-col gap-6 max-w-2xl">
@@ -46,14 +46,14 @@ export default function HeroSection({ onStartDemo }: HeroSectionProps) {
           </div>
           
           {/* Visual – CardSwap */}
-          <div className="relative w-full min-h-[420px] lg:min-h-[500px] flex items-center justify-center" style={{ height: 500 }}>
+          <div className="relative w-full min-h-[420px] lg:min-h-[500px]" style={{ height: 500 }}>
             <CardSwap
-              cardDistance={60}
-              verticalDistance={70}
+              cardDistance={50}
+              verticalDistance={30}
               delay={5000}
               pauseOnHover={true}
-              width={520}
-              height={380}
+              width={480}
+              height={340}
             >
               <Card className="overflow-hidden">
                 <img

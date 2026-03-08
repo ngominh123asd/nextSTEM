@@ -497,3 +497,124 @@ export async function apiAdminUpdateUniversity(id: string, data: Partial<Univers
 export async function apiAdminDeleteUniversity(id: string): Promise<void> {
   return request<void>(`/admin/resources/universities/${id}`, { method: 'DELETE' });
 }
+
+/* ── Chat / AI Advisor ── */
+
+export interface ChatSession {
+  id: string;
+  mode: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function apiCreateChatSession(mode: string, title?: string): Promise<ChatSession> {
+  return request<ChatSession>('/chat/sessions', {
+    method: 'POST',
+    body: JSON.stringify({ mode, title }),
+  });
+}
+
+export async function apiListChatSessions(): Promise<ChatSession[]> {
+  return request<ChatSession[]>('/chat/sessions');
+}
+
+/**
+ * Stream AI response via SSE.
+ * Returns an object with helpers to read events and abort.
+ */
+export function apiChatAIStream(
+  sessionId: string,
+  content: string,
+  mode: string,
+  onEvent: (event: string, data: any) => void,
+  onDone: () => void,
+  onError: (err: Error) => void,
+): { abort: () => void } {
+  const controller = new AbortController();
+
+  const url = `${API_BASE}/chat/sessions/${sessionId}/ai/stream`;
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+    body: JSON.stringify({ content, mode }),
+    signal: controller.signal,
+  })
+    .then(async (res) => {
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `AI request failed (${res.status})`);
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error('No response body');
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let currentEvent = '';  // track "event:" line for next "data:" line
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) {
+            // Empty line resets event name per SSE spec
+            currentEvent = '';
+            continue;
+          }
+
+          if (trimmed.startsWith('event: ')) {
+            currentEvent = trimmed.slice(7).trim();
+          } else if (trimmed.startsWith('data: ')) {
+            const jsonStr = trimmed.slice(6);
+            if (jsonStr === '[DONE]') {
+              onDone();
+              return;
+            }
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const eventType = currentEvent || parsed.event || parsed.type || 'unknown';
+              onEvent(eventType, parsed);
+
+              if (eventType === 'done') {
+                onDone();
+                return;
+              }
+            } catch {
+              // Non-JSON SSE line — forward as text_delta
+              onEvent(currentEvent || 'text_delta', { text: jsonStr });
+            }
+          }
+        }
+      }
+
+      onDone();
+    })
+    .catch((err) => {
+      if (err.name !== 'AbortError') {
+        onError(err);
+      }
+    });
+
+  return { abort: () => controller.abort() };
+}
+
+/**
+ * Save the final AI message after streaming completes.
+ */
+export async function apiSaveChatAIMessage(sessionId: string, content: string): Promise<void> {
+  return request<void>(`/chat/sessions/${sessionId}/ai/save`, {
+    method: 'POST',
+    body: JSON.stringify({ content }),
+  });
+}

@@ -24,14 +24,9 @@ export default function AdminSidebar({
       )}
       <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] ${glass.sidebar} flex flex-col transform transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         {/* Logo */}
-        <div className="flex items-center gap-2 px-5 h-16 border-b border-white/40">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg">
-            <span className="material-symbols-outlined text-white text-lg">admin_panel_settings</span>
-          </div>
-          <div>
-            <span className="text-sm font-bold text-[#1E3A8A]">nextSTEM</span>
-            <p className="text-[10px] text-slate-400 font-semibold">ADMIN PANEL</p>
-          </div>
+        <div className="flex flex-col items-start px-5 border-b border-white/40 overflow-hidden">
+          <img src="/images/logo_header.png" alt="Logo" className="h-50 w-auto object-contain -mt-13 -mb-15" />
+          <p className="text-[10px] text-slate-400 font-semibold tracking-widest pb-2">ADMIN PANEL</p>
         </div>
 
         {/* User card */}

@@ -33,7 +33,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({ customClass, ...res
   <div
     ref={ref}
     {...rest}
-    className={`absolute top-1/2 left-1/2 rounded-xl border border-white bg-black [transform-style:preserve-3d] [will-change:transform] [backface-visibility:hidden] ${customClass ?? ''} ${rest.className ?? ''}`.trim()}
+    className={`absolute rounded-xl border border-white/30 bg-black shadow-2xl overflow-hidden [transform-style:preserve-3d] [will-change:transform] [backface-visibility:hidden] ${customClass ?? ''} ${rest.className ?? ''}`.trim()}
   />
 ));
 Card.displayName = 'Card';
@@ -49,17 +49,21 @@ interface Slot {
 const makeSlot = (i: number, distX: number, distY: number, total: number): Slot => ({
   x: i * distX,
   y: -i * distY,
-  z: -i * distX * 1.5,
+  z: -i * 60,
   zIndex: total - i
 });
 
-const placeNow = (el: HTMLElement, slot: Slot, skew: number) =>
+const placeNow = (el: HTMLElement, slot: Slot, skew: number, w: number | string, h: number | string) =>
   gsap.set(el, {
     x: slot.x,
     y: slot.y,
     z: slot.z,
+    left: '50%',
+    top: '50%',
     xPercent: -50,
     yPercent: -50,
+    width: w,
+    height: h,
     skewY: skew,
     transformOrigin: 'center center',
     zIndex: slot.zIndex,
@@ -108,7 +112,7 @@ const CardSwap: React.FC<CardSwapProps> = ({
 
   useEffect(() => {
     const total = refs.length;
-    refs.forEach((r, i) => placeNow(r.current!, makeSlot(i, cardDistance, verticalDistance, total), skewAmount));
+    refs.forEach((r, i) => placeNow(r.current!, makeSlot(i, cardDistance, verticalDistance, total), skewAmount, width, height));
 
     const swap = () => {
       if (order.current.length < 2) return;
@@ -209,8 +213,8 @@ const CardSwap: React.FC<CardSwapProps> = ({
   return (
     <div
       ref={container}
-      className="absolute bottom-0 right-0 transform -translate-x-[10%] -translate-y-[5%] origin-bottom-right perspective-[900px] overflow-visible max-[768px]:translate-x-[10%] max-[768px]:translate-y-[10%] max-[768px]:scale-[0.75] max-[480px]:translate-x-[15%] max-[480px]:translate-y-[10%] max-[480px]:scale-[0.55]"
-      style={{ width, height }}
+      className="absolute inset-0 overflow-visible"
+      style={{ perspective: 900, transformStyle: 'preserve-3d' }}
     >
       {rendered}
     </div>

@@ -1,0 +1,553 @@
+openapi: 3.1.0
+
+info:
+  title: nextSTEM AI API
+  version: 0.1.0
+  description: |
+    Standalone AI service (agentic workflow + SSE streaming).
+
+    This spec documents:
+    - Non-stream execution (JSON)
+    - Streaming execution (SSE: `text/event-stream`) with **typed JSON payloads**
+      for stages, planning, tool calls/results, and text deltas.
+
+servers:
+  - url: http://localhost:8001
+    description: Local AI service
+
+tags:
+  - name: ai
+    description: Agentic AI endpoints
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    AIRunRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: User message / query.
+        workflow:
+          type: string
+          description: Workflow id (pattern-1 routing).
+          default: advisor_chat
+          examples: [advisor_chat]
+        session_id:
+          type: string
+          nullable: true
+          description: Conversation session id (caller-defined).
+        user_id:
+          type: string
+          nullable: true
+          description: Optional user id (from core backend), for trace/memory scoping.
+
+    AIHealthResponse:
+      type: object
+      required: [status, workflows]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        workflows:
+          type: array
+          items:
+            type: string
+
+    QueryType:
+      type: string
+      enum: [simple, complex]
+
+    SubAgentPlan:
+      type: object
+      required: [agent_name, task, reason, priority]
+      properties:
+        agent_name:
+          type: string
+        task:
+          type: string
+        reason:
+          type: string
+        priority:
+          type: integer
+          minimum: 1
+
+    OrchestratorPlan:
+      type: object
+      required:
+        - original_query
+        - interpreted_intent
+        - agents
+        - can_parallel
+        - expected_outcome
+        - query_type
+      properties:
+        original_query:
+          type: string
+        interpreted_intent:
+          type: string
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubAgentPlan'
+        can_parallel:
+          type: boolean
+        expected_outcome:
+          type: string
+        query_type:
+          $ref: '#/components/schemas/QueryType'
+
+    SubAgentResult:
+      type: object
+      required: [agent_name, success, result]
+      properties:
+        agent_name:
+          type: string
+        success:
+          type: boolean
+        result:
+          type: string
+        execution_time:
+          type: number
+          description: Seconds
+        stages_completed:
+          type: array
+          items:
+            type: string
+        error:
+          type: string
+          nullable: true
+
+    AgentLoopResult:
+      type: object
+      required: [success, query, final_answer]
+      properties:
+        success:
+          type: boolean
+        query:
+          type: string
+        final_answer:
+          type: string
+        query_type:
+          type: string
+          description: "simple | complex"
+        iterations:
+          type: integer
+        execution_time:
+          type: number
+          description: Seconds
+        plan:
+          allOf:
+            - $ref: '#/components/schemas/OrchestratorPlan'
+          nullable: true
+        agent_results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubAgentResult'
+        critic_reviews:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        metrics:
+          type: object
+          additionalProperties: true
+        error:
+          type: string
+          nullable: true
+
+    ToolCall:
+      type: object
+      required: [agent, tool, input]
+      properties:
+        agent:
+          type: string
+          description: SubAgent emitting the tool call.
+        tool:
+          type: string
+        input:
+          type: object
+          additionalProperties: true
+
+    ToolResult:
+      type: object
+      required: [agent, tool, success]
+      properties:
+        agent:
+          type: string
+        tool:
+          type: string
+        success:
+          type: boolean
+        output_preview:
+          type: string
+          nullable: true
+        output:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+
+    TraceBundle:
+      type: object
+      required: [workflow, session_id, user_id, tool_calls, tool_results]
+      properties:
+        workflow:
+          type: string
+        session_id:
+          type: string
+          nullable: true
+        user_id:
+          type: string
+          nullable: true
+        tool_calls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolCall'
+        tool_results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolResult'
+
+    AgentLoopResultWithTrace:
+      allOf:
+        - $ref: '#/components/schemas/AgentLoopResult'
+        - type: object
+          required: [trace]
+          properties:
+            trace:
+              $ref: '#/components/schemas/TraceBundle'
+
+    # ───────────────────────────────
+    # SSE event payloads (data field)
+    # ───────────────────────────────
+    SSEStartData:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+
+    SSEQueryClassifiedData:
+      type: object
+      required: [type]
+      properties:
+        type:
+          $ref: '#/components/schemas/QueryType'
+
+    SSEPlanningData:
+      type: object
+      required: [message, iteration]
+      properties:
+        message:
+          type: string
+        iteration:
+          type: integer
+
+    SSEPlanCreatedData:
+      type: object
+      required: [plan, mode, agents]
+      properties:
+        plan:
+          $ref: '#/components/schemas/OrchestratorPlan'
+        mode:
+          type: string
+          enum: [complex]
+        agents:
+          type: array
+          items:
+            type: string
+
+    SSEExecutingData:
+      type: object
+      required: [message, agents, parallel]
+      properties:
+        message:
+          type: string
+        agents:
+          type: array
+          items:
+            type: string
+        parallel:
+          type: boolean
+
+    SSEAgentsCompletedData:
+      type: object
+      required: [success, total]
+      properties:
+        success:
+          type: integer
+        total:
+          type: integer
+
+    SSEAgentStartData:
+      type: object
+      required: [agent, task]
+      properties:
+        agent:
+          type: string
+        task:
+          type: string
+
+    SSEAgentCompletedData:
+      type: object
+      required: [agent, execution_time, preview]
+      properties:
+        agent:
+          type: string
+        execution_time:
+          type: number
+        preview:
+          type: string
+
+    SSEAgentErrorData:
+      type: object
+      required: [agent, error]
+      properties:
+        agent:
+          type: string
+        error:
+          type: string
+
+    SSEAgentStageData:
+      type: object
+      required: [agent, stage]
+      properties:
+        agent:
+          type: string
+        stage:
+          type: string
+
+    SSEAgentStageResultData:
+      type: object
+      required: [agent, stage, chars, preview]
+      properties:
+        agent:
+          type: string
+        stage:
+          type: string
+        chars:
+          type: integer
+        preview:
+          type: string
+
+    SSETToolCallData:
+      $ref: '#/components/schemas/ToolCall'
+
+    SSETToolResultData:
+      $ref: '#/components/schemas/ToolResult'
+
+    SSESynthesizingData:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    SSETextDeltaData:
+      type: object
+      required: [delta]
+      properties:
+        delta:
+          type: string
+
+    SSECompletedData:
+      type: object
+      required: [metrics]
+      properties:
+        metrics:
+          type: object
+          additionalProperties: true
+
+    SSEErrorData:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    SSEFinalResultData:
+      $ref: '#/components/schemas/AgentLoopResultWithTrace'
+
+    SSEDoneData:
+      type: object
+      additionalProperties: false
+
+    # Conceptual representation of an SSE message as JSON.
+    # NOTE: On-the-wire format is:
+    #   event: <event_name>\n
+    #   data: <json>\n\n
+    SSEMessage:
+      type: object
+      required: [event, data]
+      properties:
+        event:
+          type: string
+          description: SSE event name.
+          enum:
+            - start
+            - query_classified
+            - planning
+            - plan_created
+            - executing
+            - agents_completed
+            - agent_start
+            - agent_stage
+            - agent_stage_result
+            - tool_call
+            - tool_result
+            - agent_completed
+            - agent_error
+            - synthesizing
+            - text_delta
+            - completed
+            - error
+            - final_result
+            - done
+        data:
+          description: Typed JSON payload depending on `event`.
+          oneOf:
+            - $ref: '#/components/schemas/SSEStartData'
+            - $ref: '#/components/schemas/SSEQueryClassifiedData'
+            - $ref: '#/components/schemas/SSEPlanningData'
+            - $ref: '#/components/schemas/SSEPlanCreatedData'
+            - $ref: '#/components/schemas/SSEExecutingData'
+            - $ref: '#/components/schemas/SSEAgentsCompletedData'
+            - $ref: '#/components/schemas/SSEAgentStartData'
+            - $ref: '#/components/schemas/SSEAgentStageData'
+            - $ref: '#/components/schemas/SSEAgentStageResultData'
+            - $ref: '#/components/schemas/SSETToolCallData'
+            - $ref: '#/components/schemas/SSETToolResultData'
+            - $ref: '#/components/schemas/SSEAgentCompletedData'
+            - $ref: '#/components/schemas/SSEAgentErrorData'
+            - $ref: '#/components/schemas/SSESynthesizingData'
+            - $ref: '#/components/schemas/SSETextDeltaData'
+            - $ref: '#/components/schemas/SSECompletedData'
+            - $ref: '#/components/schemas/SSEErrorData'
+            - $ref: '#/components/schemas/SSEFinalResultData'
+            - $ref: '#/components/schemas/SSEDoneData'
+
+paths:
+  /api/v1/ai/health:
+    get:
+      tags: [ai]
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIHealthResponse'
+
+  /api/v1/ai/run:
+    post:
+      tags: [ai]
+      summary: Run agentic workflow (non-stream)
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIRunRequest'
+      responses:
+        '200':
+          description: Agent execution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentLoopResult'
+        '401':
+          description: Invalid API key
+
+  /api/v1/ai/run/stream:
+    post:
+      tags: [ai]
+      summary: Run agentic workflow (SSE stream)
+      description: |
+        Returns a Server-Sent Events stream (`text/event-stream`).
+
+        Each message is an SSE event with JSON payload:
+        - `event: <event_name>`
+        - `data: <json>`
+
+        Events are produced during the full pipeline:
+        - planning/plan_created
+        - agent_start/agent_stage/agent_stage_result
+        - tool_call/tool_result
+        - text_delta (streaming answer)
+        - final_result (full result + trace bundle)
+        - done
+
+        Conceptual JSON schema for each SSE message is defined in:
+        `#/components/schemas/SSEMessage`.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIRunRequest'
+      responses:
+        '200':
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              examples:
+                start:
+                  summary: Start event
+                  value: |
+                    event: start
+                    data: {"query":"Xin tư vấn du học ngành CS tại Singapore"}
+
+                planCreated:
+                  summary: Plan created
+                  value: |
+                    event: plan_created
+                    data: {"plan":{"original_query":"...","interpreted_intent":"...","agents":[{"agent_name":"advisor","task":"...","reason":"...","priority":1}],"can_parallel":true,"expected_outcome":"...","query_type":"complex"},"mode":"complex","agents":["advisor"]}
+
+                toolCall:
+                  summary: Tool call
+                  value: |
+                    event: tool_call
+                    data: {"agent":"advisor","tool":"university_explorer","input":{"task":"..."}}
+
+                toolResult:
+                  summary: Tool result
+                  value: |
+                    event: tool_result
+                    data: {"agent":"advisor","tool":"university_explorer","success":true,"output_preview":"...","output":"..."}
+
+                textDelta:
+                  summary: Streaming answer delta
+                  value: |
+                    event: text_delta
+                    data: {"delta":"Mình gợi ý bạn..."}
+
+                finalResult:
+                  summary: Final result
+                  value: |
+                    event: final_result
+                    data: {"success":true,"query":"...","final_answer":"...","query_type":"complex","iterations":1,"execution_time":1.23,"plan":null,"agent_results":[],"critic_reviews":[],"metrics":{},"error":null,"trace":{"workflow":"advisor_chat","session_id":"abc","user_id":null,"tool_calls":[],"tool_results":[]}}
+
+                done:
+                  summary: Done
+                  value: |
+                    event: done
+                    data: {}
+
+        '401':
+          description: Invalid API key
+
