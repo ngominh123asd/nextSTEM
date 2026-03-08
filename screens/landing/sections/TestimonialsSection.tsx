@@ -74,31 +74,30 @@ const TestimonialsSection = () => {
 
   return (
     <section className="py-0 bg-white">
-      <div className="relative max-w-[1280px] mx-auto px-4 md:px-6 h-[600px]">
+      <div className="relative max-w-[1280px] mx-auto px-4 md:px-6 min-h-[600px] lg:h-[600px]">
         {/* Background gradient card */}
-        <div className="absolute inset-x-4 md:inset-x-6 top-1/2 -translate-y-1/2 h-[500px] bg-gradient-to-br from-[#EAF3FF] via-[#DDEBFF] to-[#BFD9FF] rounded-[2.5rem] shadow-xl shadow-blue-100/80 border border-white z-0"></div>
+        <div className="absolute inset-x-4 md:inset-x-6 top-1/2 -translate-y-1/2 h-[90%] lg:h-[500px] bg-gradient-to-br from-[#EAF3FF] via-[#DDEBFF] to-[#BFD9FF] rounded-[2.5rem] shadow-xl shadow-blue-100/80 border border-white z-0"></div>
 
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center h-full">
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center py-10 lg:py-0 lg:h-full">
           {/* Left: Heading + description */}
-          <div className="flex flex-col justify-center max-w-lg pl-8 lg:pl-16">
-            <h3 className="text-4xl md:text-[2.75rem] font-extrabold text-[#1E3A8A] leading-[1.25] mb-6">
-              Được đánh giá <br />
+          <div className="flex flex-col justify-center max-w-lg px-4 lg:pl-16">
+            <h3 className="text-2xl sm:text-3xl md:text-[2.75rem] font-extrabold text-[#1E3A8A] leading-[1.25] mb-4 lg:mb-6">
+              Được đánh giá{' '}
               cao từ
               <span className="inline-block bg-white text-[#1E3A8A] px-3 py-1 rounded-lg border-2 border-[#1E3A8A] shadow-sm transform -rotate-2 mx-2 mt-2">
                 500+
               </span>
-              <br />
-              người dùng đã <br />
+              {' '}người dùng đã
               và đang sử dụng
             </h3>
-            <p className="text-lg text-gray-700 font-medium leading-relaxed border-t border-blue-900/10 pt-6">
+            <p className="text-base lg:text-lg text-gray-700 font-medium leading-relaxed border-t border-blue-900/10 pt-4 lg:pt-6">
               Đây thực sự là sự khích lệ to lớn nhất giúp nextSTEM có động lực hoàn thiện không ngừng nghỉ và đạt đến trải nghiệm sử dụng tốt nhất dành cho bạn.
             </p>
           </div>
 
           {/* Right: Scrolling testimonial columns */}
           <div
-            className="w-full h-[600px] overflow-hidden grid grid-cols-2 gap-6 relative justify-items-center -mt-12"
+            className="w-full h-[400px] lg:h-[600px] overflow-hidden grid grid-cols-2 gap-4 lg:gap-6 relative justify-items-center"
             style={{
               maskImage:
                 'linear-gradient(transparent, black 15%, black 85%, transparent)',
