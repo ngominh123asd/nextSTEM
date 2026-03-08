@@ -1,6 +1,6 @@
 """Embedding service — generate embeddings & run HNSW-powered similarity search.
 
-Uses OpenAI-compatible API for embedding generation and pgvector HNSW
+Uses the nextSTEM AI service for embedding generation and pgvector HNSW
 index for fast approximate nearest-neighbor retrieval.
 """
 
@@ -20,25 +20,33 @@ logger = logging.getLogger(__name__)
 
 # ── Embedding generation ────────────────────────────────────
 
-_EMBED_MODEL = "text-embedding-3-small"  # 1536 dims
-_EMBED_URL = "https://api.openai.com/v1/embeddings"
 _TIMEOUT = httpx.Timeout(connect=10.0, read=30.0, write=10.0, pool=10.0)
 
 
+def _ai_headers() -> dict[str, str]:
+    """Build request headers for the AI service."""
+    h: dict[str, str] = {"Content-Type": "application/json"}
+    if settings.AI_API_KEY:
+        h["X-API-Key"] = settings.AI_API_KEY
+    return h
+
+
 async def _generate_embedding(text_input: str) -> list[float]:
-    """Call OpenAI API to get the embedding vector for a text string."""
+    """Call the AI service to get the embedding vector for a text string.
+
+    Sends a POST to {AI_SERVICE_URL}/api/v1/ai/embed.
+    Expected response: { "embedding": [float, ...] }
+    """
+    url = f"{settings.AI_SERVICE_URL.rstrip('/')}/api/v1/ai/embed"
     async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
         resp = await client.post(
-            _EMBED_URL,
-            headers={
-                "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={"input": text_input, "model": _EMBED_MODEL},
+            url,
+            headers=_ai_headers(),
+            json={"text": text_input},
         )
         resp.raise_for_status()
         data = resp.json()
-        return data["data"][0]["embedding"]
+        return data["embedding"]
 
 
 # ── Store chunk with embedding ──────────────────────────────

@@ -55,9 +55,6 @@ class Settings(BaseSettings):
     AI_SERVICE_URL: str = "https://nextstem-production.up.railway.app"
     AI_API_KEY: str = ""  # leave empty if AI service has no key requirement
 
-    # ── OpenAI (for embeddings) ──────────────────────────────
-    OPENAI_API_KEY: str = ""
-
     # ── CORS ─────────────────────────────────────────────────
     # Stored as raw string to avoid pydantic-settings JSON parsing issues.
     # Accepts: JSON array string, comma-separated URLs, or a single URL.
