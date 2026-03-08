@@ -6,7 +6,7 @@
     "watchPatterns": ["app/**", "alembic/**", "requirements.txt", "Dockerfile"]
   },
   "deploy": {
-    "startCommand": "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT",
+    "startCommand": "alembic upgrade head || echo 'Alembic migration failed, starting anyway'; uvicorn app.main:app --host 0.0.0.0 --port $PORT",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 120,
     "restartPolicyType": "ON_FAILURE",

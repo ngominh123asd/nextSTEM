@@ -3,11 +3,23 @@
 from __future__ import annotations
 
 import json as _json
+import re as _re
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
 _DEFAULT_CORS = ["http://localhost:5173", "http://localhost:3000"]
+
+# Regex that catches all common postgres URL prefixes that are NOT asyncpg
+_PG_PREFIX_RE = _re.compile(
+    r"^(?:postgres|postgresql(?:\+psycopg2(?:binary)?)?)://"
+)
+
+
+def _normalize_pg_url(url: str) -> str:
+    """Rewrite any postgres:// variant to postgresql+asyncpg://."""
+    return _PG_PREFIX_RE.sub("postgresql+asyncpg://", url, count=1)
 
 
 class Settings(BaseSettings):
@@ -16,26 +28,18 @@ class Settings(BaseSettings):
 
     # ── Postgres (Supabase) ─────────────────────────────────
     # REQUIRED — set via env var or .env file
-    # Supabase: postgresql+asyncpg://postgres.[ref]:[pw]@aws-0-[region].pooler.supabase.com:6543/postgres
+    # Auto-normalized to postgresql+asyncpg:// at startup.
     DATABASE_URL: str
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def _normalize_database_url(cls, v: str) -> str:
+        return _normalize_pg_url(v)
 
     @property
     def async_database_url(self) -> str:
-        """Ensure DATABASE_URL always uses the asyncpg driver.
-
-        Handles common misconfigurations:
-          postgres://          → postgresql+asyncpg://
-          postgresql://        → postgresql+asyncpg://
-          postgresql+psycopg2: → postgresql+asyncpg://
-        """
-        url = self.DATABASE_URL
-        if url.startswith("postgres://"):
-            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
-        elif url.startswith("postgresql://"):
-            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        elif url.startswith("postgresql+psycopg2://"):
-            url = url.replace("postgresql+psycopg2://", "postgresql+asyncpg://", 1)
-        return url
+        """Alias kept for backward compatibility — DATABASE_URL is already normalized."""
+        return self.DATABASE_URL
 
     # ── Redis (Upstash in production, local in dev) ─────────
     # Upstash: rediss://default:[pw]@[endpoint].upstash.io:6379
