@@ -25,8 +25,8 @@ def _engine_kwargs() -> dict:
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = _ssl.CERT_NONE
         kwargs.update({
-            "pool_size": 5,
-            "max_overflow": 10,
+            "pool_size": 10,
+            "max_overflow": 20,
             "connect_args": {"ssl": ssl_ctx},
         })
     return kwargs

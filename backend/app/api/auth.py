@@ -22,7 +22,9 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    await create_session(user.id)
+    # Fire-and-forget: don't block response waiting for Redis
+    import asyncio
+    asyncio.create_task(create_session(user.id))
     return TokenResponse(access_token=token)
 
 
@@ -34,7 +36,9 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
         )
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
-    await create_session(user.id)
+    # Fire-and-forget: don't block response waiting for Redis
+    import asyncio
+    asyncio.create_task(create_session(user.id))
     return TokenResponse(access_token=token)
 
 
