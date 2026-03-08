@@ -19,6 +19,24 @@ class Settings(BaseSettings):
     # Supabase: postgresql+asyncpg://postgres.[ref]:[pw]@aws-0-[region].pooler.supabase.com:6543/postgres
     DATABASE_URL: str
 
+    @property
+    def async_database_url(self) -> str:
+        """Ensure DATABASE_URL always uses the asyncpg driver.
+
+        Handles common misconfigurations:
+          postgres://          → postgresql+asyncpg://
+          postgresql://        → postgresql+asyncpg://
+          postgresql+psycopg2: → postgresql+asyncpg://
+        """
+        url = self.DATABASE_URL
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql+psycopg2://"):
+            url = url.replace("postgresql+psycopg2://", "postgresql+asyncpg://", 1)
+        return url
+
     # ── Redis (Upstash in production, local in dev) ─────────
     # Upstash: rediss://default:[pw]@[endpoint].upstash.io:6379
     REDIS_URL: str = "redis://localhost:6379/0"
