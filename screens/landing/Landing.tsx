@@ -12,7 +12,7 @@ import PartnersSection from './sections/PartnersSection';
 import Footer from './sections/Footer';
 
 export default function Landing({ onStartDemo, onOpenAuth, onOpenAbout, onOpenSpeed }: LandingProps) {
-  const partnerLogos = Array.from({ length: 24 }, (_, i) => `../images/partners/partner-${String(i + 1).padStart(2, '0')}.png`);
+  const partnerLogos = Array.from({ length: 24 }, (_, i) => `/images/partners/partner-${String(i + 1).padStart(2, '0')}.png`);
 
   return (
     <div className="bg-white">
