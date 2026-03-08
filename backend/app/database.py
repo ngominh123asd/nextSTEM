@@ -19,8 +19,11 @@ def _engine_kwargs() -> dict:
         "pool_pre_ping": True,       # recycle stale connections
     }
     if settings.is_production:
-        # Supabase requires SSL; create a default SSL context
+        # Supabase pooler uses a self-signed certificate;
+        # keep TLS encryption but skip cert verification.
         ssl_ctx = _ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = _ssl.CERT_NONE
         kwargs.update({
             "pool_size": 5,
             "max_overflow": 10,

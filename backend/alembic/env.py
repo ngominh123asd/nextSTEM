@@ -25,6 +25,8 @@ def _engine_kwargs() -> dict:
     kwargs: dict = {}
     if settings.is_production:
         ssl_ctx = _ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = _ssl.CERT_NONE
         kwargs["connect_args"] = {"ssl": ssl_ctx}
     return kwargs
 
