@@ -46,8 +46,6 @@ async def close_redis() -> None:
         redis = None
 
 
-def get_redis() -> Redis:
-    """Dependency – returns the active Redis instance."""
-    if redis is None:
-        raise RuntimeError("Redis not initialised")
+def get_redis() -> Redis | None:
+    """Dependency – returns the active Redis instance, or None if unavailable."""
     return redis
