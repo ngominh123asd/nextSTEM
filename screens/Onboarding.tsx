@@ -167,7 +167,7 @@ export default function Onboarding({ onComplete, onClose, initialData }: Onboard
                 width="auto"
                 height={42}
                 borderRadius={14}
-                style={{ background: step === TOTAL_STEPS ? 'linear-gradient(135deg, #059669, #10b981)' : 'linear-gradient(135deg, #1152d4, #2E6AE6)', cursor: canNext ? 'pointer' : 'default' }}
+                style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)', cursor: canNext ? 'pointer' : 'default' }}
                 className="hover:opacity-90 transition-opacity shadow-md"
                 onClick={canNext ? next : undefined}
               >
@@ -455,10 +455,10 @@ export default function Onboarding({ onComplete, onClose, initialData }: Onboard
           background: rgba(241,245,249,0.7); transition: all 0.2s;
         }
         .ob-interest-btn[data-sel="true"] .ob-interest-icon {
-          background: linear-gradient(135deg, #1152d4, #3b82f6);
-          box-shadow: 0 3px 10px rgba(17,82,212,0.2);
+          background: rgba(219,234,254,0.9);
+          box-shadow: 0 2px 8px rgba(17,82,212,0.1);
         }
-        .ob-interest-btn[data-sel="true"] .ob-interest-icon .material-symbols-outlined { color: #fff; }
+        .ob-interest-btn[data-sel="true"] .ob-interest-icon .material-symbols-outlined { color: #1152d4; }
         .ob-interest-icon .material-symbols-outlined { font-size: 18px; color: #94a3b8; transition: color 0.2s; }
         .ob-interest-btn:hover .ob-interest-icon .material-symbols-outlined { color: #1152d4; }
 
