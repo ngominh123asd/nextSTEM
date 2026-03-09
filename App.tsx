@@ -179,6 +179,16 @@ export default function App() {
     );
   }
 
+  if (screen === 'onboarding') {
+    return (
+      <Onboarding
+        onComplete={handleOnboardingComplete}
+        onClose={() => setScreen('landing')}
+        initialData={userData ?? undefined}
+      />
+    );
+  }
+
   return (
     <>
       <Landing onStartDemo={openOnboarding} onOpenAuth={openAuth} onOpenAbout={openAbout} onOpenSpeed={() => {}} />
@@ -197,13 +207,6 @@ export default function App() {
           loading={authLoading}
           onClearError={() => setAuthError(null)}
           successMessage={successMsg}
-        />
-      )}
-      {screen === 'onboarding' && (
-        <Onboarding
-          onComplete={handleOnboardingComplete}
-          onClose={() => setScreen('landing')}
-          initialData={userData ?? undefined}
         />
       )}
     </>
