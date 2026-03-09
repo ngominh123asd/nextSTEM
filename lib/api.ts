@@ -506,6 +506,7 @@ export interface ChatSession {
   title: string | null;
   created_at: string;
   updated_at: string;
+  last_message: string | null;
 }
 
 export async function apiCreateChatSession(mode: string, title?: string): Promise<ChatSession> {
@@ -517,6 +518,36 @@ export async function apiCreateChatSession(mode: string, title?: string): Promis
 
 export async function apiListChatSessions(): Promise<ChatSession[]> {
   return request<ChatSession[]>('/chat/sessions');
+}
+
+export interface ChatMessageData {
+  id: string;
+  role: 'user' | 'ai';
+  content: string;
+  created_at: string;
+}
+
+export interface ChatSessionDetail extends ChatSession {
+  messages: ChatMessageData[];
+}
+
+export async function apiGetChatSession(sessionId: string): Promise<ChatSessionDetail> {
+  return request<ChatSessionDetail>(`/chat/sessions/${sessionId}`);
+}
+
+export async function apiDeleteChatSession(sessionId: string): Promise<void> {
+  return request<void>(`/chat/sessions/${sessionId}`, { method: 'DELETE' });
+}
+
+export async function apiRenameChatSession(sessionId: string, title: string): Promise<ChatSession> {
+  return request<ChatSession>(`/chat/sessions/${sessionId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ title }),
+  });
+}
+
+export async function apiDeleteChatMessage(sessionId: string, messageId: string): Promise<void> {
+  return request<void>(`/chat/sessions/${sessionId}/messages/${messageId}`, { method: 'DELETE' });
 }
 
 /**

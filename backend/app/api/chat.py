@@ -88,6 +88,37 @@ async def delete_session(
         raise HTTPException(status_code=404, detail="Session not found")
 
 
+class SessionRenameRequest(BaseModel):
+    title: str
+
+
+@router.patch("/sessions/{session_id}", response_model=ChatSessionRead)
+async def rename_session(
+    session_id: uuid.UUID,
+    body: SessionRenameRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    session = await chat_service.update_session_title(
+        db, session_id, user.id, body.title
+    )
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return session
+
+
+@router.delete("/sessions/{session_id}/messages/{message_id}", status_code=204)
+async def delete_message(
+    session_id: uuid.UUID,
+    message_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    ok = await chat_service.delete_message(db, message_id, user.id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+
 # ────────────────────────────────────────────────────────────
 # AI Service proxy
 # ────────────────────────────────────────────────────────────
