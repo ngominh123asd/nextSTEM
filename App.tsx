@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Landing from './screens/landing/Landing';
-import Onboarding from './screens/Onboarding';
+import Onboarding from './screens/onboarding/Onboarding';
 import Dashboard from './screens/dashboard/Dashboard';
 import AuthScreen from './screens/auth/AuthScreen';
 import AboutScreen from './screens/AboutScreen';
