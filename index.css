@@ -163,3 +163,31 @@
     transform: translateY(0) scale(1);
   }
 }
+
+/* Dashboard tab transition */
+@keyframes sidebarItemIn {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.4);
+    transform-origin: left center;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+@keyframes sidebarContentIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

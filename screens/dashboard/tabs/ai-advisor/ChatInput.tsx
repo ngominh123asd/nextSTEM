@@ -25,11 +25,11 @@ export default function ChatInput({ activeMode, isStreaming, hasMessages, onSend
     <>
       {/* Quick Actions */}
       {hasMessages && (
-        <div className="px-6 py-2.5 flex gap-2 overflow-x-auto border-t border-white/30">
+        <div className="px-3 sm:px-6 py-2 sm:py-2.5 flex gap-2 overflow-x-auto border-t border-white/30 scrollbar-none">
           {QUICK_PROMPTS[activeMode].slice(0, 3).map(q => (
             <button key={q.text} onClick={() => onSend(q.text)}
               disabled={isStreaming}
-              className="whitespace-nowrap text-xs font-semibold px-3.5 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/70 text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 hover:border-blue-200/50 transition-all flex-shrink-0 flex items-center gap-1.5 shadow-sm disabled:opacity-50">
+              className="whitespace-nowrap text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/70 text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 hover:border-blue-200/50 transition-all flex-shrink-0 flex items-center gap-1 sm:gap-1.5 shadow-sm disabled:opacity-50">
               <span className="material-symbols-outlined text-blue-500 text-sm">{q.icon}</span>
               {q.text}
             </button>
@@ -38,8 +38,8 @@ export default function ChatInput({ activeMode, isStreaming, hasMessages, onSend
       )}
 
       {/* Input */}
-      <div className="px-6 py-4 border-t border-white/40">
-        <div className="flex gap-3">
+      <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-white/40">
+        <div className="flex gap-2 sm:gap-3">
           <div className="flex-1 relative">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">chat</span>
             <input

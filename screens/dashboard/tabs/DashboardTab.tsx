@@ -37,7 +37,7 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
         <BlobDecor className="w-36 h-36 -bottom-12 -left-12 bg-indigo-200/20" />
         <div className="relative z-10">
           <GlassHeader icon="search" title="Tìm kiếm trường đại học" />
-          <div className="flex gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
             <div className="flex-1 relative">
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
               <input type="text" placeholder="Nhập tên trường, quốc gia, hoặc ngành học..."
@@ -47,7 +47,7 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
               width="auto"
               height={48}
               borderRadius={16}
-              className="cursor-pointer hover:opacity-90 transition-opacity"
+              className="cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
               style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)' }}
             >
               <span className="text-white font-semibold px-5 flex items-center gap-2">

@@ -44,7 +44,7 @@ export default function ChatMessageList({
   }
 
   return (
-    <div ref={chatRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-4" style={{ minHeight: 300 }}>
+    <div ref={chatRef} className="flex-1 overflow-y-auto px-3 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4" style={{ minHeight: 200 }}>
       {/* Empty state with quick prompts */}
       {messages.length === 0 && (
         <div className="flex flex-col items-center justify-center h-full py-10">
@@ -55,10 +55,10 @@ export default function ChatMessageList({
           <p className="text-sm text-slate-400 mb-8 text-center max-w-md leading-relaxed">
             Chọn một chủ đề bên dưới để bắt đầu, hoặc nhập câu hỏi bất kỳ
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 w-full max-w-xl">
             {QUICK_PROMPTS[activeMode].map((q, idx) => (
               <button key={q.text} onClick={() => onSend(q.text)}
-                className="group relative p-4 rounded-2xl text-left transition-all duration-300 bg-white/50 backdrop-blur-sm border border-white/70 hover:bg-white/90 hover:border-blue-200/60 hover:shadow-lg hover:shadow-blue-100/40 hover:-translate-y-0.5">
+                className="group relative p-3 sm:p-4 rounded-2xl text-left transition-all duration-300 bg-white/50 backdrop-blur-sm border border-white/70 hover:bg-white/90 hover:border-blue-200/60 hover:shadow-lg hover:shadow-blue-100/40 hover:-translate-y-0.5">
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/0 to-indigo-50/0 group-hover:from-blue-50/50 group-hover:to-indigo-50/30 transition-all duration-300" />
                 <div className="relative flex items-start gap-3">
                   <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${
@@ -87,13 +87,13 @@ export default function ChatMessageList({
           onMouseLeave={() => setHoveredMsg(null)}
         >
           {m.role === 'ai' && (
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mr-2 mt-1 flex-shrink-0 shadow-sm">
-              <span className="material-symbols-outlined text-white text-sm">auto_awesome</span>
+          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mr-1.5 sm:mr-2 mt-1 flex-shrink-0 shadow-sm">
+              <span className="material-symbols-outlined text-white text-xs sm:text-sm">auto_awesome</span>
             </div>
           )}
-          <div className={`max-w-[75%] relative group ${
+          <div className={`max-w-[90%] sm:max-w-[75%] relative group ${
             m.role === 'user'
-              ? 'p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-line bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-md shadow-md'
+              ? 'p-3 sm:p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-line bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-md shadow-md'
               : ''
           }`}>
             {/* Thinking steps for AI messages */}
@@ -107,7 +107,7 @@ export default function ChatMessageList({
 
             {/* Message content */}
             {m.role === 'ai' ? (
-              <div className="p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-line bg-white/60 backdrop-blur-sm border border-white/60 text-slate-700 rounded-bl-md">
+              <div className="p-3 sm:p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-line bg-white/60 backdrop-blur-sm border border-white/60 text-slate-700 rounded-bl-md">
                 {m.text}
               </div>
             ) : m.text}
@@ -116,7 +116,7 @@ export default function ChatMessageList({
             {m.id && hoveredMsg === i && !isStreaming && (
               <button
                 onClick={() => onDeleteMessage(m.id!)}
-                className={`absolute ${m.role === 'user' ? '-left-8' : '-right-8'} top-1 p-1 rounded-lg bg-white/80 backdrop-blur-sm border border-white/60 shadow-sm opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:border-red-200/50 transition-all duration-200`}
+                className={`absolute ${m.role === 'user' ? '-left-7 sm:-left-8' : '-right-7 sm:-right-8'} top-1 p-1 rounded-lg bg-white/80 backdrop-blur-sm border border-white/60 shadow-sm opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:border-red-200/50 transition-all duration-200`}
                 title="Xoá tin nhắn"
               >
                 <span className="material-symbols-outlined text-slate-400 hover:text-red-500" style={{ fontSize: '14px' }}>delete</span>

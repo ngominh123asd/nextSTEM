@@ -56,4 +56,5 @@ export interface SlidingPanelProps {
 
 export interface MobileAuthProps extends LoginFormProps, RegisterFormProps {
   setIsRegister: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
 }

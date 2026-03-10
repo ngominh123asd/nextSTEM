@@ -11,6 +11,7 @@ export default function MobileAuth({
   agreeTerms, setAgreeTerms,
   handleLogin, handleRegister,
   displayError, isRegister, setIsRegister, loading,
+  onClose,
 }: MobileAuthProps) {
   return (
     <div className="lg:hidden absolute inset-0 z-30 flex flex-col overflow-y-auto"
@@ -20,7 +21,7 @@ export default function MobileAuth({
       <div className="relative h-48 flex-shrink-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#1E3A8A] via-[#2E4DA7] to-[#4361C4]" />
         <div className="absolute w-40 h-40 -top-10 -right-10 rounded-full bg-white/5 blur-2xl" />
-        <button onClick={() => {/* handled by parent onClose */}}
+        <button onClick={onClose}
           className="absolute top-4 left-4 z-10 w-9 h-9 rounded-full bg-white/15 backdrop-blur-md border border-white/20
             flex items-center justify-center text-white/80">
           <span className="material-symbols-outlined text-lg">arrow_back</span>

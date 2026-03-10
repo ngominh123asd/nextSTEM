@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { UserData } from '../types';
 import { GlassCard, PageTitle } from '../components/SharedUI';
 import { MODES } from './ai-advisor/types';
@@ -10,56 +10,70 @@ import ChatInput from './ai-advisor/ChatInput';
 export default function AIAdvisorTab({ userData }: { userData: UserData }) {
   const chat = useChatSessions();
   const currentMode = MODES.find(m => m.id === chat.activeMode);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <>
       <PageTitle icon="auto_awesome" title="AI Advisor" subtitle="Trợ lý tư vấn du học thông minh — cá nhân hoá theo hồ sơ của bạn" />
 
       {/* Mode Selector */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
         {MODES.map(m => (
           <button
             key={m.id}
             onClick={() => chat.changeMode(m.id)}
-            className={`p-4 rounded-2xl text-left transition-all duration-300 border ${
+            className={`p-2.5 sm:p-4 rounded-2xl text-left transition-all duration-300 border ${
               chat.activeMode === m.id
                 ? 'bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border-blue-300/50 shadow-md shadow-blue-100/50'
                 : 'bg-white/40 backdrop-blur-sm border-white/60 hover:bg-white/60'
             }`}
           >
-            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${m.color} flex items-center justify-center mb-3 shadow-lg`}>
-              <span className="material-symbols-outlined text-white text-lg">{m.icon}</span>
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br ${m.color} flex items-center justify-center mb-2 sm:mb-3 shadow-lg`}>
+              <span className="material-symbols-outlined text-white text-base sm:text-lg">{m.icon}</span>
             </div>
-            <h4 className={`font-bold text-sm mb-0.5 ${chat.activeMode === m.id ? 'text-[#1E3A8A]' : 'text-slate-700'}`}>{m.label}</h4>
-            <p className="text-xs text-slate-400">{m.desc}</p>
+            <h4 className={`font-bold text-xs sm:text-sm mb-0.5 ${chat.activeMode === m.id ? 'text-[#1E3A8A]' : 'text-slate-700'}`}>{m.label}</h4>
+            <p className="text-[10px] sm:text-xs text-slate-400 hidden sm:block">{m.desc}</p>
           </button>
         ))}
       </div>
 
       {/* Main Chat Layout: Sidebar + Content */}
-      <GlassCard className="!p-0 min-h-[560px] flex overflow-hidden">
+      <GlassCard className="!p-0 min-h-[400px] sm:min-h-[560px] flex overflow-hidden relative">
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
+        )}
+
         {/* Session Sidebar */}
         <SessionSidebar
           sessions={chat.sessions}
           activeSessionId={chat.activeSessionId}
           activeMode={chat.activeMode}
           loading={chat.loadingSessions}
-          onSelect={chat.selectSession}
-          onNewChat={() => chat.createNewSession()}
+          onSelect={(id) => { chat.selectSession(id); setSidebarOpen(false); }}
+          onNewChat={() => { chat.createNewSession(); setSidebarOpen(false); }}
           onDelete={chat.deleteSession}
           onRename={chat.renameSession}
           onChangeMode={chat.changeMode}
+          mobileOpen={sidebarOpen}
         />
 
         {/* Chat Area */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Chat Header */}
-          <div className="flex items-center gap-3 px-6 py-4 border-b border-white/40">
-            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${currentMode?.color} flex items-center justify-center shadow-md`}>
-              <span className="material-symbols-outlined text-white text-lg">{currentMode?.icon}</span>
+          <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 border-b border-white/40">
+            {/* Mobile sidebar toggle */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-1.5 rounded-lg hover:bg-white/50 transition-colors flex-shrink-0"
+            >
+              <span className="material-symbols-outlined text-slate-500" style={{ fontSize: '20px' }}>menu</span>
+            </button>
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br ${currentMode?.color} flex items-center justify-center shadow-md`}>
+              <span className="material-symbols-outlined text-white text-base sm:text-lg">{currentMode?.icon}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-[#1E3A8A] text-sm">{currentMode?.label}</h3>
+              <h3 className="font-bold text-[#1E3A8A] text-xs sm:text-sm">{currentMode?.label}</h3>
               <p className="text-xs text-slate-400 flex items-center gap-1">
                 <span className={`w-1.5 h-1.5 rounded-full ${chat.isStreaming ? 'bg-amber-400' : 'bg-emerald-400'} animate-pulse`} />
                 {chat.isStreaming ? 'Đang trả lời...' : 'AI sẵn sàng tư vấn'}

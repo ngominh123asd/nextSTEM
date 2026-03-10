@@ -12,11 +12,12 @@ interface Props {
   onDelete: (id: string) => void;
   onRename: (id: string, title: string) => void;
   onChangeMode: (mode: ChatMode) => void;
+  mobileOpen?: boolean;
 }
 
 export default function SessionSidebar({
   sessions, activeSessionId, activeMode, loading,
-  onSelect, onNewChat, onDelete, onRename, onChangeMode,
+  onSelect, onNewChat, onDelete, onRename, onChangeMode, mobileOpen,
 }: Props) {
   const [contextMenu, setContextMenu] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -57,7 +58,13 @@ export default function SessionSidebar({
   };
 
   return (
-    <div className="w-72 flex-shrink-0 flex flex-col h-full border-r border-white/40 bg-white/30 backdrop-blur-xl">
+    <div className={`
+      fixed md:static inset-y-0 left-0 z-40
+      w-[270px] flex-shrink-0 flex flex-col h-full
+      border-r border-white/40 bg-white/90 md:bg-white/30 backdrop-blur-xl
+      transform transition-transform duration-300 md:transform-none
+      ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+    `}>
       {/* Header */}
       <div className="p-4 border-b border-white/40">
         <button

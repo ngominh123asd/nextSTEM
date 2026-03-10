@@ -17,6 +17,11 @@ export default function Dashboard({ userData, onLogout, userRole, onOpenAdmin }:
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
+  const switchTab = (tab: TabId) => {
+    if (tab === activeTab) return;
+    setActiveTab(tab);
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex" style={{ background: 'linear-gradient(135deg, #f0f4ff 0%, #e8eeff 30%, #f5f0ff 60%, #eef4ff 100%)' }}>
       {/* Ambient blobs */}
@@ -62,17 +67,17 @@ export default function Dashboard({ userData, onLogout, userRole, onOpenAdmin }:
                       height={42}
                       borderRadius={8}
                       className="cursor-pointer"
-                      style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)' }}
-                      onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+                      style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)', animation: 'sidebarItemIn 0.35s cubic-bezier(0.22, 1, 0.36, 1)' }}
+                      onClick={() => { switchTab(item.id); setSidebarOpen(false); }}
                     >
-                      <div className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-white">
+                      <div className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-white" style={{ animation: 'sidebarContentIn 0.4s cubic-bezier(0.22, 1, 0.36, 1)' }}>
                         <span className="material-symbols-outlined text-xl">{item.icon}</span>
                         {item.label}
                       </div>
                     </GlassSurface>
                   ) : (
                     <button key={item.id}
-                      onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+                      onClick={() => { switchTab(item.id); setSidebarOpen(false); }}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${glass.navItem}`}>
                       <span className="material-symbols-outlined text-xl">{item.icon}</span>
                       {item.label}
@@ -91,7 +96,7 @@ export default function Dashboard({ userData, onLogout, userRole, onOpenAdmin }:
               <span className="material-symbols-outlined text-xl">admin_panel_settings</span>Admin Panel
             </button>
           )}
-          <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-red-50/50 hover:text-red-500 transition-all">
+          <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50/50 hover:text-red-600 transition-all">
             <span className="material-symbols-outlined text-xl">logout</span>Đăng xuất
           </button>
         </div>
@@ -107,7 +112,7 @@ export default function Dashboard({ userData, onLogout, userRole, onOpenAdmin }:
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {activeTab === 'dashboard'  && <DashboardTab userData={userData} onNav={setActiveTab} />}
+          {activeTab === 'dashboard'  && <DashboardTab userData={userData} onNav={switchTab} />}
           {activeTab === 'ai-advisor' && <AIAdvisorTab userData={userData} />}
           {activeTab === 'tools'      && <ToolsTab userData={userData} />}
           {activeTab === 'resources'  && <ResourcesTab />}

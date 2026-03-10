@@ -109,6 +109,7 @@ export default function AuthScreen({ onLogin, onRegister, onClose, error, loadin
           {...loginFormProps}
           {...registerFormProps}
           setIsRegister={setIsRegister}
+          onClose={onClose}
         />
       </div>
 
