@@ -60,4 +60,4 @@ export const glass = {
   btn:       'backdrop-blur-md rounded-2xl font-semibold transition-all duration-300',
   activeNav: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 backdrop-blur-md',
   navItem:   'text-slate-500 hover:bg-white/50 hover:text-[#1E3A8A] backdrop-blur-sm',
-};
+}

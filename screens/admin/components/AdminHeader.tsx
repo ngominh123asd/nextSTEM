@@ -27,6 +27,7 @@ const titles: Record<AdminTab, { title: string; icon: string }> = {
   billing:         { title: 'Thanh toán',       icon: 'payments' },
   infra:           { title: 'Hạ tầng',         icon: 'monitor_heart' },
   privacy:         { title: 'Quyền riêng tư',  icon: 'privacy_tip' },
+  resources:       { title: 'Tài nguyên',      icon: 'storage' },
 };
 
 export default function AdminHeader({ activeTab, setSidebarOpen }: Props) {
