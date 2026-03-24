@@ -17,9 +17,6 @@ export type ChatMode = 'career' | 'university' | 'essay' | 'general';
 
 export const MODES = [
   { id: 'general' as const, icon: 'smart_toy', label: 'Tư vấn chung', desc: 'Hỏi bất kỳ câu hỏi nào về du học', color: 'from-blue-500 to-indigo-500' },
-  { id: 'career' as const, icon: 'work', label: 'Định hướng nghề nghiệp', desc: 'AI phân tích năng lực & gợi ý ngành', color: 'from-violet-500 to-purple-500' },
-  { id: 'university' as const, icon: 'school', label: 'Tìm trường phù hợp', desc: 'So sánh & đề xuất trường đại học', color: 'from-emerald-500 to-teal-500' },
-  { id: 'essay' as const, icon: 'edit_note', label: 'Hỗ trợ viết luận', desc: 'AI Coach giúp viết Personal Statement', color: 'from-amber-500 to-orange-500' },
 ] as const;
 
 export const QUICK_PROMPTS: Record<ChatMode, { text: string; icon: string; desc: string }[]> = {

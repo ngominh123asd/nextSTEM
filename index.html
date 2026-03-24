@@ -7,6 +7,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <script>
+      // Early suppression of Chrome extension "runtime.lastError" console errors
+      (function() {
+        const originalError = console.error;
+        console.error = function(...args) {
+          const msg = args[0]?.toString?.() || '';
+          if (msg.includes('runtime.lastError') || msg.includes('Receiving end does not exist')) return;
+          return originalError.apply(console, args);
+        };
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+          const msg = args[0]?.toString?.() || '';
+          if (msg.includes('runtime.lastError') || msg.includes('Receiving end does not exist')) return;
+          return originalWarn.apply(console, args);
+        };
+      })();
+    </script>
   <script type="importmap">
 {
   "imports": {
@@ -20,15 +37,6 @@
 </head>
   <body class="bg-background-light text-slate-900 antialiased selection:bg-primary/20">
     <div id="root"></div>
-  <script>
-    // Suppress Chrome extension "runtime.lastError" console errors
-    const originalError = console.error;
-    console.error = (...args) => {
-      const msg = args[0]?.toString?.() || '';
-      if (msg.includes('runtime.lastError') || msg.includes('Receiving end does not exist')) return;
-      originalError.apply(console, args);
-    };
-  </script>
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>

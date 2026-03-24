@@ -107,7 +107,7 @@ export default function Dashboard({ userData, onLogout, userRole, onOpenAdmin }:
         {/* Mobile header */}
         <div className="lg:hidden flex items-center justify-between px-4 h-14 bg-white/40 backdrop-blur-xl border-b border-white/50 sticky top-0 z-30">
           <button onClick={() => setSidebarOpen(true)} className="p-1.5 rounded-lg hover:bg-white/50"><span className="material-symbols-outlined text-slate-600">menu</span></button>
-          <span className="font-bold text-[#1E3A8A]">nextSTEM</span>
+          <div />
           <button onClick={() => setChatOpen(true)} className="p-1.5 rounded-lg hover:bg-white/50"><span className="material-symbols-outlined text-blue-600">smart_toy</span></button>
         </div>
 

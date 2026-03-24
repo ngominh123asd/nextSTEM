@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChatSession } from '../../../../lib/api';
 import { ChatMode, MODES } from './types';
+import GlassSurface from '../../../../components/GlassSurface';
 
 interface Props {
   sessions: ChatSession[];
@@ -67,13 +68,19 @@ export default function SessionSidebar({
     `}>
       {/* Header */}
       <div className="p-4 border-b border-white/40">
-        <button
+        <GlassSurface
+          width="100%"
+          height={48}
+          borderRadius={16}
+          className="cursor-pointer hover:opacity-90 transition-opacity"
+          style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)' }}
           onClick={onNewChat}
-          className="w-full flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-0.5"
         >
-          <span className="material-symbols-outlined text-lg">add</span>
-          Cuộc trò chuyện mới
-        </button>
+          <div className="flex items-center justify-center gap-2.5 px-4 h-full text-white text-sm font-semibold">
+            <span className="material-symbols-outlined text-lg">add</span>
+            Cuộc trò chuyện mới
+          </div>
+        </GlassSurface>
       </div>
 
       {/* Mode Filter */}

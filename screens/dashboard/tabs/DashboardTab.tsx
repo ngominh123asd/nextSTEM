@@ -4,6 +4,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import GlassSurface from '../../../components/GlassSurface';
+import MarqueeText from '../../../components/MarqueeText';
 import { UserData, TabId, goalLabels } from '../types';
 import { BlobDecor, GlassCard, GlassHeader, PageTitle, ToolCard } from '../components/SharedUI';
 
@@ -13,10 +14,19 @@ const activityData = [
 ];
 
 export default function DashboardTab({ userData, onNav }: { userData: UserData; onNav: (t: TabId) => void }) {
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 640);
+  React.useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
   const radarData = React.useMemo(() => {
-    const skills = ['Lập trình', 'Khoa học', 'Giải quyết vấn đề', 'Toán học', 'Làm việc nhóm', 'Nghiên cứu'];
+    const skills = isMobile
+      ? ['Lập trình', 'Khoa học', 'GQVĐ', 'Toán', 'Nhóm', 'NC']
+      : ['Lập trình', 'Khoa học', 'Giải quyết vấn đề', 'Toán học', 'Làm việc nhóm', 'Nghiên cứu'];
     return skills.map(s => ({ subject: s, value: userData.interests.length > 0 ? Math.floor(Math.random() * 40) + 30 : 20, fullMark: 100 }));
-  }, [userData.interests]);
+  }, [userData.interests, isMobile]);
 
   const recentActivities = [
     { icon: 'school', text: 'Hoàn thành bài test định hướng nghề nghiệp', time: '2 giờ trước', color: 'from-blue-500 to-blue-600' },
@@ -80,36 +90,37 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
         <GlassHeader icon="supervisor_account" title="Mentor hướng dẫn" />
         <div className="relative z-10">
           {/* Top: Mentor info + action */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
               <img
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop"
                 alt="Mentor"
-                className="w-13 h-13 rounded-2xl object-cover shadow-md border-2 border-white flex-shrink-0"
+                className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl object-cover shadow-md border-2 border-white flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-[#1E3A8A] text-base">Dr. Trần Minh Đức</h4>
-                <p className="text-xs text-slate-500">PhD Computer Science — Stanford University</p>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-xs text-emerald-600 font-medium">Đang hoạt động</span>
+                <MarqueeText>
+                  <h4 className="font-bold text-[#1E3A8A] text-sm sm:text-base">Dr. Trần Minh Đức</h4>
+                </MarqueeText>
+                <MarqueeText>
+                  <p className="text-[10px] sm:text-xs text-slate-500">PhD Computer Science — Stanford University</p>
+                </MarqueeText>
+                <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[10px] sm:text-xs text-emerald-600 font-medium whitespace-nowrap">Đang hoạt động</span>
                 </div>
               </div>
             </div>
-            <div className="flex gap-2 flex-shrink-0">
-              <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/50 border border-white/70 text-sm font-semibold text-slate-600 hover:bg-white/80 transition-all">
-                <span className="material-symbols-outlined text-lg">chat</span>
-                Nhắn tin
-              </button>
+            <div className="flex-shrink-0">
               <GlassSurface
                 width="auto"
-                height={42}
-                borderRadius={12}
-                className="cursor-pointer hover:opacity-90 transition-opacity"
+                height={36}
+                borderRadius={10}
+                className="cursor-pointer hover:opacity-90 transition-opacity sm:!h-[42px] sm:!border-radius-[12px]"
                 style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)' }}
               >
-                <span className="text-white font-semibold px-4 flex items-center gap-2 text-sm">
-                  <span className="material-symbols-outlined text-lg">video_call</span>Gọi Mentor
+                <span className="text-white font-semibold px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm h-full">
+                  <span className="material-symbols-outlined text-base sm:text-lg">chat</span>
+                  Nhắn tin
                 </span>
               </GlassSurface>
             </div>
@@ -135,7 +146,9 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-[#1E3A8A] mb-0.5">Tin nhắn mới</p>
-                <p className="text-xs text-slate-500 line-clamp-2">"Em hoàn thiện phần portfolio nhé, anh sẽ review…"</p>
+                <MarqueeText>
+                  <p className="text-xs text-slate-500 whitespace-nowrap sm:whitespace-normal sm:line-clamp-2">"Em hoàn thiện phần portfolio nhé, anh sẽ review…"</p>
+                </MarqueeText>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3.5 rounded-xl bg-gradient-to-br from-amber-50/40 to-amber-50/20 border border-amber-100/50">
@@ -147,7 +160,9 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
                   <p className="text-sm font-semibold text-[#1E3A8A]">Bài tập từ Mentor</p>
                   <span className="text-[10px] font-bold text-amber-600 bg-amber-100/60 px-2 py-0.5 rounded-full flex-shrink-0">2 ngày</span>
                 </div>
-                <p className="text-xs text-slate-500">Viết draft Personal Statement — HSD: 22/02</p>
+                <MarqueeText>
+                  <p className="text-xs text-slate-500 whitespace-nowrap sm:whitespace-normal sm:line-clamp-2">Viết draft Personal Statement — HSD: 22/02</p>
+                </MarqueeText>
               </div>
             </div>
           </div>
@@ -166,7 +181,9 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
                   <span className="material-symbols-outlined text-white text-base">{a.icon}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#1E3A8A] truncate">{a.text}</p>
+                  <MarqueeText>
+                    <p className="text-sm font-semibold text-[#1E3A8A]">{a.text}</p>
+                  </MarqueeText>
                   <p className="text-xs text-slate-400">{a.time}</p>
                 </div>
               </div>
@@ -178,12 +195,12 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
         <GlassCard>
           <BlobDecor className="w-48 h-48 -top-20 -right-20 bg-indigo-200/20" />
           <GlassHeader icon="trending_up" title="Năng lực hiện tại" />
-          <div className="w-full h-[280px] relative z-10">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={radarData} outerRadius="70%">
+          <div className="w-full h-[280px] min-h-[280px] relative z-10">
+            <ResponsiveContainer width="100%" height="100%" debounce={50}>
+              <RadarChart data={radarData} outerRadius={isMobile ? "50%" : "70%"}>
                 <PolarGrid stroke="#c7d2fe" strokeWidth={0.5} />
-                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fill: '#475569', fontWeight: 500 }} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                <PolarAngleAxis dataKey="subject" tick={{ fontSize: isMobile ? 9 : 12, fill: '#475569', fontWeight: 500 }} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
                 <Radar name="Năng lực" dataKey="value" stroke="#4f46e5" fill="url(#radarGrad)" strokeWidth={2} />
                 <defs>
                   <linearGradient id="radarGrad" x1="0" y1="0" x2="0" y2="1">

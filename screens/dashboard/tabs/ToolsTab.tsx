@@ -6,9 +6,9 @@ import { BlobDecor, GlassCard, GlassHeader, PageTitle, ToolCard } from '../compo
 type ToolSubPage = 'home' | 'university' | 'major' | 'scholarship' | 'extracurricular' | 'testprep' | 'essay' | 'visa';
 
 const toolItems: { id: ToolSubPage; icon: string; grad: string; title: string; desc: string; tags: string[] }[] = [
-  { id: 'major',           icon: 'category',          grad: 'from-blue-500 to-blue-600',    title: 'Chọn Chuyên Ngành',                desc: 'AI gợi ý ngành học phù hợp dựa trên sở thích & năng lực',          tags: ['AI', 'Trắc nghiệm'] },
-  { id: 'university',      icon: 'school',            grad: 'from-indigo-500 to-indigo-600',title: 'Tìm Trường Đại Học',               desc: 'Tìm kiếm & so sánh trường đại học trên toàn thế giới',              tags: ['AI', 'Bộ lọc'] },
-  { id: 'scholarship',     icon: 'workspace_premium', grad: 'from-amber-500 to-orange-500', title: 'Tìm Kiếm Học Bổng',                desc: 'Khám phá cơ hội học bổng phù hợp với hồ sơ của bạn',               tags: ['AI', 'Trắc nghiệm'] },
+  { id: 'major',           icon: 'category',          grad: 'from-blue-500 to-blue-600',    title: 'Chọn Chuyên Ngành',                desc: 'AI gợi ý ngành học phù hợp dựa trên sở thích & năng lực',          tags: ['AI', 'AI hỗ trợ'] },
+  { id: 'university',      icon: 'school',            grad: 'from-indigo-500 to-indigo-600',title: 'Tìm Trường Đại Học',               desc: 'Tìm kiếm & so sánh trường đại học trên toàn thế giới',              tags: ['AI', 'AI hỗ trợ'] },
+  { id: 'scholarship',     icon: 'workspace_premium', grad: 'from-amber-500 to-orange-500', title: 'Tìm Kiếm Học Bổng',                desc: 'Khám phá cơ hội học bổng phù hợp với hồ sơ của bạn',               tags: ['AI', 'AI hỗ trợ'] },
   { id: 'extracurricular', icon: 'groups',            grad: 'from-emerald-500 to-teal-500', title: 'Kế Hoạch Ngoại Khoá',              desc: 'Lên kế hoạch hoạt động ngoại khoá & đánh giá AI',                  tags: ['Lập kế hoạch', 'AI'] },
   { id: 'testprep',        icon: 'quiz',              grad: 'from-rose-500 to-pink-500',    title: 'Chuẩn Bị Bài Kiểm Tra',            desc: 'Luyện thi IELTS, TOEFL, SAT, AP với hỗ trợ AI',                    tags: ['IELTS', 'SAT', 'AP'] },
   { id: 'essay',           icon: 'edit_note',         grad: 'from-violet-500 to-purple-500',title: 'Viết Bài Luận Cá Nhân',            desc: 'AI Coach hỗ trợ viết Personal Statement & Essay',                  tags: ['AI Writing', 'CommonApp'] },
@@ -33,7 +33,7 @@ function QuizQuestion({ q, options }: { q: string; options: string[] }) {
 }
 
 function ToolDetail({ item, onBack, userData }: { item: typeof toolItems[0]; onBack: () => void; userData: UserData }) {
-  const [mode, setMode] = useState<'guide' | 'ai' | 'quiz'>('guide');
+  const [mode, setMode] = useState<'guide' | 'ai'>('guide');
 
   return (
     <>
@@ -44,7 +44,7 @@ function ToolDetail({ item, onBack, userData }: { item: typeof toolItems[0]; onB
 
       {/* Mode Switcher */}
       <div className="flex gap-2 mb-8 p-1.5 bg-white/40 backdrop-blur-xl rounded-2xl border border-white/60 w-fit">
-        {([['guide', 'menu_book', 'Hướng dẫn'], ['ai', 'auto_awesome', 'AI Hỗ trợ'], ['quiz', 'quiz', 'Trắc nghiệm']] as const).map(([id, ic, label]) => (
+        {([['guide', 'menu_book', 'Hướng dẫn'], ['ai', 'auto_awesome', 'AI Hỗ trợ']] as const).map(([id, ic, label]) => (
           mode === id ? (
             <GlassSurface
               key={id}
@@ -60,7 +60,7 @@ function ToolDetail({ item, onBack, userData }: { item: typeof toolItems[0]; onB
               </span>
             </GlassSurface>
           ) : (
-            <button key={id} onClick={() => setMode(id)}
+            <button key={id} onClick={() => setMode(id as any)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all text-slate-500 hover:text-[#1E3A8A] hover:bg-white/50">
               <span className="material-symbols-outlined text-lg">{ic}</span>{label}
             </button>
@@ -96,27 +96,27 @@ function ToolDetail({ item, onBack, userData }: { item: typeof toolItems[0]; onB
           <BlobDecor className="w-48 h-48 -top-16 -right-16 bg-violet-200/20" />
           <GlassHeader icon="auto_awesome" title="AI Hỗ trợ tìm kiếm" />
           <div className="relative z-10">
-            <div className="flex gap-3 mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <div className="flex-1 relative">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                <input type="text" placeholder={`Hỏi AI về ${item.title.toLowerCase()}...`} className={`${glass.input} pl-11`} />
+                <input type="text" placeholder={`Hỏi AI về ${item.title.toLowerCase()}...`} className={`${glass.input} pl-11 !h-12`} />
               </div>
               <GlassSurface
-                width="auto"
+                width="100%"
                 height={48}
                 borderRadius={16}
-                className="cursor-pointer hover:opacity-90 transition-opacity"
+                className="hover:opacity-90 transition-opacity sm:!w-[120px]"
                 style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)' }}
               >
-                <span className="text-white font-semibold px-5 flex items-center gap-2">
+                <span className="text-white font-semibold flex items-center justify-center gap-2 h-full">
                   <span className="material-symbols-outlined text-lg">send</span>Gửi
                 </span>
               </GlassSurface>
             </div>
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-50/50 to-indigo-50/50 backdrop-blur-sm border border-white/60">
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-blue-50/50 to-indigo-50/50 backdrop-blur-sm border border-white/60">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-md">
-                  <span className="material-symbols-outlined text-white text-lg">smart_toy</span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                  <span className="material-symbols-outlined text-white text-base sm:text-lg">smart_toy</span>
                 </div>
                 <div>
                   <p className="font-bold text-[#1E3A8A] text-sm mb-1">AI Study Coach</p>
@@ -126,28 +126,6 @@ function ToolDetail({ item, onBack, userData }: { item: typeof toolItems[0]; onB
                 </div>
               </div>
             </div>
-          </div>
-        </GlassCard>
-      )}
-
-      {mode === 'quiz' && (
-        <GlassCard>
-          <GlassHeader icon="quiz" title="Bài trắc nghiệm tìm kiếm" />
-          <div className="relative z-10 space-y-5">
-            <QuizQuestion q="Bạn quan tâm đến lĩnh vực nào nhất?" options={['Công nghệ & Kỹ thuật', 'Khoa học & Nghiên cứu', 'Kinh doanh & Quản trị', 'Nghệ thuật & Sáng tạo']} />
-            <QuizQuestion q="Bạn muốn du học ở khu vực nào?" options={['Bắc Mỹ (USA, Canada)', 'Châu Âu (UK, Đức, Hà Lan)', 'Châu Á (Singapore, Nhật, Hàn)', 'Châu Úc (Úc, New Zealand)']} />
-            <QuizQuestion q="Ngân sách dự kiến hàng năm?" options={['Dưới 15.000 USD', '15.000 - 30.000 USD', '30.000 - 50.000 USD', 'Trên 50.000 USD / Cần học bổng']} />
-            <GlassSurface
-              width="100%"
-              height={52}
-              borderRadius={16}
-              className="cursor-pointer hover:opacity-90 transition-opacity"
-              style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)' }}
-            >
-              <span className="text-white font-semibold flex items-center gap-2">
-                <span className="material-symbols-outlined">auto_awesome</span>Xem kết quả gợi ý
-              </span>
-            </GlassSurface>
           </div>
         </GlassCard>
       )}
