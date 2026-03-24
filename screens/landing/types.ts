@@ -2,7 +2,6 @@ export interface LandingProps {
   onStartDemo: () => void;
   onOpenAuth: () => void;
   onOpenAbout: () => void;
-  onOpenSpeed: () => void;
 }
 
 export interface Testimonial {

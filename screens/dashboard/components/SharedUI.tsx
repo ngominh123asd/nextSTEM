@@ -20,10 +20,10 @@ export function GlassHeader({ icon, title, extra }: { icon: string; title: strin
   return (
     <div className="flex items-center justify-between mb-5">
       <div className="flex items-center gap-2.5">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/15 to-indigo-500/15 backdrop-blur-sm flex items-center justify-center border border-white/50">
-          <span className="material-symbols-outlined text-blue-600 text-lg">{icon}</span>
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-400/20 backdrop-blur-md flex items-center justify-center border border-white/80 shadow-[0_4px_12px_rgba(37,99,235,0.06)] transition-transform hover:scale-110">
+          <span className="material-symbols-outlined text-blue-600 text-lg font-bold">{icon}</span>
         </div>
-        <h2 className="text-lg font-bold text-[#1E3A8A]">{title}</h2>
+        <h2 className="text-xl font-extrabold text-[#1E3A8A] tracking-tight">{title}</h2>
       </div>
       {extra}
     </div>
@@ -48,9 +48,9 @@ export function ToolCard({ icon, iconGrad, title, desc, tags, onClick }: {
   icon: string; iconGrad: string; title: string; desc: string; tags?: string[]; onClick?: () => void; key?: React.Key;
 }) {
   return (
-    <div onClick={onClick} className={`${glass.card} p-5 group cursor-pointer hover:shadow-[0_12px_40px_rgba(30,58,138,0.12)] hover:-translate-y-1 transition-all duration-300`}>
-      <BlobDecor className="w-32 h-32 -top-10 -right-10 bg-blue-200/30" />
-      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${iconGrad} flex items-center justify-center mb-4 shadow-lg shadow-blue-500/15 relative z-10`}>
+    <div onClick={onClick} className={`${glass.card} p-5 group cursor-pointer hover:shadow-[0_30px_60px_rgba(37,99,235,0.18)] hover:-translate-y-2 transition-all duration-300 border border-white/90`}>
+      <BlobDecor className="w-32 h-32 -top-10 -right-10 bg-blue-200/40" />
+      <div className={`w-13 h-13 rounded-2xl bg-gradient-to-br ${iconGrad} flex items-center justify-center mb-5 shadow-xl shadow-blue-500/20 relative z-10 border border-white/30 transform group-hover:scale-110 transition-transform`}>
         <span className="material-symbols-outlined text-white text-2xl">{icon}</span>
       </div>
       <h3 className="font-bold text-[#1E3A8A] mb-1.5 relative z-10">{title}</h3>

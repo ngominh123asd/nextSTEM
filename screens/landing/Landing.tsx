@@ -11,12 +11,12 @@ import ImpactSection from './sections/ImpactSection';
 import PartnersSection from './sections/PartnersSection';
 import Footer from './sections/Footer';
 
-export default function Landing({ onStartDemo, onOpenAuth, onOpenAbout, onOpenSpeed }: LandingProps) {
+export default function Landing({ onStartDemo, onOpenAuth, onOpenAbout }: LandingProps) {
   const partnerLogos = Array.from({ length: 24 }, (_, i) => `/images/partners/partner-${String(i + 1).padStart(2, '0')}.png`);
 
   return (
     <div className="bg-white">
-      <Navbar onStartDemo={onStartDemo} onOpenAuth={onOpenAuth} onOpenAbout={onOpenAbout} onOpenSpeed={onOpenSpeed} />
+      <Navbar onStartDemo={onStartDemo} onOpenAuth={onOpenAuth} onOpenAbout={onOpenAbout} />
       <HeroSection onStartDemo={onStartDemo} />
       <ProblemsSection />
       <StackingCardsSection />

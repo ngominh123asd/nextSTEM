@@ -191,7 +191,7 @@ export default function App() {
 
   return (
     <>
-      <Landing onStartDemo={openOnboarding} onOpenAuth={openAuth} onOpenAbout={openAbout} onOpenSpeed={() => {}} />
+      <Landing onStartDemo={openOnboarding} onOpenAuth={openAuth} onOpenAbout={openAbout} />
       {screen === 'about' && (
         <AboutScreen
           onClose={() => setScreen('landing')}

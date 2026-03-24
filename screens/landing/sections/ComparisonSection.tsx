@@ -16,7 +16,7 @@ export default function ComparisonSection({ onStartDemo }: ComparisonSectionProp
         
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Traditional */}
-          <div className="bg-slate-50 rounded-2xl p-8 border border-slate-200">
+          <div className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.06)] flex flex-col">
             <div className="text-center mb-6">
               <p className="text-sm font-medium text-slate-500 mb-2">Tư vấn truyền thống</p>
               <p className="text-lg font-normal">Chi phí <span className="text-3xl font-bold text-slate-800">đắt đỏ</span></p>
@@ -33,7 +33,8 @@ export default function ComparisonSection({ onStartDemo }: ComparisonSectionProp
           </div>
           
           {/* nextSTEM */}
-          <div className="bg-primary rounded-2xl p-8 text-white relative overflow-hidden">
+          <div className="bg-primary rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-[0_30px_60px_rgba(37,99,235,0.25)] flex flex-col border border-white/20">
+            <div className="absolute -top-24 -right-24 w-60 h-60 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute top-4 right-4 bg-white/20 px-3 py-1 rounded-full text-xs font-medium">
               Khuyên dùng
             </div>
@@ -49,7 +50,7 @@ export default function ComparisonSection({ onStartDemo }: ComparisonSectionProp
             </ul>
             <button 
               onClick={onStartDemo}
-              className="w-full py-3 bg-white text-primary rounded-lg font-semibold hover:bg-slate-100 transition-colors"
+              className="w-full py-4 bg-white text-primary rounded-2xl font-bold shadow-[0_4px_15px_rgba(255,255,255,0.3)] hover:bg-slate-50 transition-all hover:scale-[1.02] active:scale-100"
             >
               Trải nghiệm ngay
             </button>

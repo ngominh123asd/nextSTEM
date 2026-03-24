@@ -52,12 +52,12 @@ export const goalLabels: Record<string, string> = {
 
 /* Glass styles */
 export const glass = {
-  card:      'bg-white/60 backdrop-blur-2xl rounded-[1.75rem] border border-white/80 shadow-[0_8px_32px_rgba(30,58,138,0.06)] relative overflow-hidden',
-  cardSolid: 'bg-white/80 backdrop-blur-xl rounded-[1.75rem] border border-white/70 shadow-[0_4px_24px_rgba(30,58,138,0.05)] relative overflow-hidden',
-  sidebar:   'bg-white/50 backdrop-blur-3xl border-r border-white/60',
-  input:     'w-full px-4 py-3 rounded-2xl border border-white/80 bg-white/40 backdrop-blur-md text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/30 focus:border-blue-300/50 focus:bg-white/70 transition-all',
-  tag:       'px-3.5 py-1.5 rounded-xl text-sm font-semibold backdrop-blur-sm',
-  btn:       'backdrop-blur-md rounded-2xl font-semibold transition-all duration-300',
-  activeNav: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 backdrop-blur-md',
-  navItem:   'text-slate-500 hover:bg-white/50 hover:text-[#1E3A8A] backdrop-blur-sm',
+  card:      'bg-white/70 backdrop-blur-2xl rounded-[2.5rem] border border-white/90 shadow-[0_20px_50px_rgba(37,99,235,0.12),0_4px_12px_rgba(37,99,235,0.04)] relative overflow-hidden',
+  cardSolid: 'bg-white/85 backdrop-blur-xl rounded-[2.5rem] border border-white/80 shadow-[0_12px_40px_rgba(37,99,235,0.1),0_2px_8px_rgba(37,99,235,0.03)] relative overflow-hidden',
+  sidebar:   'bg-white/60 backdrop-blur-3xl border-r border-blue-50/50',
+  input:     'w-full px-5 py-4 rounded-2xl border border-white/90 bg-white/40 backdrop-blur-md text-slate-900 placeholder:text-slate-400 shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-400/20 focus:border-blue-300/60 focus:bg-white/80 transition-all',
+  tag:       'px-3.5 py-1.5 rounded-xl text-sm font-semibold backdrop-blur-md border border-white/50',
+  btn:       'backdrop-blur-md rounded-2xl font-bold tracking-tight transition-all duration-300 shadow-[0_4px_12px_rgba(37,99,235,0.08)] active:shadow-none active:translate-y-0.5 whitespace-nowrap',
+  activeNav: 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-[0_10px_25px_rgba(37,99,235,0.3)] backdrop-blur-md',
+  navItem:   'text-slate-500 hover:bg-white/60 hover:text-blue-600 backdrop-blur-sm',
 }

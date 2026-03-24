@@ -6,10 +6,9 @@ interface NavbarProps {
   onStartDemo: () => void;
   onOpenAuth: () => void;
   onOpenAbout: () => void;
-  onOpenSpeed: () => void;
 }
 
-export default function Navbar({ onStartDemo, onOpenAuth, onOpenAbout, onOpenSpeed }: NavbarProps) {
+export default function Navbar({ onStartDemo, onOpenAuth, onOpenAbout }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -22,7 +21,6 @@ export default function Navbar({ onStartDemo, onOpenAuth, onOpenAbout, onOpenSpe
           <div className="hidden md:flex items-center gap-8">
             <button onClick={onOpenAbout} className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Về chúng tôi</button>
             <button className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Sản phẩm</button>
-            <button onClick={onOpenSpeed} className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Tốc độ</button>
             <button className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">So sánh</button>
             <button className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Liên hệ</button>
           </div>
@@ -62,7 +60,6 @@ export default function Navbar({ onStartDemo, onOpenAuth, onOpenAbout, onOpenSpe
           <div className="px-4 py-3 space-y-1">
             <button onClick={() => { onOpenAbout(); setMobileMenuOpen(false); }} className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors">Về chúng tôi</button>
             <button className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors">Sản phẩm</button>
-            <button onClick={() => { onOpenSpeed(); setMobileMenuOpen(false); }} className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors">Tốc độ</button>
             <button className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors">So sánh</button>
             <button className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors">Liên hệ</button>
             <div className="border-t border-slate-100 my-2" />
