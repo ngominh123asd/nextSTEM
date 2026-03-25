@@ -16,29 +16,8 @@ export default function AIAdvisorTab({ userData }: { userData: UserData }) {
     <>
       <PageTitle icon="auto_awesome" title="AI Advisor" subtitle="Trợ lý tư vấn du học thông minh — cá nhân hoá theo hồ sơ của bạn" />
 
-      {/* Mode Selector */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
-        {MODES.map(m => (
-          <button
-            key={m.id}
-            onClick={() => chat.changeMode(m.id)}
-            className={`p-2.5 sm:p-4 rounded-2xl text-left transition-all duration-300 border ${
-              chat.activeMode === m.id
-                ? 'bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border-blue-300/50 shadow-md shadow-blue-100/50'
-                : 'bg-white/40 backdrop-blur-sm border-white/60 hover:bg-white/60'
-            }`}
-          >
-            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br ${m.color} flex items-center justify-center mb-2 sm:mb-3 shadow-lg`}>
-              <span className="material-symbols-outlined text-white text-base sm:text-lg">{m.icon}</span>
-            </div>
-            <h4 className={`font-bold text-xs sm:text-sm mb-0.5 ${chat.activeMode === m.id ? 'text-[#1E3A8A]' : 'text-slate-700'}`}>{m.label}</h4>
-            <p className="text-[10px] sm:text-xs text-slate-400 hidden sm:block">{m.desc}</p>
-          </button>
-        ))}
-      </div>
-
       {/* Main Chat Layout: Sidebar + Content */}
-      <GlassCard className="!p-0 min-h-[400px] sm:min-h-[560px] flex overflow-hidden relative">
+      <GlassCard className="!p-0 min-h-[400px] sm:min-h-[560px] flex overflow-hidden relative !bg-white/60 shadow-xl border-white/80">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden" onClick={() => setSidebarOpen(false)} />

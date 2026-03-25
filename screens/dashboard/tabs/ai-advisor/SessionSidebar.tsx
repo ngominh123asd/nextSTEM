@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChatSession } from '../../../../lib/api';
-import { ChatMode, MODES } from './types';
+import { ChatMode } from './types';
 import GlassSurface from '../../../../components/GlassSurface';
 
 interface Props {
@@ -68,6 +68,7 @@ export default function SessionSidebar({
     `}>
       {/* Header */}
       <div className="p-4 border-b border-white/40">
+        <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">Lịch sử trò chuyện</h3>
         <GlassSurface
           width="100%"
           height={48}
@@ -81,24 +82,6 @@ export default function SessionSidebar({
             Cuộc trò chuyện mới
           </div>
         </GlassSurface>
-      </div>
-
-      {/* Mode Filter */}
-      <div className="px-3 py-2 flex gap-1.5 border-b border-white/30">
-        {MODES.map(m => (
-          <button
-            key={m.id}
-            onClick={() => onChangeMode(m.id)}
-            title={m.label}
-            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 ${
-              activeMode === m.id
-                ? `bg-gradient-to-br ${m.color} text-white shadow-md`
-                : 'text-slate-400 hover:bg-white/60 hover:text-slate-600'
-            }`}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{m.icon}</span>
-          </button>
-        ))}
       </div>
 
       {/* Session List */}

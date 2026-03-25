@@ -58,8 +58,8 @@ export default function ChatMessageList({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 w-full max-w-xl">
             {QUICK_PROMPTS[activeMode].map((q, idx) => (
               <button key={q.text} onClick={() => onSend(q.text)}
-                className="group relative p-3 sm:p-4 rounded-2xl text-left transition-all duration-300 bg-white/50 backdrop-blur-sm border border-white/70 hover:bg-white/90 hover:border-blue-200/60 hover:shadow-lg hover:shadow-blue-100/40 hover:-translate-y-0.5">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/0 to-indigo-50/0 group-hover:from-blue-50/50 group-hover:to-indigo-50/30 transition-all duration-300" />
+                className="group relative p-3 sm:p-4 rounded-2xl text-left transition-all duration-300 bg-white/90 backdrop-blur-md border border-white shadow-sm hover:bg-white hover:border-blue-300/60 hover:shadow-xl hover:shadow-blue-100/50 hover:-translate-y-0.5">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/0 to-indigo-50/0 group-hover:from-blue-50/80 group-hover:to-indigo-50/50 transition-all duration-300" />
                 <div className="relative flex items-start gap-3">
                   <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${
                     idx === 0 ? 'from-blue-500 to-blue-600' : idx === 1 ? 'from-violet-500 to-purple-500' : idx === 2 ? 'from-emerald-500 to-teal-500' : 'from-amber-500 to-orange-500'
@@ -107,7 +107,7 @@ export default function ChatMessageList({
 
             {/* Message content */}
             {m.role === 'ai' ? (
-              <div className="p-3 sm:p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-line bg-white/60 backdrop-blur-sm border border-white/60 text-slate-700 rounded-bl-md">
+              <div className="p-3 sm:p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-line bg-white/90 backdrop-blur-md border border-white shadow-sm text-slate-700 rounded-bl-md">
                 {m.text}
               </div>
             ) : m.text}

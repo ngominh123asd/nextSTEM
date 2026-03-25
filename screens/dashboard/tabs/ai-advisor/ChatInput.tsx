@@ -29,7 +29,7 @@ export default function ChatInput({ activeMode, isStreaming, hasMessages, onSend
           {QUICK_PROMPTS[activeMode].slice(0, 3).map(q => (
             <button key={q.text} onClick={() => onSend(q.text)}
               disabled={isStreaming}
-              className="whitespace-nowrap text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/70 text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 hover:border-blue-200/50 transition-all flex-shrink-0 flex items-center gap-1 sm:gap-1.5 shadow-sm disabled:opacity-50">
+              className="whitespace-nowrap text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-white/90 backdrop-blur-md border border-white shadow-sm text-slate-600 hover:text-blue-600 hover:bg-white hover:border-blue-200/60 transition-all flex-shrink-0 flex items-center gap-1 sm:gap-1.5 disabled:opacity-50">
               <span className="material-symbols-outlined text-blue-500 text-sm">{q.icon}</span>
               {q.text}
             </button>
@@ -48,7 +48,7 @@ export default function ChatInput({ activeMode, isStreaming, hasMessages, onSend
               onKeyDown={e => e.key === 'Enter' && !isStreaming && handleSend()}
               disabled={isStreaming}
               placeholder={isStreaming ? 'Đang trả lời...' : `Hỏi về ${MODES.find(m => m.id === activeMode)?.label.toLowerCase()}...`}
-              className={`${glass.input} pl-13 ${isStreaming ? 'opacity-50' : ''}`}
+              className={`${glass.input} pl-13 ${isStreaming ? 'opacity-50' : ''} !bg-white/90 border-2 border-blue-100/50 focus:border-blue-400 focus:shadow-[0_0_20px_rgba(59,130,246,0.15)] shadow-md transition-all duration-300`}
             />
           </div>
           {isStreaming ? (
