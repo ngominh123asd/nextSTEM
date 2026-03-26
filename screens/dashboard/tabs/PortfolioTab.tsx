@@ -140,7 +140,7 @@ export default function PortfolioTab({ userData }: { userData: UserData }) {
             <BlobDecor className="w-36 h-36 -bottom-12 -right-12 bg-blue-200/20" />
             <GlassHeader icon="bar_chart" title="Hoạt động tuần này" />
             <div className="w-full h-[200px] relative z-10 mt-2">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minHeight={200} minWidth={1}>
                 <AreaChart data={activityData}>
                   <defs>
                     <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">

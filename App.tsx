@@ -81,15 +81,19 @@ export default function App() {
 
   const handleOnboardingComplete = async (data: UserData) => {
     try {
-      const updated = await apiOnboarding({
-        name: data.name,
-        goals: data.goals,
-        grade: data.grade,
-        school: data.school,
-        subjects: data.subjects,
-        interests: data.interests,
-      });
-      setUserData(apiUserToLocal(updated));
+      if (getToken()) {
+        const updated = await apiOnboarding({
+          name: data.name,
+          goals: data.goals,
+          grade: data.grade,
+          school: data.school,
+          subjects: data.subjects,
+          interests: data.interests,
+        });
+        setUserData(apiUserToLocal(updated));
+      } else {
+        setUserData(data);
+      }
       setScreen('dashboard');
     } catch {
       // Fallback – still go to dashboard with local data

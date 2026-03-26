@@ -196,7 +196,7 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
           <BlobDecor className="w-48 h-48 -top-20 -right-20 bg-indigo-200/20" />
           <GlassHeader icon="trending_up" title="Năng lực hiện tại" />
           <div className="w-full h-[280px] min-h-[280px] relative z-10">
-            <ResponsiveContainer width="100%" height="100%" debounce={50}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={280} minWidth={1} debounce={50}>
               <RadarChart data={radarData} outerRadius={isMobile ? "50%" : "70%"}>
                 <PolarGrid stroke="#c7d2fe" strokeWidth={0.5} />
                 <PolarAngleAxis dataKey="subject" tick={{ fontSize: isMobile ? 9 : 12, fill: '#475569', fontWeight: 500 }} />

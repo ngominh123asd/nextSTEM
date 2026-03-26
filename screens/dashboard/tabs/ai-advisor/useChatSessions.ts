@@ -9,6 +9,7 @@ import {
   apiChatAIStream,
   apiSaveChatAIMessage,
   ChatSession,
+  getToken,
 } from '../../../../lib/api';
 import { ChatMessage, ChatMode, ThinkingStep, mapEventToStep } from './types';
 
@@ -31,6 +32,10 @@ export function useChatSessions() {
   }, []);
 
   const loadSessions = useCallback(async () => {
+    if (!getToken()) {
+      setLoadingSessions(false);
+      return;
+    }
     try {
       setLoadingSessions(true);
       const list = await apiListChatSessions();
@@ -141,6 +146,16 @@ export function useChatSessions() {
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isStreaming) return;
+
+    if (!getToken()) {
+      setMessages(prev => [...prev, { role: 'user', text }]);
+      setIsStreaming(true);
+      setTimeout(() => {
+        setMessages(prev => [...prev, { role: 'ai', text: 'Vui lòng đăng nhập để sử dụng tính năng AI Chatbot.' }]);
+        setIsStreaming(false);
+      }, 800);
+      return;
+    }
 
     // Ensure we have a session
     let sid = activeSessionId;

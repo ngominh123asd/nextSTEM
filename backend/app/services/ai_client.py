@@ -19,6 +19,15 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 _TIMEOUT = httpx.Timeout(connect=10.0, read=120.0, write=10.0, pool=10.0)
+MAX_RETRIES = 3
+INITIAL_BACKOFF = 1.0
+
+def is_transient_error(e: Exception) -> bool:
+    if isinstance(e, httpx.HTTPStatusError):
+        return e.response.status_code in (500, 502, 503, 504)
+    if isinstance(e, httpx.RequestError):
+        return True
+    return False
 
 
 def _headers() -> dict[str, str]:
@@ -58,22 +67,30 @@ async def ai_run(
         payload["user_id"] = user_id
 
     logger.info(
-        "ai_run  req=%s session=%s user=%s",
-        request_id, session_id, user_id,
+        "ai_run  req=%s session=%s user=%s workflow=%s",
+        request_id, session_id, user_id, workflow,
     )
 
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        resp = await client.post(
-            f"{_base_url()}/api/v1/ai/run",
-            json=payload,
-            headers=_headers(),
-        )
-        resp.raise_for_status()
-        data = resp.json()
-
-    latency = time.monotonic() - t0
-    logger.info("ai_run  req=%s latency=%.2fs", request_id, latency)
-    return data
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+                resp = await client.post(
+                    f"{_base_url()}/api/v1/ai/run",
+                    json=payload,
+                    headers=_headers(),
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                latency = time.monotonic() - t0
+                logger.info("ai_run  req=%s latency=%.2fs attempt=%d", request_id, latency, attempt)
+                return data
+        except Exception as e:
+            if attempt == MAX_RETRIES or not is_transient_error(e):
+                logger.error("ai_run  req=%s failed attempt=%d error='%s'", request_id, attempt, str(e))
+                raise
+            backoff = INITIAL_BACKOFF * (2 ** (attempt - 1))
+            logger.warning("ai_run  req=%s attempt=%d failed, retrying in %.1fs (error: %s)", request_id, attempt, backoff, str(e))
+            await asyncio.sleep(backoff)
 
 
 # ────────────────────────────────────────────────────────────
@@ -106,26 +123,46 @@ async def ai_run_stream(
         payload["user_id"] = user_id
 
     logger.info(
-        "ai_stream  req=%s session=%s user=%s",
-        request_id, session_id, user_id,
+        "ai_stream_start  req=%s session=%s user=%s workflow=%s",
+        request_id, session_id, user_id, workflow,
     )
 
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        async with client.stream(
-            "POST",
-            f"{_base_url()}/api/v1/ai/run/stream",
-            json=payload,
-            headers=_headers(),
-        ) as resp:
-            resp.raise_for_status()
-            # Use aiter_bytes for minimal buffering (true streaming)
-            buf = ""
-            async for raw in resp.aiter_bytes():
-                buf += raw.decode("utf-8", errors="replace")
-                # Flush complete SSE blocks (delimited by \n\n)
-                while "\n\n" in buf:
-                    block, buf = buf.split("\n\n", 1)
-                    yield block + "\n\n"
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+                async with client.stream(
+                    "POST",
+                    f"{_base_url()}/api/v1/ai/run/stream",
+                    json=payload,
+                    headers=_headers(),
+                ) as resp:
+                    resp.raise_for_status()
+                    buf = ""
+                    async for raw in resp.aiter_bytes():
+                        buf += raw.decode("utf-8", errors="replace")
+                        while "\n\n" in buf:
+                            block, buf = buf.split("\n\n", 1)
+                            
+                            # Simple SSE structural parsing for logging
+                            lines = block.split("\n")
+                            event_name = "message"
+                            for line in lines:
+                                if line.startswith("event:"):
+                                    event_name = line.split(":", 1)[1].strip()
+                                    break
+                            
+                            if event_name in ("text_delta", "clarification_required", "final_result", "done"):
+                                logger.debug("ai_stream_event  req=%s event=%s", request_id, event_name)
 
-    latency = time.monotonic() - t0
-    logger.info("ai_stream  req=%s latency=%.2fs", request_id, latency)
+                            yield block + "\n\n"
+                    
+                    latency = time.monotonic() - t0
+                    logger.info("ai_stream_end  req=%s latency=%.2fs attempt=%d", request_id, latency, attempt)
+                    return # Successfully finished streaming
+        except Exception as e:
+            if attempt == MAX_RETRIES or not is_transient_error(e):
+                logger.error("ai_stream  req=%s failed attempt=%d error='%s'", request_id, attempt, str(e))
+                raise
+            backoff = INITIAL_BACKOFF * (2 ** (attempt - 1))
+            logger.warning("ai_stream  req=%s attempt=%d failed, retrying in %.1fs (error: %s)", request_id, attempt, backoff, str(e))
+            await asyncio.sleep(backoff)

@@ -1,23 +1,37 @@
 openapi: 3.1.0
 
 info:
-  title: nextSTEM AI API
-  version: 0.1.0
+  title: nextSTEM AI Service API
+  version: 1.1.0
   description: |
-    Standalone AI service (agentic workflow + SSE streaming).
+    Standalone AI API used by nextSTEM.
 
-    This spec documents:
-    - Non-stream execution (JSON)
-    - Streaming execution (SSE: `text/event-stream`) with **typed JSON payloads**
-      for stages, planning, tool calls/results, and text deltas.
+    Current live workflow:
+    - `advisor_chat`
+
+    Public endpoints:
+    - `GET /health`
+    - `GET /api/v1/ai/health`
+    - `POST /api/v1/ai/run`
+    - `POST /api/v1/ai/run/stream`
+
+    Notes:
+    - The service shares the same `AgentLoop` core as the core backend route.
+    - `workflow` is used here, not `mode`.
+    - `profile_context` is optional and forward-compatible.
+    - `X-API-Key` is only required when the service sets `AI_API_KEY`.
+    - UI clients should render URLs as clickable links, especially in `final_answer`
+      and `tool_result.raw_links`.
 
 servers:
   - url: http://localhost:8001
     description: Local AI service
+  - url: https://nextstem-production.up.railway.app
+    description: Railway production AI service
 
 tags:
+  - name: health
   - name: ai
-    description: Agentic AI endpoints
 
 components:
   securitySchemes:
@@ -29,44 +43,169 @@ components:
   schemas:
     AIRunRequest:
       type: object
-      required: [message]
+      required:
+        - message
       properties:
         message:
           type: string
-          description: User message / query.
+          description: End-user message or query.
+          examples:
+            - Toi muon hoc cu nhan tam ly o UK
+            - Xin tu van du hoc nganh CS tai Singapore
         workflow:
           type: string
-          description: Workflow id (pattern-1 routing).
           default: advisor_chat
-          examples: [advisor_chat]
+          description: AI workflow id. Today only `advisor_chat` is supported.
+          examples:
+            - advisor_chat
         session_id:
           type: string
           nullable: true
-          description: Conversation session id (caller-defined).
+          description: Caller-defined session id for short-term memory continuity.
         user_id:
           type: string
           nullable: true
-          description: Optional user id (from core backend), for trace/memory scoping.
+          description: Optional user id for tracing and caller-side scoping.
+        profile_context:
+          $ref: "#/components/schemas/ProfileContext"
+      additionalProperties: false
+
+    ProfileContext:
+      type: object
+      description: |
+        Optional structured profile context forwarded by the caller.
+
+        Preferred normalized keys are plural:
+        - `target_countries`
+        - `target_fields`
+
+        Legacy singular aliases are also accepted by runtime normalization:
+        - `target_country`
+        - `target_field`
+
+        Unknown keys are allowed for forward compatibility.
+      additionalProperties: true
+      properties:
+        grade:
+          type: string
+          nullable: true
+        current_stage:
+          type: string
+          nullable: true
+        school:
+          type: string
+          nullable: true
+        subjects:
+          type: string
+          nullable: true
+        gpa_value:
+          type: number
+          nullable: true
+        gpa_scale:
+          type: number
+          nullable: true
+        target_country:
+          type: string
+          nullable: true
+          description: Legacy alias. Prefer `target_countries`.
+        target_countries:
+          type: array
+          items:
+            type: string
+        target_field:
+          type: string
+          nullable: true
+          description: Legacy alias. Prefer `target_fields`.
+        target_fields:
+          type: array
+          items:
+            type: string
+        budget_amount:
+          type: number
+          nullable: true
+        budget_currency:
+          type: string
+          nullable: true
+        needs_scholarship:
+          type: boolean
+          nullable: true
+        ielts:
+          type: number
+          nullable: true
+        toefl:
+          type: number
+          nullable: true
+        sat:
+          type: integer
+          nullable: true
+        act:
+          type: integer
+          nullable: true
+        intake_year:
+          type: integer
+          nullable: true
+        intake_term:
+          type: string
+          nullable: true
+        timeline_target:
+          type: string
+          nullable: true
+        goals:
+          type: array
+          items:
+            type: string
+        interests:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+          nullable: true
+      example:
+        grade: "12"
+        gpa_value: 8.8
+        gpa_scale: 10
+        target_countries:
+          - Singapore
+        target_fields:
+          - Computer Science
+        needs_scholarship: true
+        ielts: 7.0
+        intake_year: 2027
+        intake_term: fall
 
     AIHealthResponse:
       type: object
-      required: [status, workflows]
+      required:
+        - status
+        - workflows
       properties:
         status:
           type: string
-          enum: [ok]
+          enum:
+            - ok
         workflows:
           type: array
           items:
             type: string
+      example:
+        status: ok
+        workflows:
+          - advisor_chat
 
     QueryType:
       type: string
-      enum: [simple, complex]
+      enum:
+        - simple
+        - complex
 
     SubAgentPlan:
       type: object
-      required: [agent_name, task, reason, priority]
+      required:
+        - agent_name
+        - task
+        - reason
+        - priority
       properties:
         agent_name:
           type: string
@@ -76,7 +215,14 @@ components:
           type: string
         priority:
           type: integer
-          minimum: 1
+        tools:
+          type: array
+          items:
+            type: string
+        context:
+          type: object
+          nullable: true
+          additionalProperties: true
 
     OrchestratorPlan:
       type: object
@@ -95,17 +241,20 @@ components:
         agents:
           type: array
           items:
-            $ref: '#/components/schemas/SubAgentPlan'
+            $ref: "#/components/schemas/SubAgentPlan"
         can_parallel:
           type: boolean
         expected_outcome:
           type: string
         query_type:
-          $ref: '#/components/schemas/QueryType'
+          $ref: "#/components/schemas/QueryType"
 
     SubAgentResult:
       type: object
-      required: [agent_name, success, result]
+      required:
+        - agent_name
+        - success
+        - result
       properties:
         agent_name:
           type: string
@@ -115,7 +264,6 @@ components:
           type: string
         execution_time:
           type: number
-          description: Seconds
         stages_completed:
           type: array
           items:
@@ -126,7 +274,14 @@ components:
 
     AgentLoopResult:
       type: object
-      required: [success, query, final_answer]
+      required:
+        - success
+        - query
+        - final_answer
+        - query_type
+        - iterations
+        - execution_time
+        - metrics
       properties:
         success:
           type: boolean
@@ -136,7 +291,6 @@ components:
           type: string
         query_type:
           type: string
-          description: "simple | complex"
         iterations:
           type: integer
         execution_time:
@@ -144,12 +298,12 @@ components:
           description: Seconds
         plan:
           allOf:
-            - $ref: '#/components/schemas/OrchestratorPlan'
+            - $ref: "#/components/schemas/OrchestratorPlan"
           nullable: true
         agent_results:
           type: array
           items:
-            $ref: '#/components/schemas/SubAgentResult'
+            $ref: "#/components/schemas/SubAgentResult"
         critic_reviews:
           type: array
           items:
@@ -164,26 +318,47 @@ components:
 
     ToolCall:
       type: object
-      required: [agent, tool, input]
+      required:
+        - agent
+        - tool
+        - input
       properties:
         agent:
           type: string
-          description: SubAgent emitting the tool call.
         tool:
           type: string
         input:
           type: object
           additionalProperties: true
+        resolved_from:
+          type: object
+          additionalProperties:
+            type: string
+
+    HttpRequestTrace:
+      type: object
+      properties:
+        method:
+          type: string
+        url:
+          type: string
+        from_cache:
+          type: boolean
 
     ToolResult:
       type: object
-      required: [agent, tool, success]
+      required:
+        - agent
+        - tool
+        - success
       properties:
         agent:
           type: string
         tool:
           type: string
         success:
+          type: boolean
+        skipped:
           type: boolean
         output_preview:
           type: string
@@ -194,10 +369,28 @@ components:
         error:
           type: string
           nullable: true
+        missing_fields:
+          type: array
+          items:
+            type: string
+        raw_links:
+          type: array
+          description: |
+            Canonical source URLs collected from the tool. UI clients should render
+            these as clickable references or source cards instead of plain text when possible.
+          items:
+            type: string
+        request_trace:
+          type: array
+          items:
+            $ref: "#/components/schemas/HttpRequestTrace"
 
     TraceBundle:
       type: object
-      required: [workflow, session_id, user_id, tool_calls, tool_results]
+      required:
+        - workflow
+        - tool_calls
+        - tool_results
       properties:
         workflow:
           type: string
@@ -207,44 +400,60 @@ components:
         user_id:
           type: string
           nullable: true
+        profile_context:
+          $ref: "#/components/schemas/ProfileContext"
         tool_calls:
           type: array
           items:
-            $ref: '#/components/schemas/ToolCall'
+            $ref: "#/components/schemas/ToolCall"
         tool_results:
           type: array
           items:
-            $ref: '#/components/schemas/ToolResult'
+            $ref: "#/components/schemas/ToolResult"
 
     AgentLoopResultWithTrace:
       allOf:
-        - $ref: '#/components/schemas/AgentLoopResult'
+        - $ref: "#/components/schemas/AgentLoopResult"
         - type: object
-          required: [trace]
+          required:
+            - trace
           properties:
             trace:
-              $ref: '#/components/schemas/TraceBundle'
+              $ref: "#/components/schemas/TraceBundle"
 
-    # ───────────────────────────────
-    # SSE event payloads (data field)
-    # ───────────────────────────────
+    UIFriendlyRenderingNote:
+      type: object
+      description: |
+        Rendering guidance for frontend clients:
+        - Any `http://` or `https://` URL appearing in `final_answer` should be linkified.
+        - `tool_result.raw_links` should be shown as clickable links or source cards.
+        - If a response includes a "Nguon tham khao" section, each item should be clickable.
+        - Unknown events may be ignored, but link rendering should still apply to visible text.
+
     SSEStartData:
       type: object
-      required: [query]
+      required:
+        - query
+        - mode
       properties:
         query:
+          type: string
+        mode:
           type: string
 
     SSEQueryClassifiedData:
       type: object
-      required: [type]
+      required:
+        - type
       properties:
         type:
-          $ref: '#/components/schemas/QueryType'
+          $ref: "#/components/schemas/QueryType"
 
     SSEPlanningData:
       type: object
-      required: [message, iteration]
+      required:
+        - message
+        - iteration
       properties:
         message:
           type: string
@@ -253,114 +462,63 @@ components:
 
     SSEPlanCreatedData:
       type: object
-      required: [plan, mode, agents]
+      required:
+        - plan
+        - mode
+        - agents
       properties:
         plan:
-          $ref: '#/components/schemas/OrchestratorPlan'
+          $ref: "#/components/schemas/OrchestratorPlan"
         mode:
           type: string
-          enum: [complex]
         agents:
           type: array
           items:
             type: string
 
-    SSEExecutingData:
+    SSEClarificationRequiredData:
       type: object
-      required: [message, agents, parallel]
+      required:
+        - missing_fields
+        - blocked_tools
+        - questions
+        - resolved_from
+        - can_continue
+        - continue_message
       properties:
-        message:
-          type: string
-        agents:
+        missing_fields:
           type: array
           items:
             type: string
-        parallel:
+        blocked_tools:
+          type: array
+          items:
+            type: string
+        questions:
+          type: array
+          items:
+            type: string
+        resolved_from:
+          type: object
+          additionalProperties:
+            type: string
+        can_continue:
           type: boolean
-
-    SSEAgentsCompletedData:
-      type: object
-      required: [success, total]
-      properties:
-        success:
-          type: integer
-        total:
-          type: integer
-
-    SSEAgentStartData:
-      type: object
-      required: [agent, task]
-      properties:
-        agent:
-          type: string
-        task:
-          type: string
-
-    SSEAgentCompletedData:
-      type: object
-      required: [agent, execution_time, preview]
-      properties:
-        agent:
-          type: string
-        execution_time:
-          type: number
-        preview:
-          type: string
-
-    SSEAgentErrorData:
-      type: object
-      required: [agent, error]
-      properties:
-        agent:
-          type: string
-        error:
-          type: string
-
-    SSEAgentStageData:
-      type: object
-      required: [agent, stage]
-      properties:
-        agent:
-          type: string
-        stage:
-          type: string
-
-    SSEAgentStageResultData:
-      type: object
-      required: [agent, stage, chars, preview]
-      properties:
-        agent:
-          type: string
-        stage:
-          type: string
-        chars:
-          type: integer
-        preview:
-          type: string
-
-    SSETToolCallData:
-      $ref: '#/components/schemas/ToolCall'
-
-    SSETToolResultData:
-      $ref: '#/components/schemas/ToolResult'
-
-    SSESynthesizingData:
-      type: object
-      required: [message]
-      properties:
-        message:
+        continue_message:
           type: string
 
     SSETextDeltaData:
       type: object
-      required: [delta]
+      required:
+        - delta
       properties:
         delta:
           type: string
 
     SSECompletedData:
       type: object
-      required: [metrics]
+      required:
+        - metrics
       properties:
         metrics:
           type: object
@@ -368,89 +526,61 @@ components:
 
     SSEErrorData:
       type: object
-      required: [error]
+      required:
+        - error
       properties:
         error:
           type: string
-
-    SSEFinalResultData:
-      $ref: '#/components/schemas/AgentLoopResultWithTrace'
 
     SSEDoneData:
       type: object
       additionalProperties: false
 
-    # Conceptual representation of an SSE message as JSON.
-    # NOTE: On-the-wire format is:
-    #   event: <event_name>\n
-    #   data: <json>\n\n
-    SSEMessage:
-      type: object
-      required: [event, data]
-      properties:
-        event:
-          type: string
-          description: SSE event name.
-          enum:
-            - start
-            - query_classified
-            - planning
-            - plan_created
-            - executing
-            - agents_completed
-            - agent_start
-            - agent_stage
-            - agent_stage_result
-            - tool_call
-            - tool_result
-            - agent_completed
-            - agent_error
-            - synthesizing
-            - text_delta
-            - completed
-            - error
-            - final_result
-            - done
-        data:
-          description: Typed JSON payload depending on `event`.
-          oneOf:
-            - $ref: '#/components/schemas/SSEStartData'
-            - $ref: '#/components/schemas/SSEQueryClassifiedData'
-            - $ref: '#/components/schemas/SSEPlanningData'
-            - $ref: '#/components/schemas/SSEPlanCreatedData'
-            - $ref: '#/components/schemas/SSEExecutingData'
-            - $ref: '#/components/schemas/SSEAgentsCompletedData'
-            - $ref: '#/components/schemas/SSEAgentStartData'
-            - $ref: '#/components/schemas/SSEAgentStageData'
-            - $ref: '#/components/schemas/SSEAgentStageResultData'
-            - $ref: '#/components/schemas/SSETToolCallData'
-            - $ref: '#/components/schemas/SSETToolResultData'
-            - $ref: '#/components/schemas/SSEAgentCompletedData'
-            - $ref: '#/components/schemas/SSEAgentErrorData'
-            - $ref: '#/components/schemas/SSESynthesizingData'
-            - $ref: '#/components/schemas/SSETextDeltaData'
-            - $ref: '#/components/schemas/SSECompletedData'
-            - $ref: '#/components/schemas/SSEErrorData'
-            - $ref: '#/components/schemas/SSEFinalResultData'
-            - $ref: '#/components/schemas/SSEDoneData'
-
 paths:
-  /api/v1/ai/health:
+  /health:
     get:
-      tags: [ai]
-      summary: Health check
+      tags:
+        - health
+      summary: Root service health check
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Service is healthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AIHealthResponse'
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - ok
+              example:
+                status: ok
+
+  /api/v1/ai/health:
+    get:
+      tags:
+        - ai
+      summary: AI workflow health check
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AIHealthResponse"
 
   /api/v1/ai/run:
     post:
-      tags: [ai]
-      summary: Run agentic workflow (non-stream)
+      tags:
+        - ai
+      summary: Run AI workflow and return JSON
+      description: |
+        Non-streaming execution.
+
+        Auth note:
+        - If `AI_API_KEY` is empty on the service, `X-API-Key` is optional.
+        - If `AI_API_KEY` is set, callers must send the matching `X-API-Key`.
       security:
         - ApiKeyAuth: []
       requestBody:
@@ -458,38 +588,64 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AIRunRequest'
+              $ref: "#/components/schemas/AIRunRequest"
+            examples:
+              advisorChat:
+                value:
+                  message: Xin tu van du hoc nganh CS tai Singapore
+                  workflow: advisor_chat
+                  session_id: sess-001
+                  user_id: user-123
+                  profile_context:
+                    grade: "12"
+                    gpa_value: 8.8
+                    gpa_scale: 10
+                    target_countries:
+                      - Singapore
+                    target_fields:
+                      - Computer Science
+                    needs_scholarship: true
+                    ielts: 7.0
       responses:
-        '200':
+        "200":
           description: Agent execution result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AgentLoopResult'
-        '401':
+                $ref: "#/components/schemas/AgentLoopResult"
+        "401":
           description: Invalid API key
 
   /api/v1/ai/run/stream:
     post:
-      tags: [ai]
-      summary: Run agentic workflow (SSE stream)
+      tags:
+        - ai
+      summary: Run AI workflow and stream SSE events
       description: |
-        Returns a Server-Sent Events stream (`text/event-stream`).
+        Streaming execution using `text/event-stream`.
 
-        Each message is an SSE event with JSON payload:
-        - `event: <event_name>`
-        - `data: <json>`
+        Typical event sequence:
+        - `start`
+        - `query_classified`
+        - `planning`
+        - `plan_created`
+        - `clarification_required` (optional)
+        - `executing`
+        - `agent_start`
+        - `agent_stage`
+        - `tool_call`
+        - `tool_result`
+        - `text_delta`
+        - `completed`
+        - `final_result`
+        - `done`
 
-        Events are produced during the full pipeline:
-        - planning/plan_created
-        - agent_start/agent_stage/agent_stage_result
-        - tool_call/tool_result
-        - text_delta (streaming answer)
-        - final_result (full result + trace bundle)
-        - done
-
-        Conceptual JSON schema for each SSE message is defined in:
-        `#/components/schemas/SSEMessage`.
+        Clients should:
+        - append answer text from `text_delta`
+        - treat `final_result` as the authoritative final payload
+        - stop reading on `done`
+        - ignore unknown events for forward compatibility
+        - render any URLs found in streamed text or `raw_links` as clickable UI links
       security:
         - ApiKeyAuth: []
       requestBody:
@@ -497,57 +653,49 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AIRunRequest'
+              $ref: "#/components/schemas/AIRunRequest"
       responses:
-        '200':
+        "200":
           description: SSE stream
           content:
             text/event-stream:
               schema:
                 type: string
               examples:
-                start:
-                  summary: Start event
+                clarificationFlow:
+                  summary: Clarification required
                   value: |
                     event: start
-                    data: {"query":"Xin tư vấn du học ngành CS tại Singapore"}
+                    data: {"query":"Tim hoc bong CS tai Singapore","mode":"general"}
 
-                planCreated:
-                  summary: Plan created
-                  value: |
-                    event: plan_created
-                    data: {"plan":{"original_query":"...","interpreted_intent":"...","agents":[{"agent_name":"advisor","task":"...","reason":"...","priority":1}],"can_parallel":true,"expected_outcome":"...","query_type":"complex"},"mode":"complex","agents":["advisor"]}
+                    event: query_classified
+                    data: {"type":"complex"}
 
-                toolCall:
-                  summary: Tool call
-                  value: |
-                    event: tool_call
-                    data: {"agent":"advisor","tool":"university_explorer","input":{"task":"..."}}
+                    event: clarification_required
+                    data: {"missing_fields":["gpa_value"],"blocked_tools":["scholarship_finder"],"questions":["GPA hoac diem trung binh hien tai cua ban la bao nhieu? (thang 10 hoac 4)"],"resolved_from":{"target_countries":"current_turn","target_fields":"current_turn"},"can_continue":true,"continue_message":"tiep tuc"}
 
-                toolResult:
-                  summary: Tool result
-                  value: |
-                    event: tool_result
-                    data: {"agent":"advisor","tool":"university_explorer","success":true,"output_preview":"...","output":"..."}
-
-                textDelta:
-                  summary: Streaming answer delta
-                  value: |
-                    event: text_delta
-                    data: {"delta":"Mình gợi ý bạn..."}
-
-                finalResult:
-                  summary: Final result
-                  value: |
-                    event: final_result
-                    data: {"success":true,"query":"...","final_answer":"...","query_type":"complex","iterations":1,"execution_time":1.23,"plan":null,"agent_results":[],"critic_reviews":[],"metrics":{},"error":null,"trace":{"workflow":"advisor_chat","session_id":"abc","user_id":null,"tool_calls":[],"tool_results":[]}}
-
-                done:
-                  summary: Done
-                  value: |
                     event: done
                     data: {}
 
-        '401':
-          description: Invalid API key
+                fullRun:
+                  summary: Full streamed run
+                  value: |
+                    event: start
+                    data: {"query":"Toi muon hoc cu nhan tam ly o UK","mode":"general"}
 
+                    event: tool_call
+                    data: {"agent":"advisor","tool":"university_explorer","input":{"query":"Toi muon hoc cu nhan tam ly o UK","country":"UK","field":"Psychology","gpa":null},"resolved_from":{"target_countries":"current_turn","target_fields":"current_turn"}}
+
+                    event: tool_result
+                    data: {"agent":"advisor","tool":"university_explorer","success":true,"raw_links":["https://www.ucl.ac.uk/prospective-students/undergraduate/degrees/psychology-bsc","https://www.kcl.ac.uk/study/undergraduate/courses/psychology-bsc"],"output_preview":"Tim thay 3 truong phu hop: ..."}
+
+                    event: text_delta
+                    data: {"delta":"Chao ban, nextSTEM rat vui duoc ho tro ban..."}
+
+                    event: final_result
+                    data: {"success":true,"query":"Toi muon hoc cu nhan tam ly o UK","final_answer":"...","query_type":"complex","iterations":1,"execution_time":12.34,"plan":null,"agent_results":[],"critic_reviews":[],"metrics":{"latency_ms":12340.0},"error":null,"trace":{"workflow":"advisor_chat","session_id":"sess-001","user_id":"user-123","profile_context":{"target_countries":["UK"],"target_fields":["Psychology"]},"tool_calls":[],"tool_results":[]}}
+
+                    event: done
+                    data: {}
+        "401":
+          description: Invalid API key
