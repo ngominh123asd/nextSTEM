@@ -103,7 +103,7 @@ async def ai_run_stream(
     session_id: str | None = None,
     user_id: str | None = None,
     workflow: str = "advisor_chat",
-) -> AsyncIterator[str]:
+) -> AsyncIterator[bytes]:
     """
     Stream SSE events from the AI service.
 
@@ -137,24 +137,24 @@ async def ai_run_stream(
                     headers=_headers(),
                 ) as resp:
                     resp.raise_for_status()
-                    buf = ""
-                    async for chunk in resp.aiter_text():
+                    buf = b""
+                    async for chunk in resp.aiter_bytes():
                         buf += chunk
-                        while "\n\n" in buf:
-                            block, buf = buf.split("\n\n", 1)
+                        while b"\n\n" in buf:
+                            block, buf = buf.split(b"\n\n", 1)
                             
                             # Simple SSE structural parsing for logging
-                            lines = block.split("\n")
-                            event_name = "message"
+                            lines = block.split(b"\n")
+                            event_name = b"message"
                             for line in lines:
-                                if line.startswith("event:"):
-                                    event_name = line.split(":", 1)[1].strip()
+                                if line.startswith(b"event:"):
+                                    event_name = line.split(b":", 1)[1].strip()
                                     break
                             
-                            if event_name in ("text_delta", "clarification_required", "final_result", "done"):
-                                logger.debug("ai_stream_event  req=%s event=%s", request_id, event_name)
+                            if event_name in (b"text_delta", b"clarification_required", b"final_result", b"done"):
+                                logger.debug("ai_stream_event  req=%s event=%s", request_id, event_name.decode("utf-8", "ignore"))
 
-                            yield block + "\n\n"
+                            yield block + b"\n\n"
                     
                     latency = time.monotonic() - t0
                     logger.info("ai_stream_end  req=%s latency=%.2fs attempt=%d", request_id, latency, attempt)

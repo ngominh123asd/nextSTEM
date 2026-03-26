@@ -196,7 +196,7 @@ async def ai_chat_stream(
                 yield chunk
         except Exception as e:
             logger.error("AI stream error: %s", e)
-            yield f"data: {{\"event\":\"error\",\"data\":\"AI service unavailable\"}}\n\n"
+            yield b"data: {\"event\":\"error\",\"data\":\"AI service unavailable\"}\n\n"
 
     return StreamingResponse(
         event_generator(),
