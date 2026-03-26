@@ -138,8 +138,8 @@ async def ai_run_stream(
                 ) as resp:
                     resp.raise_for_status()
                     buf = ""
-                    async for raw in resp.aiter_bytes():
-                        buf += raw.decode("utf-8", errors="replace")
+                    async for chunk in resp.aiter_text():
+                        buf += chunk
                         while "\n\n" in buf:
                             block, buf = buf.split("\n\n", 1)
                             
