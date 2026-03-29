@@ -13,10 +13,10 @@ export interface Testimonial {
 }
 
 export const stackingCardsData = [
-  { number: "01", title: "AI Advisor", desc: "Gợi ý định hướng ngành học, quốc gia, trường dựa trên GPA và sở thích của bạn một cách cá nhân hoá. Công nghệ LLM fine-tune theo học bổng + ngành học giúp bạn có lộ trình tối ưu nhất.", image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop" },
-  { number: "02", title: "Project Builder", desc: "Hướng dẫn xây dựng dự án STEM từng bước để tạo điểm nhấn độc đáo cho hồ sơ du học. Phương pháp Bloom + Design Thinking giúp CV nổi bật với các dự án nghiên cứu mini.", image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=600&auto=format&fit=crop" },
-  { number: "03", title: "Portfolio Dashboard", desc: "Lưu toàn bộ hoạt động – kỹ năng – chứng chỉ. Tự động sinh CV và Personal Statement theo chuẩn CommonApp, UCAS chỉ với vài cú click dễ dàng.", image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format&fit=crop" },
-  { number: "04", title: "Essay & Interview Coach", desc: "AI Coach phản hồi bài luận, phỏng vấn và câu chuyện cá nhân với phân tích sâu sắc. LLM Scoring + Sentiment Analysis giúp cải thiện liên tục kỹ năng viết và giao tiếp.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop" },
+  { number: "01", title: "AI Advisor", desc: "Gợi ý định hướng ngành học, quốc gia, trường dựa trên GPA và sở thích của bạn một cách cá nhân hoá.", image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop" },
+  { number: "02", title: "Project Builder", desc: "Hướng dẫn xây dựng dự án STEM từng bước để tạo điểm nhấn độc đáo cho hồ sơ du học.", image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=600&auto=format&fit=crop" },
+  { number: "03", title: "Portfolio Dashboard", desc: "Lưu toàn bộ hoạt động – kỹ năng – chứng chỉ. Tự động sinh CV và bài luận cá nhân theo chuẩn CommonApp, UCAS chỉ với vài cú click dễ dàng.", image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format&fit=crop" },
+  { number: "04", title: "Essay & Interview Coach", desc: "AI Coach phản hồi bài luận, phỏng vấn và câu chuyện cá nhân với phân tích sâu sắc.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop" },
   { number: "05", title: "Mentor Hub", desc: "Kết nối với mentor thật từ Ivy League, A*STAR và các trường top thế giới. Học hỏi kinh nghiệm thực tế, nhận lời khuyên cá nhân hoá cho hành trình du học của bạn.", image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600&auto=format&fit=crop" },
 ];
 
