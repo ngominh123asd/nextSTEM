@@ -78,15 +78,11 @@ export interface Mentor {
 export const mentorsData: Mentor[] = [
   {
     id: "m1",
-    name: "Lê Minh Tuấn",
+    name: "Biện Đức Tiến",
     role: "Software Engineer",
     school: "MIT",
-    images: [
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=600&auto=format&fit=crop"
-    ],
-    bio: "Tuấn hiện là kỹ sư phần mềm tại một tập đoàn công nghệ lớn ở Mỹ. Từng chinh phục học bổng toàn phần MIT, Tuấn có nhiều kinh nghiệm trong việc xây dựng hồ sơ và viết luận ngành Khoa học Máy tính.",
+    images: ["/images/mentor/Biện Đức Tiến.jpg"],
+    bio: "Tiến hiện là kỹ sư phần mềm tại một tập đoàn công nghệ lớn ở Mỹ. Từng chinh phục học bổng toàn phần MIT, Tuấn có nhiều kinh nghiệm trong việc xây dựng hồ sơ và viết luận ngành Khoa học Máy tính.",
     achievements: [
       "Học bổng toàn phần MIT 2019",
       "Quán quân Hackathon toàn quốc",
@@ -95,15 +91,11 @@ export const mentorsData: Mentor[] = [
   },
   {
     id: "m2",
-    name: "Phạm Thảo Vy",
+    name: "Bùi Hồng Anh",
     role: "Data Scientist",
     school: "Harvard University",
-    images: [
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=600&auto=format&fit=crop"
-    ],
-    bio: "Vy hướng dẫn tư duy phân tích dữ liệu và xây dựng dự án Khoa học Dữ liệu nổi bật. Với background mạnh về Toán và Khoa học, Vy giúp học sinh định hình rõ ràng lộ trình.",
+    images: ["/images/mentor/Bùi Hồng Anh.jpg"],
+    bio: "Hồng Anh hướng dẫn tư duy phân tích dữ liệu và xây dựng dự án Khoa học Dữ liệu nổi bật. Với background mạnh về Toán và Khoa học, Vy giúp học sinh định hình rõ ràng lộ trình.",
     achievements: [
       "Ivy League Merit Scholar",
       "Tác giả bài báo khoa học về AI",
@@ -112,15 +104,11 @@ export const mentorsData: Mentor[] = [
   },
   {
     id: "m3",
-    name: "Nguyễn Hoàng Nam",
+    name: "Dương Anh Đức",
     role: "AI Researcher",
     school: "Stanford University",
-    images: [
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop"
-    ],
-    bio: "Nghiên cứu sinh về Trí tuệ Nhân tạo tại Stanford. Anh Nam rất tâm huyết với việc kết nối và chia sẻ kiến thức về học máy cho cộng đồng du học sinh Việt.",
+    images: ["/images/mentor/Dương Anh Đức.jpg"],
+    bio: "Nghiên cứu sinh về Trí tuệ Nhân tạo tại Stanford. Anh Đức rất tâm huyết với việc kết nối và chia sẻ kiến thức về học máy cho cộng đồng du học sinh Việt.",
     achievements: [
       "Stanford Graduate Fellowship",
       "Speaker tại hội nghị AI quốc tế",
@@ -129,15 +117,11 @@ export const mentorsData: Mentor[] = [
   },
   {
     id: "m4",
-    name: "Trần Mai Phương",
+    name: "Lê Thị Ngà",
     role: "Product Manager",
     school: "National University of Singapore (NUS)",
-    images: [
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600&auto=format&fit=crop"
-    ],
-    bio: "Phương từng đạt học bổng ASEAN và có trải nghiệm đa dạng tại các startup công nghệ châu Á. Phương chuyên hỗ trợ các bạn muốn theo học hệ STEM tại Singapore.",
+    images: ["/images/mentor/Lê Thị Ngà.jpg"],
+    bio: "Từng đạt học bổng ASEAN và có trải nghiệm đa dạng tại các startup công nghệ châu Á. Ngà chuyên hỗ trợ các bạn muốn theo học hệ STEM tại Singapore.",
     achievements: [
       "Học bổng ASEAN (A*STAR)",
       "Top 5 Product Hackathon",
@@ -146,15 +130,11 @@ export const mentorsData: Mentor[] = [
   },
   {
     id: "m5",
-    name: "Phan Quốc Bảo",
+    name: "Lương Đức Dũng",
     role: "Biomedical Engineer",
     school: "Johns Hopkins University",
-    images: [
-      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=600&auto=format&fit=crop"
-    ],
-    bio: "Đam mê kết nối y tế và công nghệ, Bảo có thành tích xuất sắc trong các dự án công nghệ sinh học và sẵn sàng hướng dẫn các bạn xây dựng portfolio chuyên môn.",
+    images: ["/images/mentor/Lương Đức Dũng.jpg"],
+    bio: "Đam mê kết nối y tế và công nghệ, Dũng có thành tích xuất sắc trong các dự án công nghệ sinh học và sẵn sàng hướng dẫn các bạn xây dựng portfolio chuyên môn.",
     achievements: [
       "Quán quân Biomedical Innovation",
       "Đại sứ sinh viên quốc tế",
@@ -163,15 +143,11 @@ export const mentorsData: Mentor[] = [
   },
   {
     id: "m6",
-    name: "Hoàng Ngân An",
+    name: "Nguyễn Khánh Huyền",
     role: "Mechanical Engineer",
     school: "UC Berkeley",
-    images: [
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop"
-    ],
-    bio: "An là thành viên chủ chốt trong CLB Robotics của Berkeley. An thường xuyên mentor cho các dự án STEM và giúp học sinh thiết kế các project ấn tượng.",
+    images: ["/images/mentor/Nguyễn Khánh Huyền.jpg"],
+    bio: "Thành viên chủ chốt trong CLB Robotics của Berkeley. Khánh Huyền thường xuyên mentor cho các dự án STEM và giúp học sinh thiết kế các project ấn tượng.",
     achievements: [
       "Học bổng kỹ sư xuất sắc Mĩ",
       "Giải nhì cuộc thi Robotics toàn cầu",
@@ -180,15 +156,11 @@ export const mentorsData: Mentor[] = [
   },
   {
     id: "m7",
-    name: "Vũ Hải Đăng",
+    name: "Nguyễn Thành Công",
     role: "Cybersecurity Analyst",
     school: "Carnegie Mellon University",
-    images: [
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop"
-    ],
-    bio: "Chuyên gia về an toàn thông tin, Đăng mang đến góc nhìn sâu sắc về một ngành học đòi hỏi tính bảo mật cao và tư duy logic nhạy bén.",
+    images: ["/images/mentor/Nguyễn Thành Công.jpg"],
+    bio: "Chuyên gia về an toàn thông tin, Công mang đến góc nhìn sâu sắc về một ngành học đòi hỏi tính bảo mật cao và tư duy logic nhạy bén.",
     achievements: [
       "Cybersecurity Scholar Award",
       "Speaker tại DEF CON (Sinh viên)",
@@ -197,15 +169,11 @@ export const mentorsData: Mentor[] = [
   },
   {
     id: "m8",
-    name: "Đinh Bảo Trâm",
+    name: "Nguyễn Thái Anh",
     role: "UI/UX Designer",
     school: "Parsons School of Design",
-    images: [
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop"
-    ],
-    bio: "Trâm là một designer cá tính, làm cầu nối giữa Art và STEM (STEAM). Cô đã giúp nhiều bạn xây dựng hồ sơ thiết kế tương tác rất mạnh để apply vào trường top.",
+    images: ["/images/mentor/Nguyễn Thái Anh.jpg"],
+    bio: "Một designer cá tính, làm cầu nối giữa Art và STEM (STEAM). Thái Anh đã giúp nhiều bạn xây dựng hồ sơ thiết kế tương tác rất mạnh để apply vào trường top.",
     achievements: [
       "Giải thiết kế tương tác quốc tế",
       "Học bổng Parsons Design",

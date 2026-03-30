@@ -224,7 +224,7 @@ const MasonryColumn: React.FC<{
           >
             <div
               className="relative w-full h-full bg-cover bg-center rounded-xl overflow-hidden shadow-[0px_10px_40px_-10px_rgba(0,0,0,0.15)]"
-              style={{ backgroundImage: `url(${item.img})` }}
+              style={{ backgroundImage: `url("${item.img}")` }}
             >
               {colorShiftOnHover && (
                 <div className="color-overlay absolute inset-0 bg-gradient-to-tr from-cyan-500/80 to-blue-500/80 opacity-0 pointer-events-none transition-opacity" />

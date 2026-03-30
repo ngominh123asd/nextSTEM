@@ -44,7 +44,7 @@ const MentorModal: React.FC<{ mentor: Mentor | null; onClose: () => void }> = ({
             <div
               key={idx}
               className={`absolute inset-0 transition-opacity duration-700 ease-in-out bg-cover bg-center ${idx === currentImageIdx ? 'opacity-100' : 'opacity-0'}`}
-              style={{ backgroundImage: `url(${img})` }}
+              style={{ backgroundImage: `url("${img}")` }}
             />
           ))}
 
