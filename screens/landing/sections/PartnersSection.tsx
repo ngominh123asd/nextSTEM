@@ -3,9 +3,10 @@ import { PartnerRow } from '../components/SharedUI';
 
 interface PartnersSectionProps {
   partnerLogos: string[];
+  onOpenAuth: () => void;
 }
 
-export default function PartnersSection({ partnerLogos }: PartnersSectionProps) {
+export default function PartnersSection({ partnerLogos, onOpenAuth }: PartnersSectionProps) {
   return (
     <>
       {/* Partners Section */}
@@ -47,9 +48,11 @@ export default function PartnersSection({ partnerLogos }: PartnersSectionProps) 
                 nextSTEM đồng hành cùng bạn trong hành trình học tập, nghiên cứu và chinh phục thế giới.
               </p>
               
-              <button className="group relative inline-flex items-center justify-center px-8 py-4 text-[17px] font-bold text-[#1E3A8A] bg-white hover:bg-gray-50 transition-all duration-300 rounded-2xl shadow-xl hover:shadow-[0_10px_40px_rgba(255,255,255,0.25)] hover:-translate-y-1">
+              <button 
+                onClick={onOpenAuth}
+                className="group relative inline-flex items-center justify-center px-8 py-4 text-[17px] font-bold text-[#1E3A8A] bg-white hover:bg-gray-50 transition-all duration-300 rounded-2xl shadow-xl hover:shadow-[0_10px_40px_rgba(255,255,255,0.25)] hover:-translate-y-1">
                 <span className="relative z-10 flex items-center">
-                  Tiến vào nền tảng
+                  Đăng nhập
                   <svg className="ml-2 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>

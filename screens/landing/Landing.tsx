@@ -26,7 +26,7 @@ export default function Landing({ onStartDemo, onOpenAuth, onOpenAbout }: Landin
       <DemoSection onStartDemo={onStartDemo} />
       <TestimonialsSection />
       <ImpactSection />
-      <PartnersSection partnerLogos={partnerLogos} />
+      <PartnersSection partnerLogos={partnerLogos} onOpenAuth={onOpenAuth} />
       <Footer onOpenAbout={onOpenAbout} />
     </div>
   );

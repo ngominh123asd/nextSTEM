@@ -38,6 +38,11 @@ async function request<T>(
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      setToken(null);
+      window.location.href = '/login';
+      throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+    }
     const body = await res.json().catch(() => ({}));
     const message = body.detail || `Request failed (${res.status})`;
     throw new Error(message);
@@ -320,6 +325,11 @@ async function downloadFile(path: string, fallbackFilename: string): Promise<voi
 
   const res = await fetch(`${API_BASE}${path}`, { headers });
   if (!res.ok) {
+    if (res.status === 401) {
+      setToken(null);
+      window.location.href = '/login';
+      throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+    }
     const body = await res.json().catch(() => ({}));
     throw new Error(body.detail || `Export failed (${res.status})`);
   }
@@ -577,6 +587,11 @@ export function apiChatAIStream(
   })
     .then(async (res) => {
       if (!res.ok) {
+        if (res.status === 401) {
+          setToken(null);
+          window.location.href = '/login';
+          throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+        }
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail || `AI request failed (${res.status})`);
       }

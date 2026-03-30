@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.redis import init_redis, close_redis
-from app.api import auth, users, chat, portfolio, roadmap, documents, resources, tools, admin, embeddings
+from app.api import auth, users, chat, portfolio, roadmap, documents, resources, tools, admin, embeddings, gemini
 from app.api.admin_resources import router as admin_resources_router
 from app.api.data_exchange import router as export_router, import_router
 
@@ -55,6 +55,8 @@ app.include_router(tools.router,     prefix="/api/v1")
 app.include_router(admin.router,     prefix="/api/v1")
 app.include_router(admin_resources_router, prefix="/api/v1")
 app.include_router(embeddings.router, prefix="/api/v1")
+print("INCLUDING GEMINI ROUTER, ROUTES=", gemini.router.routes)
+app.include_router(gemini.router,     prefix="/api/v1")
 app.include_router(export_router,    prefix="/api/v1")
 app.include_router(import_router,    prefix="/api/v1")
 

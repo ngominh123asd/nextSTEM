@@ -9,7 +9,7 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
-_DEFAULT_CORS = ["http://localhost:5173", "http://localhost:3000"]
+_DEFAULT_CORS = ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"]
 
 # Regex that catches all common postgres URL prefixes that are NOT asyncpg
 _PG_PREFIX_RE = _re.compile(
@@ -54,6 +54,10 @@ class Settings(BaseSettings):
     # ── AI Service (external) ──────────────────────────────
     AI_SERVICE_URL: str = "https://nextstem-production.up.railway.app"
     AI_API_KEY: str = ""  # leave empty if AI service has no key requirement
+
+    # ── Gemini (Google AI) ────────────────────────────────
+    # Used for Academic Editor, Roadmap, and AI Study Coach Widget
+    GEMINI_API_KEY: str = ""
 
     # ── CORS ─────────────────────────────────────────────────
     # Stored as raw string to avoid pydantic-settings JSON parsing issues.

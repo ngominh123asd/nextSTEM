@@ -3,9 +3,17 @@ import { mbtiQuestions } from './mbtiData';
 
 interface MBTIQuizProps {
   onComplete: (answers: Record<number, string>) => void;
+  title?: string;
+  description?: string;
+  badgeText?: string;
 }
 
-export default function MBTIQuiz({ onComplete }: MBTIQuizProps) {
+export default function MBTIQuiz({ 
+  onComplete,
+  title = "Đánh giá MBTI & Khám phá bản năng",
+  description = "Hoàn thành bài trắc nghiệm này để AI Advisor thiết lập một hệ thống tư vấn chuẩn xác nhất dành riêng cho bạn.",
+  badgeText = "AI Profile Setup"
+}: MBTIQuizProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [animatingOut, setAnimatingOut] = useState(false);
@@ -44,15 +52,23 @@ export default function MBTIQuiz({ onComplete }: MBTIQuizProps) {
         {!isFinishing ? (
           <>
             <div className="flex flex-col items-center text-center mb-8 sm:mb-12 mt-2">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 border border-blue-100/60 shadow-sm mb-4 backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-                <span className="text-blue-800 font-extrabold text-[11px] uppercase tracking-widest">AI Profile Setup</span>
+              {/* Minimalist Tech Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100/50 mb-4 shadow-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                <span className="text-xs font-semibold text-blue-700 tracking-wide uppercase">{badgeText}</span>
               </div>
-              <h2 className="text-3xl sm:text-[2.2rem] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#1E3A8A] to-blue-600 mb-4 tracking-tight leading-tight">
-                Đánh giá MBTI & Khám phá bản năng
+
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 mb-4 tracking-tight">
+                {title}
               </h2>
+              
+              <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-indigo-400 rounded-full mb-6" />
+              
               <p className="text-slate-600 text-[15px] sm:text-[16px] font-medium px-4 max-w-xl leading-[1.6]">
-                Hoàn thành bài trắc nghiệm này để AI Advisor thiết lập một hệ thống tư vấn chuẩn xác nhất dành riêng cho bạn.
+                {description}
               </p>
             </div>
             

@@ -11,8 +11,14 @@ import {
 import scholarshipsData from '../../../data/scholarships.json';
 import universitiesData from '../../../data/universities.json';
 
-export default function ResourcesTab() {
-  const [cat, setCat] = useState<'scholarships' | 'universities' | 'guides' | 'ai-guide'>('scholarships');
+export default function ResourcesTab({ initialTab }: { initialTab?: string }) {
+  const [cat, setCat] = useState<'scholarships' | 'universities' | 'guides' | 'ai-guide'>(
+    (initialTab as any) || 'scholarships'
+  );
+
+  React.useEffect(() => {
+    if (initialTab) setCat(initialTab as any);
+  }, [initialTab]);
   const [selectedScholarship, setSelectedScholarship] = useState<ScholarshipData | null>(null);
   const [selectedUniversity, setSelectedUniversity] = useState<UniversityData | null>(null);
 
@@ -35,7 +41,7 @@ export default function ResourcesTab() {
 
   return (
     <>
-      <PageTitle icon="menu_book" title="Tài Liệu & Tài Nguyên" subtitle="Thư viện hướng dẫn và cơ sở dữ liệu du học" />
+      <PageTitle icon="menu_book" title="Tài Nguyên" subtitle="Thư viện, trường đại học và cơ sở dữ liệu học bổng" />
 
       {/* Category Tabs */}
       <div className="flex gap-2 mb-8 p-1.5 bg-white/40 backdrop-blur-xl rounded-2xl border border-white/60 overflow-x-auto">
@@ -111,7 +117,7 @@ export default function ResourcesTab() {
                 </div>
                 <div className="flex items-center gap-4 text-center">
                   <div>
-                    <p className="text-xs text-slate-400">Rank</p>
+                    <p className="text-xs text-slate-400">QS</p>
                     <p className="text-lg font-extrabold text-[#1E3A8A]">{u.rank}</p>
                   </div>
                   <div>

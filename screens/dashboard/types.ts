@@ -28,7 +28,7 @@ export const sidebarSections = [
   ]},
   { group: 'CÔNG CỤ', items: [
     { icon: 'build',         label: 'Bộ Công Cụ',     id: 'tools' as TabId },
-    { icon: 'menu_book',     label: 'Tài Liệu',       id: 'resources' as TabId },
+    { icon: 'menu_book',     label: 'Tài Nguyên',     id: 'resources' as TabId },
     { icon: 'edit_document', label: 'Academic Editor', id: 'editor' as TabId },
   ]},
   { group: 'CÁ NHÂN', items: [

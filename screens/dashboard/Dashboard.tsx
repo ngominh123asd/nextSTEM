@@ -14,12 +14,13 @@ import SettingsTab from './tabs/SettingsTab';
 
 export default function Dashboard({ userData, onLogout, userRole, onOpenAdmin }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
+  const [activeSubTab, setActiveSubTab] = useState<string | undefined>();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
-  const switchTab = (tab: TabId) => {
-    if (tab === activeTab) return;
+  const switchTab = (tab: TabId, subTab?: string) => {
     setActiveTab(tab);
+    setActiveSubTab(subTab);
   };
 
   return (
@@ -115,9 +116,9 @@ export default function Dashboard({ userData, onLogout, userRole, onOpenAdmin }:
           {activeTab === 'dashboard'  && <DashboardTab userData={userData} onNav={switchTab} />}
           {activeTab === 'ai-advisor' && <AIAdvisorTab userData={userData} />}
           {activeTab === 'tools'      && <ToolsTab userData={userData} />}
-          {activeTab === 'resources'  && <ResourcesTab />}
+          {activeTab === 'resources'  && <ResourcesTab initialTab={activeSubTab} />}
           {activeTab === 'editor'     && <EditorTab />}
-          {activeTab === 'portfolio'  && <PortfolioTab userData={userData} />}
+          {activeTab === 'portfolio'  && <PortfolioTab userData={userData} initialTab={activeSubTab} />}
           {activeTab === 'roadmap'    && <RoadmapTab userData={userData} />}
           {activeTab === 'settings'   && <SettingsTab userData={userData} />}
         </div>
@@ -139,7 +140,9 @@ export default function Dashboard({ userData, onLogout, userRole, onOpenAdmin }:
       )}
 
       {/* ─── AI CHAT PANEL ─── */}
-      {chatOpen && <AIChatPanel onClose={() => setChatOpen(false)} userName={userData.name} />}
+      <div className={chatOpen ? 'block' : 'hidden'}>
+        <AIChatPanel onClose={() => setChatOpen(false)} userName={userData.name} userData={userData} onNavigate={(tab: TabId, subTab?: string) => { switchTab(tab, subTab); setChatOpen(false); }} />
+      </div>
     </div>
   );
 }

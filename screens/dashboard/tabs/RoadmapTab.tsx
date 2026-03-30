@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import GlassSurface from '../../../components/GlassSurface';
 import { UserData } from '../types';
 import { BlobDecor, GlassCard, GlassHeader, PageTitle } from '../components/SharedUI';
+import MBTIQuiz from './ai-advisor/MBTIQuiz';
 
 interface RoadmapStep {
   id: number;
@@ -16,6 +17,26 @@ interface RoadmapStep {
 export default function RoadmapTab({ userData }: { userData: UserData }) {
   const [roadmap, setRoadmap] = useState<RoadmapStep[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [mbtiCompleted, setMbtiCompleted] = useState<boolean>(
+    localStorage.getItem('mbti_completed') === 'true'
+  );
+
+  const handleMBTIComplete = (answers: Record<number, string>) => {
+    localStorage.setItem('mbti_completed', 'true');
+    localStorage.setItem('mbti_answers', JSON.stringify(answers));
+    setMbtiCompleted(true);
+  };
+
+  if (!mbtiCompleted) {
+    return (
+      <MBTIQuiz 
+        onComplete={handleMBTIComplete}
+        title="Đánh giá Năng lực & MBTI"
+        description="Hoàn thành bài trắc nghiệm ngắn này để AI phân tích và tự động tạo ra lộ trình học tập tối ưu nhất cho riêng bạn."
+        badgeText="Roadmap Setup"
+      />
+    );
+  }
 
   const generateRoadmap = () => {
     setGenerating(true);
