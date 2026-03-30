@@ -39,7 +39,7 @@ const MentorModal: React.FC<{ mentor: Mentor | null; onClose: () => void }> = ({
         </button>
 
         {/* Left: Image Carousel */}
-        <div className="relative w-full md:w-[45%] h-64 md:h-full bg-gray-50 flex-shrink-0">
+        <div className="relative w-full md:w-[45%] h-64 md:h-auto self-stretch bg-gray-50 flex-shrink-0">
           {mentor.images.map((img, idx) => (
             <div
               key={idx}
