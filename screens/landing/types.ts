@@ -179,5 +179,83 @@ export const mentorsData: Mentor[] = [
       "Học bổng Parsons Design",
       "Cố vấn sáng tạo cho quỹ đầu tư"
     ]
+  },
+  {
+    id: "m9",
+    name: "Lại Minh Thông",
+    role: "Quantitative Analyst",
+    school: "Columbia University",
+    images: ["/images/mentor/Lại Minh Thông 1.jpg", "/images/mentor/Lại Minh Thông.jpg"],
+    bio: "Thông có chuyên môn sâu về phân tích định lượng và mô hình hóa tài chính. Anh sẵn sàng hỗ trợ các bạn đam mê Toán ứng dụng và Khoa học dữ liệu chinh phục các trường Ivy League.",
+    achievements: [
+      "Học bổng toàn phần Columbia",
+      "Quán quân Math Olympiad Quốc gia",
+      "Thực tập sinh tại quỹ quant hàng đầu"
+    ]
+  },
+  {
+    id: "m10",
+    name: "Nguyễn Linh Trang",
+    role: "Marketing Analyst",
+    school: "UCLA",
+    images: ["/images/mentor/Nguyễn Linh Trang.jpg"],
+    bio: "Sự kết hợp giữa sáng tạo và tư duy phân tích giúp Linh Trang có góc nhìn đa chiều trong việc xây dựng profile hồ sơ ngoại khóa ngành Business/Marketing.",
+    achievements: [
+      "Học bổng Presidential UCLA",
+      "Sáng lập chiến dịch Marketing cộng đồng",
+      "Top 10 Business Case Competition"
+    ]
+  },
+  {
+    id: "m11",
+    name: "Nguyễn Thị Minh Huyền",
+    role: "Environmental Engineer",
+    school: "Yale University",
+    images: ["/images/mentor/Nguyễn Thị Minh Huyền.jpg"],
+    bio: "Là một người nghiên cứu các giải pháp biến đổi khí hậu, Minh Huyền rất giỏi định hướng học sinh cấp 3 xây dựng các dự án cộng đồng về hệ sinh thái và năng lượng sạch.",
+    achievements: [
+      "Yale Sustainability Scholar",
+      "Tác giả nghiên cứu về nước sạch",
+      "Lãnh đạo dự án Môi trường trẻ VN"
+    ]
+  },
+  {
+    id: "m12",
+    name: "Nguyễn Trường Nam",
+    role: "Aerospace Engineer",
+    school: "Caltech",
+    images: ["/images/mentor/Nguyễn Trường Nam.jpg"],
+    bio: "Đam mê khám phá vũ trụ và công nghệ hàng không, Nam chia sẻ kinh nghiệm quý báu cho các bạn muốn theo đuổi ngành học yêu cầu kỹ thuật và toán học đỉnh cao.",
+    achievements: [
+      "Nghiên cứu sinh tại NASA Jet Propulsion",
+      "Học bổng toàn phần Caltech",
+      "Đại diện tham dự Science Fair toàn cầu"
+    ]
+  },
+  {
+    id: "m13",
+    name: "Ngô Linh Trang",
+    role: "Bioinformatics Data Scientist",
+    school: "University of Cambridge",
+    images: ["/images/mentor/Ngô Linh Trang.jpg"],
+    bio: "Chuyên công tác nghiên cứu tin sinh học, Trang hướng dẫn học sinh kết hợp bộ đôi Sinh học - Khoa học Máy tính để tạo ra những bài luận sắc bén ở hệ Anh.",
+    achievements: [
+      "Học bổng Gates Cambridge",
+      "Báo cáo viên tại hội nghị Gen",
+      "Trưởng nhóm dự án Tech in Bio"
+    ]
+  },
+  {
+    id: "m14",
+    name: "Đỗ Minh Trang",
+    role: "Financial Technology (FinTech)",
+    school: "Imperial College London",
+    images: ["/images/mentor/Đỗ Minh Trang.jpg"],
+    bio: "Minh Trang có nền tảng vững vàng về tài chính và công nghệ, luôn tiên phong giúp đàn em khối tự nhiên tìm đường rẽ nhánh vào các ngành FinTech đang cực hot tại London.",
+    achievements: [
+      "Imperial Excellence Scholarship",
+      "Giải nhất FinTech Innovation Series",
+      "Chuyên viên ngân hàng số tập đoàn Anh"
+    ]
   }
 ];
