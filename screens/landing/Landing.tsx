@@ -5,6 +5,7 @@ import HeroSection from './sections/HeroSection';
 import ProblemsSection from './sections/ProblemsSection';
 import StackingCardsSection from './sections/StackingCardsSection';
 import ComparisonSection from './sections/ComparisonSection';
+import MentorSection from './sections/MentorSection';
 import DemoSection from './sections/DemoSection';
 import TestimonialsSection from './sections/TestimonialsSection';
 import ImpactSection from './sections/ImpactSection';
@@ -21,6 +22,7 @@ export default function Landing({ onStartDemo, onOpenAuth, onOpenAbout }: Landin
       <ProblemsSection />
       <StackingCardsSection />
       <ComparisonSection onStartDemo={onStartDemo} />
+      <MentorSection />
       <DemoSection onStartDemo={onStartDemo} />
       <TestimonialsSection />
       <ImpactSection />

@@ -84,8 +84,8 @@ export default function Footer({ onOpenAbout }: FooterProps) {
               </li>
               <li>
                 <a href="tel:+84123456789" className="flex items-center gap-2 hover:text-primary transition-colors">
-                  <span className="material-symbols-outlined text-sm text-primary">call</span>
-                  +84 (123) 456-7890
+                  <span className="material-symbols-outlined text-sm text-primary flex-shrink-0">call</span>
+                  <span className="whitespace-nowrap">+84 (123) 456-7890</span>
                 </a>
               </li>
               <li>
