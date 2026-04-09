@@ -43,6 +43,7 @@ class Certificate(Base):
     score: Mapped[str | None] = mapped_column(String(50))
     date: Mapped[str | None] = mapped_column(String(30))
     organisation: Mapped[str | None] = mapped_column(String(200))
+    file_url: Mapped[str | None] = mapped_column(String(500))
 
 
 class Activity(Base):

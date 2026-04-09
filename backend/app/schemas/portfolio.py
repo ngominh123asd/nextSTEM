@@ -27,6 +27,7 @@ class CertificateCreate(BaseModel):
     score: str | None = None
     date: str | None = None
     organisation: str | None = None
+    file_url: str | None = None
 
 
 class CertificateRead(CertificateCreate):

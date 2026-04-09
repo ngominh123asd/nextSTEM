@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import GlassSurface from '../../../components/GlassSurface';
 import MarqueeText from '../../../components/MarqueeText';
 import { UserData, TabId, goalLabels } from '../types';
@@ -6,10 +7,11 @@ import { BlobDecor, GlassCard, GlassHeader, PageTitle } from '../components/Shar
 import STEMCompetencyPanel from '../components/STEMCompetencyPanel';
 import { apiGetDTSProfile, type DTSProfile } from '../../../lib/api';
 
-export default function DashboardTab({ userData, onNav }: { userData: UserData; onNav: (t: TabId) => void }) {
+export default function DashboardTab({ userData, onNav }: { userData: UserData; onNav: (t: TabId, subTab?: string) => void }) {
   const [dtsProfile, setDtsProfile] = useState<DTSProfile | null>(null);
   const [dtsLoading, setDtsLoading] = useState(true);
   const [showScoreInfo, setShowScoreInfo] = useState(false);
+  const [showAllActivities, setShowAllActivities] = useState(false);
 
   useEffect(() => {
     apiGetDTSProfile()
@@ -18,41 +20,47 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
       .finally(() => setDtsLoading(false));
   }, []);
 
-  const recentActivities = dtsProfile?.recent_activities?.length
-    ? dtsProfile.recent_activities.slice(0, 4).map(a => {
-        const iconMap: Record<string, string> = {
-          project_created: 'science', project_updated: 'edit', cert_added: 'verified',
-          skill_assessed: 'psychology', batch_skill_assessed: 'psychology',
-          snapshot_created: 'photo_camera', quiz_completed: 'quiz',
-        };
-        const colorMap: Record<string, string> = {
-          project_created: 'from-blue-500 to-blue-600', cert_added: 'from-amber-500 to-orange-500',
-          skill_assessed: 'from-violet-500 to-purple-500', batch_skill_assessed: 'from-violet-500 to-purple-500',
-          snapshot_created: 'from-emerald-500 to-teal-500',
-        };
-        const actionLabels: Record<string, string> = {
-          project_created: 'Tạo dự án mới', project_updated: 'Cập nhật dự án',
-          cert_added: 'Thêm chứng chỉ', skill_assessed: 'Đánh giá năng lực',
-          batch_skill_assessed: 'Đánh giá năng lực hàng loạt',
-          snapshot_created: 'Tạo ảnh chụp DTS', quiz_completed: 'Hoàn thành bài test',
-        };
-        const timeDiff = Date.now() - new Date(a.created_at).getTime();
-        const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-        const timeStr = hours < 1 ? 'Vừa xong' : hours < 24 ? `${hours} giờ trước` : `${Math.floor(hours / 24)} ngày trước`;
+  const mapActivity = (a: any) => {
+    const iconMap: Record<string, string> = {
+      project_created: 'science', project_updated: 'edit', cert_added: 'verified',
+      skill_assessed: 'psychology', batch_skill_assessed: 'psychology',
+      snapshot_created: 'photo_camera', quiz_completed: 'quiz',
+    };
+    const colorMap: Record<string, string> = {
+      project_created: 'from-blue-500 to-blue-600', cert_added: 'from-amber-500 to-orange-500',
+      skill_assessed: 'from-violet-500 to-purple-500', batch_skill_assessed: 'from-violet-500 to-purple-500',
+      snapshot_created: 'from-emerald-500 to-teal-500',
+    };
+    const actionLabels: Record<string, string> = {
+      project_created: 'Tạo dự án mới', project_updated: 'Cập nhật dự án',
+      cert_added: 'Thêm chứng chỉ', skill_assessed: 'Đánh giá năng lực',
+      batch_skill_assessed: 'Đánh giá năng lực hàng loạt',
+      snapshot_created: 'Tạo ảnh chụp DTS', quiz_completed: 'Hoàn thành bài test',
+    };
+    const timeDiff = Date.now() - new Date(a.created_at).getTime();
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const timeStr = hours < 1 ? 'Vừa xong' : hours < 24 ? `${hours} giờ trước` : `${Math.floor(hours / 24)} ngày trước`;
+    return {
+      icon: iconMap[a.action] || 'history',
+      text: actionLabels[a.action] || a.action,
+      time: timeStr,
+      color: colorMap[a.action] || 'from-blue-500 to-blue-600',
+    };
+  };
 
-        return {
-          icon: iconMap[a.action] || 'history',
-          text: actionLabels[a.action] || a.action,
-          time: timeStr,
-          color: colorMap[a.action] || 'from-blue-500 to-blue-600',
-        };
-      })
-    : [
-        { icon: 'school', text: 'Hoàn thành bài test định hướng', time: '2 giờ trước', color: 'from-blue-500 to-blue-600' },
-        { icon: 'science', text: 'Cập nhật dự án: AI Chatbot', time: '5 giờ trước', color: 'from-indigo-500 to-indigo-600' },
-        { icon: 'emoji_events', text: 'Thêm giải thưởng Olympic', time: 'Hôm qua', color: 'from-amber-500 to-orange-500' },
-        { icon: 'edit_note', text: 'Bắt đầu viết Personal Statement', time: '2 ngày trước', color: 'from-violet-500 to-purple-500' },
-      ];
+  const defaultActivities = [
+    { icon: 'school', text: 'Hoàn thành bài test định hướng', time: '2 giờ trước', color: 'from-blue-500 to-blue-600' },
+    { icon: 'science', text: 'Cập nhật dự án: AI Chatbot', time: '5 giờ trước', color: 'from-indigo-500 to-indigo-600' },
+    { icon: 'emoji_events', text: 'Thêm giải thưởng Olympic', time: 'Hôm qua', color: 'from-amber-500 to-orange-500' },
+    { icon: 'edit_note', text: 'Bắt đầu viết Personal Statement', time: '2 ngày trước', color: 'from-violet-500 to-purple-500' },
+  ];
+
+  const allActivities = dtsProfile?.recent_activities?.length
+    ? dtsProfile.recent_activities.map(mapActivity)
+    : defaultActivities;
+
+  const recentActivities = showAllActivities ? allActivities : allActivities.slice(0, 4);
+  const hasMoreActivities = allActivities.length > 4;
 
   return (
     <>
@@ -63,10 +71,10 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
         <STEMCompetencyPanel onShowScoreInfo={() => setShowScoreInfo(true)} />
       </div>
 
-      {/* ── Score Info Modal overlay ── */}
-      {showScoreInfo && (
+      {/* ── Score Info Modal overlay (Using Portal to cover entire screen including Sidebar) ── */}
+      {showScoreInfo && createPortal(
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/30 backdrop-blur-[4px] z-[9999] flex items-center justify-center p-4"
           onClick={() => setShowScoreInfo(false)}
         >
           <div
@@ -176,7 +184,8 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
 
@@ -265,7 +274,17 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
 
       {/* ── Hoạt động gần đây ── */}
       <GlassCard>
-        <GlassHeader icon="history" title="Hoạt động gần đây" extra={<button className="text-xs font-semibold text-blue-600 hover:underline">Xem tất cả</button>} />
+        <GlassHeader icon="history" title="Hoạt động gần đây" extra={
+          hasMoreActivities ? (
+            <button onClick={() => setShowAllActivities(!showAllActivities)} className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1">
+              {showAllActivities ? (
+                <><span className="material-symbols-outlined text-sm">expand_less</span>Thu gọn</>
+              ) : (
+                <><span className="material-symbols-outlined text-sm">expand_more</span>Xem tất cả ({allActivities.length})</>
+              )}
+            </button>
+          ) : null
+        } />
         <div className="space-y-3 relative z-10">
           {recentActivities.map((a, i) => (
             <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60 hover:bg-white/60 transition-all">

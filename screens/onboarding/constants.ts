@@ -1,4 +1,4 @@
-export const TOTAL_STEPS = 3;
+export const TOTAL_STEPS = 5;
 
 export const goalOptions = [
   { id: 'choose-major', icon: 'school', label: 'Chọn ngành học', desc: 'Tìm hiểu và lựa chọn ngành phù hợp' },
@@ -24,4 +24,6 @@ export const stepMeta = [
   { label: 'Mục tiêu', icon: 'flag', heading: 'Xác định mục tiêu', sub: 'Bạn muốn đạt được gì với nextSTEM?' },
   { label: 'Học tập', icon: 'menu_book', heading: 'Thông tin học tập', sub: 'Giúp chúng tôi cá nhân hóa trải nghiệm' },
   { label: 'Sở thích', icon: 'interests', heading: 'Sở thích STEM', sub: 'Chọn các lĩnh vực bạn yêu thích' },
+  { label: 'Chứng chỉ', icon: 'verified', heading: 'Chứng chỉ & Thành tích', sub: 'Tải lên chứng chỉ, điểm thi hoặc giải thưởng (không bắt buộc)' },
+  { label: 'Dự án', icon: 'science', heading: 'Dự án nổi bật', sub: 'Khai báo các dự án bạn đã hoặc đang thực hiện (không bắt buộc)' },
 ];

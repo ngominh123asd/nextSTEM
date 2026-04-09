@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend,
 } from 'recharts';
 import {
   apiGetCompetencyRadar, apiGetCompetencyAnalysis, apiGetCompetencyFramework,
-  apiUpdateCompetencyScore, apiGetDTSTimeline,
-  type CompetencyRadarResponse, type CompetencyAnalysis, type STEMCompetency, type DTSTimeline,
+  apiUpdateCompetencyScore, apiGetDTSTimeline, apiGetCompetencyScores,
+  type CompetencyRadarResponse, type CompetencyAnalysis, type STEMCompetency, type DTSTimeline, type CompetencyScore,
 } from '../../../lib/api';
 import { GlassCard, GlassHeader, BlobDecor } from './SharedUI';
 
@@ -25,6 +26,7 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
   const [analysis, setAnalysis] = useState<CompetencyAnalysis | null>(null);
   const [framework, setFramework] = useState<STEMCompetency[]>([]);
   const [timeline, setTimeline] = useState<DTSTimeline | null>(null);
+  const [userScores, setUserScores] = useState<CompetencyScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAssessment, setShowAssessment] = useState(false);
   const [assessingComp, setAssessingComp] = useState<STEMCompetency | null>(null);
@@ -46,16 +48,18 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
   const loadData = async () => {
     setLoading(true);
     try {
-      const [r, a, f, t] = await Promise.all([
+      const [r, a, f, t, s] = await Promise.all([
         apiGetCompetencyRadar().catch(() => null),
         apiGetCompetencyAnalysis().catch(() => null),
         apiGetCompetencyFramework().catch(() => []),
         apiGetDTSTimeline().catch(() => null),
+        apiGetCompetencyScores().catch(() => []),
       ]);
       if (r) setRadar(r);
       if (a) setAnalysis(a);
       setFramework(f);
       if (t) setTimeline(t);
+      if (s) setUserScores(s);
     } catch { /* ignore */ }
     setLoading(false);
   };
@@ -194,6 +198,7 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
               <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                 (radar?.overall_score || 0) >= 60 ? 'bg-emerald-50/60 text-emerald-600' :
                 (radar?.overall_score || 0) >= 30 ? 'bg-amber-50/60 text-amber-600' :
+                (radar?.overall_score || 0) > 0 ? 'bg-rose-50/60 text-rose-600' :
                 'bg-slate-50/60 text-slate-400'
               }`}>
                 {radar?.overall_score || 0}/100
@@ -212,7 +217,7 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
           <div className="relative" style={{ height: isMobile ? 260 : 280, padding: isMobile ? '28px 12px' : '28px 20px' }}>
             {/* Radar chart */}
             <div className="w-full h-full">
-              <ResponsiveContainer width="100%" height="100%" minWidth={1} debounce={50}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={50}>
                 <RadarChart data={radarData} outerRadius={isMobile ? "65%" : "68%"}>
                   <PolarGrid stroke="#c7d2fe" strokeWidth={0.5} />
                   <PolarAngleAxis dataKey="subject" tick={false} />
@@ -269,6 +274,7 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
                     isActive ? 'bg-white/20 text-white' :
                     score >= 60 ? 'bg-emerald-50 text-emerald-600' :
                     score >= 30 ? 'bg-amber-50 text-amber-600' :
+                    score > 0 ? 'bg-rose-50 text-rose-600' :
                     'bg-slate-50 text-slate-400'
                   }`}>{score}</span>
                 </button>
@@ -279,16 +285,17 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
       </GlassCard>
 
 
-      {/* ── Competency Popover (fixed overlay, never clipped) ── */}
+      {/* ── Competency Popover (z-[100] to be above sidebar z-50) ── */}
       {popoverComp && (() => {
         const comp = framework.find(c => c.id === popoverComp);
         if (!comp) return null;
         const rd = radar?.data.find(d => d.competency_code === comp.code);
         const score = rd?.score || 0;
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setPopoverComp(null)}>
-            <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
+        return createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setPopoverComp(null)}>
+            <div className="absolute inset-0 bg-black/25 backdrop-blur-[3px]" />
             <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-xs overflow-hidden" onClick={e => e.stopPropagation()}>
+              {/* Header */}
               <div className="bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] px-5 py-4 relative overflow-hidden">
                 <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-white/10" />
                 <div className="flex items-center gap-3 relative z-10">
@@ -304,26 +311,48 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
                   </button>
                 </div>
               </div>
+
               <div className="p-5">
+                {/* Overall score */}
                 <div className="flex items-end justify-between mb-2">
-                  <span className="text-xs font-semibold text-slate-500">Điểm hiện tại</span>
-                  <span className={`text-xl font-extrabold ${score >= 60 ? 'text-emerald-600' : score >= 30 ? 'text-amber-600' : 'text-slate-300'}`}>
+                  <span className="text-xs font-semibold text-slate-500">Điểm thành tố</span>
+                  <span className={`text-xl font-extrabold ${
+                    score >= 60 ? 'text-emerald-600' : 
+                    score >= 30 ? 'text-amber-600' : 
+                    score > 0 ? 'text-rose-600' : 
+                    'text-slate-300'
+                  }`}>
                     {score}<span className="text-sm font-bold text-slate-300">/100</span>
                   </span>
                 </div>
                 <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-4">
                   <div className="h-full rounded-full bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] transition-all duration-500" style={{ width: `${score}%` }} />
                 </div>
+
+                {/* Indicators with individual scores */}
                 {comp.indicators && comp.indicators.length > 0 && (
                   <div className="space-y-1.5 mb-4">
-                    {comp.indicators.map((ind: any) => (
-                      <div key={ind.id} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50/80">
-                        <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">{ind.code}</span>
-                        <span className="text-[11px] text-slate-600 flex-1">{ind.name}</span>
-                      </div>
-                    ))}
+                    {comp.indicators.map((ind: any) => {
+                      const indScoreObj = userScores.find((s: any) => s.indicator_id === ind.id);
+                      const indScore = indScoreObj?.score ?? 0;
+                      return (
+                        <div key={ind.id} className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50/80">
+                          <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">{ind.code}</span>
+                          <span className="text-[11px] text-slate-600 flex-1">{ind.name}</span>
+                          <span className={`text-[10px] font-bold min-w-[28px] text-right ${
+                            indScore >= 60 ? 'text-emerald-600' : 
+                            indScore >= 30 ? 'text-amber-600' : 
+                            indScore > 0 ? 'text-rose-500' : 
+                            'text-slate-400'
+                          }`}>
+                            {indScore > 0 ? indScore : '—'}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
+
                 <button
                   onClick={() => { setAssessingComp(comp); setShowAssessment(true); setScores({}); setPopoverComp(null); }}
                   className="w-full py-2.5 bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5"
@@ -333,7 +362,8 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         );
       })()}
 
@@ -359,7 +389,7 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
             }
           />
           <div className="w-full h-[240px] relative z-10 mt-3">
-            <ResponsiveContainer width="100%" height="100%" minHeight={240} minWidth={1}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
               <LineChart data={timeline.points.map(p => ({
                 date: new Date(p.date).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' }),
                 'Tổng điểm': Math.round(p.overall_score),

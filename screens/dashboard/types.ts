@@ -1,6 +1,7 @@
 /* ── Dashboard Module Shared Types & Constants ── */
 
 export interface UserData {
+  id?: string;
   name: string;
   email: string;
   goals: string[];

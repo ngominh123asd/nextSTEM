@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
 import GlassSurface from '../../../components/GlassSurface';
 import { UserData, glass, getInitials, goalLabels } from '../types';
 import { BlobDecor, GlassCard, GlassHeader, PageTitle } from '../components/SharedUI';
 import {
   apiListProjects, apiCreateProject, apiDeleteProject,
-  apiListCertificates, apiCreateCertificate, apiDeleteCertificate,
+  apiListCertificates, apiCreateCertificate, apiDeleteCertificate, apiUploadCertFile,
   apiListActivities, apiCreateActivity, apiDeleteActivity,
   getToken,
   type ProjectItem, type CertItem, type ActivityItem,
@@ -28,7 +29,7 @@ const Input = ({ label, val, set, type = 'text', ph }: {
 /* ── Skills stored locally (self-assessment) ── */
 const SKILLS_KEY = 'nextstem_skills_map';
 function loadSkills(): Record<string, number> {
-  try { const s = localStorage.getItem(SKILLS_KEY); if (s) return JSON.parse(s); } catch {}
+  try { const s = localStorage.getItem(SKILLS_KEY); if (s) return JSON.parse(s); } catch { }
   return {};
 }
 function saveSkills(map: Record<string, number>) {
@@ -50,7 +51,7 @@ function buildActivityChart(activities: ActivityItem[]) {
 }
 
 export default function PortfolioTab({ userData, initialTab }: { userData: UserData; initialTab?: string }) {
-  const [tab, setTab] = useState<'overview' | 'timeline' | 'certs' | 'skills'>(
+  const [tab, setTab] = useState<'overview' | 'timeline' | 'certs'>(
     (initialTab as any) || 'overview'
   );
   useEffect(() => { if (initialTab) setTab(initialTab as any); }, [initialTab]);
@@ -68,6 +69,8 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
   const [newProj, setNewProj] = useState({ title: '', status: 'Đang phát triển', category: '', date_label: '', description: '', progress: 0 });
   const [showCertForm, setShowCertForm] = useState(false);
   const [newCert, setNewCert] = useState({ title: '', score: '', date: '', organisation: '' });
+  const [certFile, setCertFile] = useState<File | null>(null);
+  const [selectedCert, setSelectedCert] = useState<CertItem | null>(null);
   const [showTimeForm, setShowTimeForm] = useState(false);
   const [newTime, setNewTime] = useState({ event: '', date_label: '', icon: 'star', color: 'from-blue-500 to-indigo-500' });
   const [editingSkill, setEditingSkill] = useState<string | null>(null);
@@ -125,15 +128,24 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
     if (!newCert.title.trim()) return;
     setSaving(true);
     try {
+      let fileUrl: string | null = null;
+      if (certFile) {
+        try {
+          const uploaded = await apiUploadCertFile(certFile);
+          fileUrl = uploaded.file_url;
+        } catch (e) { console.warn('File upload failed', e); }
+      }
       const created = await apiCreateCertificate({
         title: newCert.title,
         score: newCert.score || null,
         date: newCert.date || null,
         organisation: newCert.organisation || null,
+        file_url: fileUrl,
       });
       setCerts(prev => [created, ...prev]);
       setShowCertForm(false);
       setNewCert({ title: '', score: '', date: '', organisation: '' });
+      setCertFile(null);
     } catch (e) { console.error('Create cert failed', e); }
     setSaving(false);
   };
@@ -180,10 +192,9 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
   const totalThisWeek = activityChart.reduce((s, d) => s + d.tasks, 0);
 
   const tabs = [
-    { id: 'overview' as const,  icon: 'person',    label: 'Tổng quan' },
-    { id: 'timeline' as const,  icon: 'timeline',  label: 'Timeline' },
-    { id: 'certs' as const,     icon: 'verified',  label: 'Chứng chỉ' },
-    { id: 'skills' as const,    icon: 'psychology', label: 'Kỹ năng' },
+    { id: 'overview' as const, icon: 'person', label: 'Tổng quan' },
+    { id: 'timeline' as const, icon: 'timeline', label: 'Timeline' },
+    { id: 'certs' as const, icon: 'verified', label: 'Chứng chỉ' },
   ];
 
   /* ── Skeleton loader ── */
@@ -240,11 +251,10 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
       <div className="flex gap-2 mb-6 p-1.5 bg-white/40 backdrop-blur-xl rounded-2xl border border-white/60 w-fit overflow-x-auto max-w-full shadow-sm">
         {tabs.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all flex-shrink-0 ${
-              tab === t.id
-                ? 'bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] text-white shadow-md'
-                : 'text-slate-500 hover:text-[#1E3A8A] hover:bg-white/50'
-            }`}>
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all flex-shrink-0 ${tab === t.id
+              ? 'bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] text-white shadow-md'
+              : 'text-slate-500 hover:text-[#1E3A8A] hover:bg-white/50'
+              }`}>
             <span className="material-symbols-outlined text-lg">{t.icon}</span>{t.label}
           </button>
         ))}
@@ -266,7 +276,7 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
               </div>
             </GlassCard>
             <GlassCard>
-              <GlassHeader icon="interests" title="Sở thích STEM" />
+              <GlassHeader icon="interests" title="Sở thích" />
               <div className="relative z-10 flex flex-wrap gap-2 mt-2">
                 {userData.interests.map(i => (
                   <span key={i} className={`${glass.tag} bg-gradient-to-r from-violet-500/10 to-purple-500/10 text-indigo-700 border border-indigo-200/40`}>{i}</span>
@@ -275,36 +285,6 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
               </div>
             </GlassCard>
           </div>
-
-          {/* Activity chart */}
-          <GlassCard>
-            <BlobDecor className="w-36 h-36 -bottom-12 -right-12 bg-blue-200/20" />
-            <GlassHeader icon="bar_chart" title="Hoạt động tuần này" />
-            <div className="w-full h-[200px] relative z-10 mt-2">
-              <ResponsiveContainer width="100%" height="100%" minHeight={200} minWidth={1}>
-                <AreaChart data={activityChart}>
-                  <defs>
-                    <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.25} />
-                      <stop offset="100%" stopColor="#818cf8" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis hide />
-                  <Tooltip contentStyle={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: '12px', fontSize: 12 }} />
-                  <Area type="monotone" dataKey="tasks" stroke="#4f46e5" fill="url(#actGrad)" strokeWidth={2.5} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex items-center justify-between mt-3 relative z-10">
-              <span className="text-sm font-semibold text-slate-500">Tổng hoạt động: <strong className="text-[#1E3A8A]">{totalThisWeek}</strong></span>
-              {activities.length > 0 && (
-                <span className="text-xs font-bold text-emerald-500 bg-emerald-50/60 px-2.5 py-1 rounded-full">
-                  {activities.length} sự kiện
-                </span>
-              )}
-            </div>
-          </GlassCard>
 
           {/* Projects */}
           <GlassCard>
@@ -373,11 +353,10 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
                         {p.date_label && <><span className="w-1 h-1 rounded-full bg-slate-300" /><span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">calendar_today</span>{p.date_label}</span></>}
                       </div>
                     </div>
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${
-                      p.status === 'Hoàn thành' ? 'bg-emerald-100 text-emerald-700' :
+                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${p.status === 'Hoàn thành' ? 'bg-emerald-100 text-emerald-700' :
                       p.status === 'Tạm dừng' ? 'bg-slate-100 text-slate-600' :
-                      'bg-amber-100 text-amber-700'
-                    }`}>{p.status}</span>
+                        'bg-amber-100 text-amber-700'
+                      }`}>{p.status}</span>
                   </div>
                   {p.description && <p className="text-sm text-slate-600 mb-4 bg-white/40 p-3 rounded-xl border border-white leading-relaxed">{p.description}</p>}
                   <div className="flex items-center gap-3">
@@ -392,6 +371,36 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
                   </button>
                 </div>
               ))}
+            </div>
+          </GlassCard>
+
+          {/* Activity chart - moved to bottom */}
+          <GlassCard>
+            <BlobDecor className="w-36 h-36 -bottom-12 -right-12 bg-blue-200/20" />
+            <GlassHeader icon="bar_chart" title="Hoạt động tuần này" />
+            <div className="w-full h-[200px] relative z-10 mt-2">
+              <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
+                <AreaChart data={activityChart}>
+                  <defs>
+                    <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.25} />
+                      <stop offset="100%" stopColor="#818cf8" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis hide />
+                  <Tooltip contentStyle={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: '12px', fontSize: 12 }} />
+                  <Area type="monotone" dataKey="tasks" stroke="#4f46e5" fill="url(#actGrad)" strokeWidth={2.5} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex items-center justify-between mt-3 relative z-10">
+              <span className="text-sm font-semibold text-slate-500">Tổng hoạt động: <strong className="text-[#1E3A8A]">{totalThisWeek}</strong></span>
+              {activities.length > 0 && (
+                <span className="text-xs font-bold text-emerald-500 bg-emerald-50/60 px-2.5 py-1 rounded-full">
+                  {activities.length} sự kiện
+                </span>
+              )}
             </div>
           </GlassCard>
         </div>
@@ -485,124 +494,208 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
 
       {/* ══ Certificates ══ */}
       {tab === 'certs' && (
-        <div className="space-y-4">
-          {showCertForm ? (
-            <GlassCard className="!p-6 !bg-white/80">
-              <h4 className="font-bold text-[#1E3A8A] mb-4 flex items-center gap-2">
-                <span className="material-symbols-outlined text-blue-500">card_membership</span>Nhập Chứng chỉ Mới
-              </h4>
-              <div className="space-y-4">
+        <GlassCard>
+          <GlassHeader
+            icon="verified" title="Chứng chỉ & Thành tích"
+            extra={
+              isLoggedIn ? (
+                <button onClick={() => setShowCertForm(!showCertForm)}
+                  className="text-xs font-semibold text-white bg-blue-600 px-3 py-1.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">{showCertForm ? 'close' : 'add'}</span>
+                  {showCertForm ? 'Đóng' : 'Thêm mới'}
+                </button>
+              ) : null
+            }
+          />
+          <div className="space-y-4 relative z-10 mt-3">
+            {/* Add form */}
+            {showCertForm && (
+              <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-blue-200 shadow-xl space-y-4 mb-2">
+                <h4 className="font-bold text-[#1E3A8A] flex items-center gap-2 border-b border-blue-100 pb-2">
+                  <span className="material-symbols-outlined text-blue-500 text-lg">card_membership</span>Nhập Chứng chỉ Mới
+                </h4>
                 <Input label="Tên chứng chỉ" ph="Vd: IELTS, SAT, Huy chương Vàng..." val={newCert.title} set={v => setNewCert({ ...newCert, title: v })} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input label="Điểm số / Thành tích" ph="Vd: 8.0, 1500, Giải Nhất" val={newCert.score} set={v => setNewCert({ ...newCert, score: v })} />
                   <Input label="Ngày thi / Ngày cấp" ph="Vd: Tháng 10, 2025" val={newCert.date} set={v => setNewCert({ ...newCert, date: v })} />
                 </div>
                 <Input label="Tổ chức cấp" ph="Vd: British Council, College Board" val={newCert.organisation} set={v => setNewCert({ ...newCert, organisation: v })} />
-                <div className="flex gap-3 pt-2">
-                  <button onClick={() => setShowCertForm(false)} className="flex-1 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50">Hủy bỏ</button>
-                  <button onClick={addCert} disabled={saving} className="flex-1 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:opacity-90 disabled:opacity-60">
-                    {saving ? 'Đang lưu...' : 'Lưu chứng chỉ'}
-                  </button>
-                </div>
-              </div>
-            </GlassCard>
-          ) : (
-            isLoggedIn && (
-              <GlassCard onClick={() => setShowCertForm(true)} className="!p-5 text-center cursor-pointer hover:bg-blue-50/50 transition-colors border-dashed border-2 border-blue-200/60 shadow-none">
-                <div className="flex flex-col items-center relative z-10 opacity-70">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-2"><span className="material-symbols-outlined text-blue-600">add</span></div>
-                  <p className="font-bold text-[#1E3A8A]">Khai báo chứng chỉ mới</p>
-                  <p className="text-xs text-slate-400 mt-1">GPA, Chứng chỉ Tiếng Anh, AP, Giải thưởng học thuật</p>
-                </div>
-              </GlassCard>
-            )
-          )}
-
-          {loadingData && <Skeleton h="h-20" n={3} />}
-          {!loadingData && certs.length === 0 && !showCertForm && (
-            <div className="text-center p-8 text-slate-400 border-2 border-dashed border-white/60 rounded-2xl bg-white/20">
-              {isLoggedIn ? 'Chưa có chứng chỉ nào.' : 'Đăng nhập để xem chứng chỉ.'}
-            </div>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {certs.map(c => (
-              <GlassCard key={c.id} className="group relative pr-12 hover:shadow-lg transition-all border border-white">
-                <div className="flex items-center gap-4 relative z-10 w-full mb-2">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-yellow-100 flex items-center justify-center border border-amber-200 flex-shrink-0">
-                    <span className="material-symbols-outlined text-amber-600 text-[26px]">verified</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-[#1E3A8A] text-sm sm:text-base truncate">{c.title}</h4>
-                    <p className="text-[11px] sm:text-xs text-slate-500 truncate mt-0.5">{c.organisation}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0 pl-2 border-l border-slate-100">
-                    <p className="text-lg sm:text-xl font-extrabold text-[#1E3A8A]">{c.score}</p>
-                    <p className="text-[10px] sm:text-[11px] font-bold text-blue-500">{c.date}</p>
-                  </div>
-                </div>
-                <button onClick={() => delCert(c.id)}
-                  className="absolute top-2 right-2 p-1.5 bg-white shadow-sm border border-slate-100 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all">
-                  <span className="material-symbols-outlined text-sm">delete</span>
-                </button>
-              </GlassCard>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ══ Skills ══ */}
-      {tab === 'skills' && (
-        <GlassCard>
-          <GlassHeader icon="psychology" title="Bảng Giá Trị Kỹ Năng" />
-          <p className="text-xs text-slate-500 mb-4 relative z-10 -mt-2">Tự đánh giá năng lực để AI lên lộ trình chính xác</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10 mt-2">
-            {allSkills.map((skill: string, i: number) => {
-              let defaultLevel = 0;
-              for (let ci = 0; ci < skill.length; ci++) defaultLevel += skill.charCodeAt(ci);
-              defaultLevel = (defaultLevel % 50) + 40;
-              const level = skillsMap[skill] !== undefined ? skillsMap[skill] : defaultLevel;
-              const labels = ['Sơ cấp', 'Căn bản', 'Khá giỏi', 'Cứng cáp', 'Chuyên gia'];
-              const labelIdx = Math.min(Math.floor(level / 20), 4);
-              const colors = ['from-sky-400', 'from-blue-500', 'from-indigo-500', 'from-violet-500', 'from-fuchsia-500'];
-              const isEditing = editingSkill === skill;
-              return (
-                <div key={i} className="p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-white relative group shadow-sm transition-all hover:shadow-md h-[90px]">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-[#1E3A8A] text-sm">{skill}</span>
-                    {isEditing ? (
-                      <button onClick={() => saveSkill(skill)} className="text-[11px] font-extrabold text-white bg-emerald-500 px-3 py-1 rounded-full shadow-sm hover:bg-emerald-600">LƯU LẠI</button>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-[#1E3A8A] ml-1">Tải file chứng chỉ <span className="text-slate-400 font-normal">(PDF hoặc ảnh, tối đa 5MB)</span></label>
+                  <div
+                    className="flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-blue-200/50 bg-white/50 cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all"
+                    onClick={() => document.getElementById('cert-file-input')?.click()}
+                  >
+                    <input
+                      id="cert-file-input"
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg,.webp"
+                      style={{ display: 'none' }}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f && f.size > 5 * 1024 * 1024) { alert('File quá lớn. Tối đa 5MB.'); return; }
+                        setCertFile(f || null);
+                      }}
+                    />
+                    {certFile ? (
+                      <>
+                        <span className="material-symbols-outlined text-blue-500">{certFile.name.endsWith('.pdf') ? 'picture_as_pdf' : 'image'}</span>
+                        <span className="text-sm font-semibold text-slate-700 flex-1 truncate">{certFile.name}</span>
+                        <button onClick={(e) => { e.stopPropagation(); setCertFile(null); }} className="text-slate-400 hover:text-red-500">
+                          <span className="material-symbols-outlined text-sm">close</span>
+                        </button>
+                      </>
                     ) : (
-                      <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md uppercase tracking-wide">{labels[labelIdx]}</span>
+                      <>
+                        <span className="material-symbols-outlined text-slate-400">cloud_upload</span>
+                        <span className="text-sm text-slate-400">Nhấn để chọn file</span>
+                      </>
                     )}
                   </div>
-                  {isEditing ? (
-                    <div className="flex items-center gap-3 w-full animate-in fade-in slide-in-from-top-1">
-                      <input type="range" min="0" max="100" value={skillLevel}
-                        onChange={e => setSkillLevel(parseInt(e.target.value))}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
-                      <span className="text-xs font-bold text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 min-w-[36px] text-center">{skillLevel}</span>
-                    </div>
-                  ) : (
-                    <div className="group-hover:opacity-90 transition-opacity">
-                      <div className="w-full h-2 bg-white/80 border border-slate-100 rounded-full overflow-hidden cursor-pointer shadow-inner"
-                        onClick={() => { setEditingSkill(skill); setSkillLevel(level); }}>
-                        <div className={`h-full rounded-full bg-gradient-to-r ${colors[labelIdx]} to-blue-400 transition-all duration-300`} style={{ width: `${level}%` }} />
-                      </div>
-                      <div className="flex justify-between mt-1.5 px-0.5">
-                        <span className="text-[10px] font-medium text-slate-400">0</span>
-                        <span className="text-[10px] font-bold text-slate-500">{level}/100</span>
-                      </div>
-                      <button onClick={() => { setEditingSkill(skill); setSkillLevel(level); }}
-                        className="absolute -top-2 -right-2 p-1.5 bg-white shadow-md border border-slate-100 rounded-xl text-blue-600 opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-50">
-                        <span className="material-symbols-outlined text-sm">edit</span>
-                      </button>
-                    </div>
-                  )}
                 </div>
-              );
-            })}
+                <button onClick={addCert} disabled={saving}
+                  className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:opacity-90 transition-all flex justify-center items-center gap-2 disabled:opacity-60">
+                  <span className="material-symbols-outlined text-base">{saving ? 'progress_activity' : 'save'}</span>
+                  {saving ? 'Đang lưu...' : 'Lưu chứng chỉ'}
+                </button>
+              </div>
+            )}
+
+            {loadingData && <Skeleton h="h-20" n={3} />}
+            {!loadingData && certs.length === 0 && !showCertForm && (
+              <div className="p-8 text-center text-slate-400 border-2 border-dashed border-white/60 rounded-2xl bg-white/20">
+                {isLoggedIn ? "Chưa có chứng chỉ nào. Bấm 'Thêm mới' để khai báo." : 'Đăng nhập để xem chứng chỉ.'}
+              </div>
+            )}
+
+            {/* Cert cards */}
+            {certs.map(c => (
+              <div key={c.id} onClick={() => setSelectedCert(c)}
+                className="group relative rounded-2xl bg-white/60 backdrop-blur-sm border border-white overflow-hidden hover:shadow-lg transition-all cursor-pointer">
+                {/* Decorative accent */}
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-blue-500 to-blue-700 rounded-l-2xl" />
+                <div className="absolute -top-8 -right-8 w-24 h-24 bg-blue-100/30 rounded-full blur-2xl group-hover:bg-blue-200/40 transition-colors" />
+
+                <div className="p-4 sm:p-5 pl-6 flex items-center gap-4 relative z-10">
+                  {/* Medal icon */}
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/25 text-white flex-shrink-0">
+                    <span className="material-symbols-outlined text-[28px]">workspace_premium</span>
+                  </div>
+
+                  {/* Info block */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-[#1E3A8A] text-[15px] sm:text-base leading-tight">{c.title}</h4>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+                      {c.organisation && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100/80 px-2 py-0.5 rounded-md">
+                          <span className="material-symbols-outlined text-[12px] text-slate-400">apartment</span>
+                          {c.organisation}
+                        </span>
+                      )}
+                      {c.date && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500">
+                          <span className="material-symbols-outlined text-[12px] text-slate-400">schedule</span>
+                          {c.date}
+                        </span>
+                      )}
+                      {c.file_url && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                          <span className="material-symbols-outlined text-[12px]">description</span>
+                          Có file
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Score badge */}
+                  <div className="flex-shrink-0 text-center">
+                    <div className="min-w-[56px] px-3 py-2.5 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200/60">
+                      <p className="text-lg sm:text-xl font-black text-blue-700 leading-none">{c.score || '—'}</p>
+                      <p className="text-[9px] font-bold text-blue-400 uppercase tracking-wider mt-1">Thành tích</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delete button */}
+                <button onClick={(e) => { e.stopPropagation(); delCert(c.id); }}
+                  className="absolute top-1/2 -translate-y-1/2 right-3 p-1.5 bg-white shadow-sm border border-slate-100 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all">
+                  <span className="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+            ))}
           </div>
         </GlassCard>
+      )}
+      {/* ── Certificate Detail Modal ── */}
+      {selectedCert && createPortal(
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm transition-all" onClick={() => setSelectedCert(null)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row overflow-hidden border border-white relative" style={{ animation: 'modalIn .25s ease-out' }} onClick={e => e.stopPropagation()}>
+            {/* Context & Info (Left Panel) */}
+            <div className="w-full md:w-1/3 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)' }}>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-white/5 rounded-full blur-xl" />
+              <button onClick={() => setSelectedCert(null)} className="absolute top-4 right-4 p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full md:hidden">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+              <div className="relative z-10">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white mb-6 ring-2 ring-white/20">
+                  <span className="material-symbols-outlined text-[32px]">workspace_premium</span>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2 leading-snug">{selectedCert.title}</h3>
+                <p className="text-sm font-semibold text-blue-200 mb-8">{selectedCert.organisation}</p>
+
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-[11px] font-bold text-blue-300/80 uppercase tracking-wider mb-1.5 flex items-center gap-1.5"><span className="material-symbols-outlined text-[14px]">military_tech</span> Kết quả / Điểm số</p>
+                    <p className="text-2xl font-black text-white">{selectedCert.score || 'Ghi nhận'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold text-blue-300/80 uppercase tracking-wider mb-1.5 flex items-center gap-1.5"><span className="material-symbols-outlined text-[14px]">calendar_month</span> Thời gian</p>
+                    <p className="text-base font-bold text-white bg-white/15 inline-block px-3 py-1.5 rounded-lg">{selectedCert.date || 'Chưa xác định'}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="relative z-10 mt-auto pt-6 space-y-3">
+                <button onClick={() => { delCert(selectedCert.id); setSelectedCert(null); }}
+                  className="hidden md:flex py-3 w-full items-center justify-center gap-2 bg-white/10 border border-red-300/40 rounded-xl font-bold text-red-200 hover:bg-red-500/30 hover:text-white transition-colors">
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                  Xóa chứng chỉ
+                </button>
+                <button onClick={() => setSelectedCert(null)} className="hidden md:flex py-3 w-full items-center justify-center gap-2 border-2 border-white/30 rounded-xl font-bold text-white hover:bg-white/10 transition-colors">
+                  Đóng lại
+                </button>
+              </div>
+            </div>
+
+            {/* Document Preview (Right Panel) */}
+            <div className="w-full md:w-2/3 bg-slate-100/50 flex flex-col relative h-[400px] md:h-auto">
+              <div className="flex-1 p-4 sm:p-6 overflow-hidden">
+                {selectedCert.file_url ? (
+                  <div className="w-full h-full bg-slate-200/50 rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative group">
+                    {selectedCert.file_url.toLowerCase().endsWith('.pdf') ? (
+                      <iframe src={selectedCert.file_url} className="w-full h-full" title="PDF Preview" />
+                    ) : (
+                      <img src={selectedCert.file_url} alt="Content" className="w-full h-full object-contain" />
+                    )}
+
+                    {/* Action overlay */}
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                      <a href={selectedCert.file_url} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-4 py-2 text-sm font-bold rounded-xl shadow-lg hover:bg-blue-700 transition flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[18px]">open_in_new</span> Phóng to
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full h-full rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50">
+                    <span className="material-symbols-outlined text-[64px] mb-4 opacity-30">description</span>
+                    <p className="font-semibold text-slate-500">Người dùng chưa tải lên file đính kèm</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </>
   );

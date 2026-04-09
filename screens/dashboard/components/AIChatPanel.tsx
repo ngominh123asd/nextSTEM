@@ -12,7 +12,7 @@ interface NavigationAction { tabId: TabId; subTab?: string; label: string; confi
 const FEATURE_MAP: { id: string; keywords: string[]; tabId: TabId; subTab?: string; label: string; description: string }[] = [
   { id: 'roadmap', keywords: ['lộ trình', 'roadmap', 'learning path', 'lên roadmap'], tabId: 'roadmap', label: 'Lộ Trình', description: 'Xem lộ trình học tập cá nhân hóa' },
   { id: 'portfolio', keywords: ['hồ sơ', 'portfolio', 'năng lực', 'profile'], tabId: 'portfolio', label: 'Hồ Sơ Năng Lực', description: 'Quản lý hồ sơ và thành tích' },
-  { id: 'portfolio-skills', keywords: ['ma trận kỹ năng', 'skills', 'skill matrix', 'kỹ năng'], tabId: 'portfolio', subTab: 'skills', label: 'Ma trận Kỹ năng', description: 'Xem đánh giá kỹ năng' },
+
   { id: 'portfolio-certs', keywords: ['chứng chỉ', 'certificates', 'cert'], tabId: 'portfolio', subTab: 'certs', label: 'Chứng chỉ', description: 'Xem danh sách chứng chỉ' },
   { id: 'portfolio-timeline', keywords: ['timeline', 'dòng thời gian', 'hoạt động gần'], tabId: 'portfolio', subTab: 'timeline', label: 'Timeline', description: 'Xem timeline hoạt động' },
   { id: 'tools', keywords: ['công cụ', 'bộ công cụ', 'tools'], tabId: 'tools', label: 'Bộ Công Cụ', description: '7 công cụ AI hỗ trợ du học' },
@@ -65,7 +65,6 @@ Ví dụ nếu bạn đưa người dùng tới học bổng, bạn PHẢI in ra
 Danh sách id hợp lệ duy nhất:
 - roadmap (Lộ Trình)
 - portfolio (Hồ Sơ Năng Lực tổng)
-- portfolio-skills (Ma trận Kỹ năng)
 - resources (Tài Nguyên)
 - resources-scholarships (Danh sách Học bổng)
 - resources-universities (Danh sách Trường Đại học)
@@ -81,7 +80,7 @@ QUY TẮC:
 1. Trả lời ngắn gọn, thân thiện, bằng tiếng Việt
 2. Khi người dùng hỏi về thông tin cá nhân, hãy trả lời dựa trên thông tin có sẵn ở trên
 3. KHI NGƯỜI DÙNG MỚI HỎI NÊN BẮT ĐẦU TỪ ĐÂU: TUYỆT ĐỐI KHÔNG KHUYÊN HỌ Ở LẠI DASHBOARD. Hãy định hướng rõ ràng theo lộ trình sau:
-   - Bước 1: Vào "Hồ Sơ Năng Lực" (Mã mở: [NAV:portfolio]) để lưu trữ thành tích và cập nhật các kỹ năng nền tảng.
+   - Bước 1: Vào "Hồ Sơ Năng Lực" (Mã mở: [NAV:portfolio]) để lưu trữ thành tích và hoạt động cá nhân.
    - Bước 2: Xem danh sách học bổng, các trường đại học hoặc tìm hiểu cẩm nang du học ở phần "Tài Nguyên" (Mã mở: [NAV:resources]).
    - Bước 3: Vào "AI Advisor" (Mã mở: [NAV:ai-advisor]) để đặt câu hỏi tư vấn chuyên sâu về ngành nghề.
 4. NẾU KHÔNG CÓ THẺ [NAV:id], HỆ THỐNG SẼ BỊ LIỆT. ĐỪNG QUÊN NÓ!
@@ -98,7 +97,7 @@ interface Props {
 
 export default function AIChatPanel({ onClose, userName, userData, onNavigate }: Props) {
   const [messages, setMessages] = useState<ChatMsg[]>([
-    { role: 'ai', text: `Xin chào ${userName?.split(' ').pop()}! 👋\n\nMình là **AI Study Coach** của nextSTEM. Mình có thể giúp bạn:\n\n🧭 **Điều hướng** — "Mở lộ trình" hoặc "Vào Ma trận kỹ năng"\n📊 **Tra cứu** — "Timeline gần nhất" hoặc "Kỹ năng của tôi"\n💡 **Tư vấn** — Hỏi bất kỳ điều gì về du học, học tập\n\nBạn muốn bắt đầu từ đâu?`, time: 'Vừa xong' },
+    { role: 'ai', text: `Xin chào ${userName?.split(' ').pop()}! 👋\n\nMình là **AI Study Coach** của nextSTEM. Mình có thể giúp bạn:\n\n🧭 **Điều hướng** — "Mở lộ trình" hoặc "Vào Hồ sơ năng lực"\n📊 **Tra cứu** — "Timeline gần nhất" hoặc "Dự án của tôi"\n💡 **Tư vấn** — Hỏi bất kỳ điều gì về du học, học tập\n\nBạn muốn bắt đầu từ đâu?`, time: 'Vừa xong' },
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -111,7 +110,7 @@ export default function AIChatPanel({ onClose, userName, userData, onNavigate }:
 
   const quickActions = [
     { label: 'Mở Lộ trình', icon: 'map' },
-    { label: 'Xem kỹ năng', icon: 'psychology' },
+    { label: 'Hồ sơ năng lực', icon: 'account_box' },
     { label: 'Soạn văn bản', icon: 'edit_document' },
     { label: 'Tư vấn du học', icon: 'school' },
   ];
@@ -224,7 +223,7 @@ export default function AIChatPanel({ onClose, userName, userData, onNavigate }:
             <p className="font-bold text-sm tracking-tight">AI Study Coach</p>
             <p className="text-[11px] text-white/70 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400/50" />
-              Gemini AI · Sẵn sàng 24/7
+              Sẵn sàng 24/7
             </p>
           </div>
         </div>
@@ -339,7 +338,7 @@ export default function AIChatPanel({ onClose, userName, userData, onNavigate }:
             <span className="material-symbols-outlined text-lg">arrow_upward</span>
           </button>
         </div>
-        <p className="text-[10px] text-slate-400 text-center mt-2">Powered by Gemini AI · Có thể đưa ra thông tin không chính xác</p>
+
       </div>
     </div>
   );

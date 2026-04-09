@@ -39,9 +39,15 @@ async function request<T>(
 
   if (!res.ok) {
     if (res.status === 401) {
-      setToken(null);
-      window.location.href = '/login';
-      throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+      // Only redirect if they actually had a token (expired/invalid).
+      // If no token (Guest), just throw so components can degrade gracefully.
+      if (accessToken) {
+        setToken(null);
+        window.location.href = '/';
+        throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+      } else {
+        throw new Error('Bạn cần đăng nhập để thực hiện tác vụ này.');
+      }
     }
     const body = await res.json().catch(() => ({}));
     const message = body.detail || `Request failed (${res.status})`;
@@ -1032,6 +1038,7 @@ export interface STEMIndicator {
   name: string;
   description: string;
   weight: number;
+  level_descriptors?: Record<string, string>;
 }
 
 export interface STEMCompetency {
@@ -1042,6 +1049,8 @@ export interface STEMCompetency {
   weight: number;
   order_index: number;
   indicators: STEMIndicator[];
+  icon?: string;
+  color?: string;
 }
 
 export interface CompetencyScore {
@@ -1061,9 +1070,10 @@ export interface CompetencyScore {
 export interface RadarDataPoint {
   competency_code: string;
   competency_name: string;
-  avg_score: number;
+  score: number;
   weight: number;
   scored_count: number;
+  indicators?: { indicator_id: string; code: string; score: number }[];
 }
 
 export interface CompetencyRadarResponse {
@@ -1113,6 +1123,7 @@ export async function apiUpdateCompetencyScore(data: {
     body: JSON.stringify(data),
   });
 }
+
 
 /** Batch update multiple competency scores. */
 export async function apiBatchCompetencyScores(scores: Array<{
@@ -1244,6 +1255,7 @@ export interface CertItem {
   score: string | null;
   date: string | null;
   organisation: string | null;
+  file_url: string | null;
 }
 
 export interface ActivityItem {
@@ -1277,11 +1289,27 @@ export async function apiListCertificates(): Promise<CertItem[]> {
 }
 
 export async function apiCreateCertificate(data: {
-  title: string; score?: string | null; date?: string | null; organisation?: string | null;
+  title: string; score?: string | null; date?: string | null; organisation?: string | null; file_url?: string | null;
 }): Promise<CertItem> {
   return request<CertItem>('/portfolio/certificates', {
     method: 'POST', body: JSON.stringify(data),
   });
+}
+
+export async function apiUploadCertFile(file: File): Promise<{ file_url: string; file_name: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/portfolio/certificates/upload`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Upload failed');
+  }
+  return res.json();
 }
 
 export async function apiDeleteCertificate(id: string): Promise<void> {
@@ -1465,3 +1493,5 @@ export async function apiToggleRoadmapTask(taskId: string, done: boolean): Promi
     body: JSON.stringify({ done }),
   });
 }
+
+// Trigger Vite refresh

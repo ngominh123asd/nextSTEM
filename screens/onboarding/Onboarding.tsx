@@ -5,6 +5,8 @@ import { TOTAL_STEPS, stepMeta } from './constants';
 import StepGoals from './StepGoals';
 import StepInfo from './StepInfo';
 import StepInterests from './StepInterests';
+import StepCerts from './StepCerts';
+import StepProjects from './StepProjects';
 import './Onboarding.css';
 
 export default function Onboarding({ onComplete, onClose, initialData }: OnboardingProps) {
@@ -17,6 +19,8 @@ export default function Onboarding({ onComplete, onClose, initialData }: Onboard
     school: initialData?.school ?? '',
     subjects: initialData?.subjects ?? '',
     interests: initialData?.interests ?? [],
+    certs: initialData?.certs ?? [],
+    projects: initialData?.projects ?? [],
   });
   const [dir, setDir] = useState<'next' | 'prev'>('next');
 
@@ -36,7 +40,12 @@ export default function Onboarding({ onComplete, onClose, initialData }: Onboard
         : [...(d[key] as string[]), val],
     }));
 
-  const canNext = step === 1 ? data.goals.length > 0 : step === 2 ? data.grade.length > 0 : data.interests.length > 0;
+  // Steps 1-3 are required, steps 4-5 are optional (always allow next)
+  const canNext = step === 1 ? data.goals.length > 0
+    : step === 2 ? data.grade.length > 0
+    : step === 3 ? data.interests.length > 0
+    : true; // Steps 4 & 5 are always skippable
+
   const meta = stepMeta[step - 1];
 
   return (
@@ -47,7 +56,7 @@ export default function Onboarding({ onComplete, onClose, initialData }: Onboard
         <div className="ob-left-content">
           <img src="/images/logo_header.png" alt="nextSTEM" className="ob-logo" />
           <h1 className="ob-brand-title">Xây dựng hồ sơ<br/>năng lực STEM</h1>
-          <p className="ob-brand-desc">Chỉ cần 3 bước đơn giản để bắt đầu hành trình của bạn</p>
+          <p className="ob-brand-desc">5 bước đơn giản để bắt đầu hành trình của bạn</p>
 
           {/* Visual steps */}
           <div className="ob-steps-visual">
@@ -114,6 +123,8 @@ export default function Onboarding({ onComplete, onClose, initialData }: Onboard
             {step === 1 && <StepGoals data={data} toggle={id => toggle('goals', id)} />}
             {step === 2 && <StepInfo data={data} setData={setData} />}
             {step === 3 && <StepInterests data={data} toggle={tag => toggle('interests', tag)} />}
+            {step === 4 && <StepCerts data={data} setData={setData} />}
+            {step === 5 && <StepProjects data={data} setData={setData} />}
           </div>
 
           {/* Footer nav */}
@@ -124,20 +135,28 @@ export default function Onboarding({ onComplete, onClose, initialData }: Onboard
                 Quay lại
               </button>
             </div>
-            <div className={!canNext ? 'ob-next-disabled' : ''}>
-              <GlassSurface
-                width="auto"
-                height={42}
-                borderRadius={14}
-                style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)', cursor: canNext ? 'pointer' : 'default' }}
-                className="hover:opacity-90 transition-opacity shadow-md"
-                onClick={canNext ? next : undefined}
-              >
-                <span className="px-5 text-sm font-semibold text-white flex items-center gap-1.5">
-                  {step === TOTAL_STEPS ? 'Hoàn thành' : 'Tiếp theo'}
-                  <span className="material-symbols-outlined text-base">{step === TOTAL_STEPS ? 'check' : 'chevron_right'}</span>
-                </span>
-              </GlassSurface>
+            <div className="ob-nav-right">
+              {(step === 4 || step === 5) && (
+                <button className="ob-btn-skip" onClick={next}>
+                  Bỏ qua
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>skip_next</span>
+                </button>
+              )}
+              <div className={!canNext ? 'ob-next-disabled' : ''}>
+                <GlassSurface
+                  width="auto"
+                  height={42}
+                  borderRadius={14}
+                  style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)', cursor: canNext ? 'pointer' : 'default' }}
+                  className="hover:opacity-90 transition-opacity shadow-md"
+                  onClick={canNext ? next : undefined}
+                >
+                  <span className="px-5 text-sm font-semibold text-white flex items-center gap-1.5">
+                    {step === TOTAL_STEPS ? 'Hoàn thành' : 'Tiếp theo'}
+                    <span className="material-symbols-outlined text-base">{step === TOTAL_STEPS ? 'check' : 'chevron_right'}</span>
+                  </span>
+                </GlassSurface>
+              </div>
             </div>
           </div>
         </div>

@@ -83,7 +83,7 @@ export default function App() {
   const openAuth = () => { setAuthError(null); setScreen('auth'); };
   const openAbout = () => setScreen('about');
 
-  const handleOnboardingComplete = async (data: UserData) => {
+  const handleOnboardingComplete = async (data: any) => {
     try {
       if (getToken()) {
         const updated = await apiOnboarding({
@@ -95,6 +95,43 @@ export default function App() {
           interests: data.interests,
         });
         setUserData(apiUserToLocal(updated));
+
+        // Sync certificates & projects to Portfolio API
+        const { apiCreateCertificate, apiCreateProject, apiUploadCertFile } = await import('./lib/api');
+
+        // Upload cert files and create cert records
+        for (const cert of (data.certs || [])) {
+          let fileUrl: string | null = null;
+          // If there's a file, upload it first
+          if (cert.fileName && cert._file) {
+            try {
+              const uploaded = await apiUploadCertFile(cert._file);
+              fileUrl = uploaded.file_url;
+            } catch (e) { console.warn('Cert file upload failed:', e); }
+          }
+          try {
+            await apiCreateCertificate({
+              title: cert.title,
+              score: cert.score || null,
+              date: cert.date || null,
+              organisation: cert.organisation || null,
+              file_url: fileUrl,
+            });
+          } catch (e) { console.warn('Create cert failed:', e); }
+        }
+
+        // Create project records
+        for (const proj of (data.projects || [])) {
+          try {
+            await apiCreateProject({
+              title: proj.title,
+              description: proj.description || null,
+              category: proj.category || null,
+              status: proj.status,
+              progress: proj.progress,
+            });
+          } catch (e) { console.warn('Create project failed:', e); }
+        }
       } else {
         setUserData(data);
       }

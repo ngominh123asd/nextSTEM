@@ -278,6 +278,162 @@
 .ob-interest-icon .material-symbols-outlined { font-size: 18px; color: #94a3b8; transition: color 0.2s; }
 .ob-interest-btn:hover .ob-interest-icon .material-symbols-outlined { color: #1152d4; }
 
+/* ── Certificates & Projects step ── */
+.ob-certs-container, .ob-projects-container { display: flex; flex-direction: column; gap: 16px; }
+.ob-cert-list, .ob-proj-list { display: flex; flex-direction: column; gap: 10px; }
+.ob-cert-card, .ob-proj-card {
+  position: relative; display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: 16px;
+  background: rgba(255,255,255,0.6); backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255,255,255,0.8);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  transition: all 0.2s;
+}
+.ob-cert-card:hover, .ob-proj-card:hover {
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 4px 16px rgba(17,82,212,0.06);
+}
+.ob-proj-card { flex-direction: column; align-items: stretch; }
+.ob-proj-card-header { display: flex; align-items: center; gap: 12px; }
+.ob-cert-card-icon, .ob-proj-card-icon {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow: 0 3px 10px rgba(245,158,11,0.25);
+}
+.ob-proj-card-icon {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  box-shadow: 0 3px 10px rgba(59,130,246,0.25);
+}
+.ob-cert-card-icon .material-symbols-outlined,
+.ob-proj-card-icon .material-symbols-outlined { color: #fff; font-size: 20px; }
+.ob-cert-card-info, .ob-proj-card-info { flex: 1; min-width: 0; }
+.ob-cert-card-title, .ob-proj-card-title { font-size: 14px; font-weight: 700; color: #1e293b; }
+.ob-cert-card-meta, .ob-proj-card-meta { font-size: 12px; color: #64748b; margin-top: 2px; }
+.ob-cert-card-file {
+  display: flex; align-items: center; gap: 4px; margin-top: 4px;
+  font-size: 11px; color: #1152d4; font-weight: 600;
+}
+.ob-proj-card-desc {
+  font-size: 12px; color: #64748b; line-height: 1.5; margin-top: 6px;
+  padding: 8px 10px; background: rgba(248,250,252,0.6); border-radius: 10px;
+}
+.ob-cert-remove {
+  position: absolute; top: 10px; right: 10px;
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.06);
+  color: #94a3b8; cursor: pointer; transition: all 0.15s;
+  opacity: 0;
+}
+.ob-cert-card:hover .ob-cert-remove,
+.ob-proj-card:hover .ob-cert-remove { opacity: 1; }
+.ob-cert-remove:hover { color: #ef4444; background: #fef2f2; border-color: #fecaca; }
+.ob-proj-progress-bar {
+  height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin-top: 8px;
+}
+.ob-proj-progress-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  transition: width 0.3s ease;
+}
+.ob-proj-progress-label { font-size: 11px; font-weight: 700; color: #1152d4; margin-top: 4px; }
+
+/* Form shared */
+.ob-cert-form {
+  padding: 20px; border-radius: 18px;
+  background: rgba(255,255,255,0.5); backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255,255,255,0.8);
+  box-shadow: 0 4px 20px rgba(17,82,212,0.06);
+}
+.ob-cert-form-grid { display: flex; flex-direction: column; gap: 16px; }
+.ob-cert-form-row { display: flex; gap: 12px; }
+.ob-cert-form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+.ob-cert-btn-cancel {
+  padding: 8px 18px; border-radius: 12px; font-size: 13px; font-weight: 600;
+  background: #fff; border: 1.5px solid #e2e8f0; color: #64748b;
+  cursor: pointer; transition: all 0.15s;
+}
+.ob-cert-btn-cancel:hover { border-color: #94a3b8; color: #334155; }
+.ob-cert-btn-add {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 20px; border-radius: 12px; font-size: 13px; font-weight: 700;
+  background: linear-gradient(135deg, #1152d4, #2E6AE6); color: #fff;
+  border: none; cursor: pointer; transition: opacity 0.15s;
+  box-shadow: 0 4px 12px rgba(17,82,212,0.25);
+}
+.ob-cert-btn-add:disabled { opacity: 0.4; cursor: default; }
+.ob-cert-btn-add:not(:disabled):hover { opacity: 0.9; }
+.ob-cert-add-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 16px; border-radius: 16px; font-size: 14px; font-weight: 600;
+  background: rgba(255,255,255,0.45); backdrop-filter: blur(12px);
+  border: 2px dashed rgba(17,82,212,0.2); color: #1152d4;
+  cursor: pointer; transition: all 0.2s;
+}
+.ob-cert-add-btn:hover {
+  background: rgba(239,246,255,0.7); border-color: rgba(17,82,212,0.4);
+  box-shadow: 0 4px 16px rgba(17,82,212,0.08);
+}
+.ob-cert-skip-hint {
+  display: flex; align-items: center; gap: 6px; justify-content: center;
+  font-size: 12px; color: #94a3b8; font-weight: 500; margin-top: 8px;
+}
+
+/* Upload zone */
+.ob-cert-upload-zone {
+  padding: 16px; border-radius: 14px; cursor: pointer;
+  border: 2px dashed rgba(17,82,212,0.15);
+  background: rgba(248,250,252,0.5); transition: all 0.2s;
+}
+.ob-cert-upload-zone:hover {
+  border-color: rgba(17,82,212,0.35); background: rgba(239,246,255,0.5);
+}
+.ob-cert-upload-placeholder {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  font-size: 13px; color: #94a3b8; font-weight: 500;
+}
+.ob-cert-upload-file {
+  display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; font-weight: 600;
+}
+.ob-cert-upload-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ob-cert-upload-clear {
+  width: 24px; height: 24px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  background: #f1f5f9; border: 1px solid #e2e8f0; color: #94a3b8;
+  cursor: pointer; transition: all 0.15s;
+}
+.ob-cert-upload-clear:hover { color: #ef4444; background: #fef2f2; }
+
+/* Select styling */
+.ob-select { appearance: none; cursor: pointer; }
+
+/* Progress slider */
+.ob-proj-slider {
+  width: 100%; height: 6px; border-radius: 3px;
+  appearance: none; background: #e2e8f0; outline: none;
+  margin-top: 6px;
+}
+.ob-proj-slider::-webkit-slider-thumb {
+  appearance: none; width: 18px; height: 18px; border-radius: 50%;
+  background: linear-gradient(135deg, #1152d4, #3b82f6);
+  box-shadow: 0 2px 8px rgba(17,82,212,0.3); cursor: pointer;
+}
+.ob-proj-slider-labels {
+  display: flex; justify-content: space-between; margin-top: 4px;
+  font-size: 10px; color: #94a3b8; font-weight: 600;
+}
+
+/* Skip button */
+.ob-btn-skip {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 16px; border-radius: 12px; font-size: 13px; font-weight: 600;
+  background: transparent; border: 1.5px solid #cbd5e1; color: #64748b;
+  cursor: pointer; transition: all 0.15s;
+}
+.ob-btn-skip:hover { border-color: #94a3b8; color: #334155; }
+.ob-nav-right { display: flex; align-items: center; gap: 10px; }
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .ob-left { display: none; }
@@ -287,9 +443,11 @@
   .ob-heading { font-size: 22px; }
   .ob-goals { gap: 10px; }
   .ob-goal-card { padding: 16px; }
+  .ob-cert-form-row { flex-direction: column; }
 }
 @media (max-width: 480px) {
   .ob-goals { grid-template-columns: 1fr; }
   .ob-interests { grid-template-columns: 1fr; }
   .ob-grade-grid { grid-template-columns: repeat(2, 1fr); }
+  .ob-cert-form-row { flex-direction: column; }
 }

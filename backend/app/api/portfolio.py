@@ -1,8 +1,11 @@
 """Portfolio endpoints: projects, certificates, activities."""
 
 import uuid
+import os
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,6 +22,10 @@ from app.schemas.portfolio import (
 from app.services import portfolio_service
 
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
+
+UPLOAD_DIR = Path(__file__).resolve().parent.parent.parent / "uploads" / "certificates"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 
 # ── Projects ─────────────────────────────────────────────────
@@ -68,6 +75,45 @@ async def create_cert(
     db: AsyncSession = Depends(get_db),
 ):
     return await portfolio_service.create_certificate(db, user.id, **body.model_dump())
+
+
+@router.post("/certificates/upload")
+async def upload_cert_file(
+    file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+):
+    """Upload a certificate file (PDF or image, max 5MB)."""
+    if not file.filename:
+        raise HTTPException(400, "No file provided")
+
+    # Validate file type
+    allowed = {".pdf", ".png", ".jpg", ".jpeg", ".webp"}
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed:
+        raise HTTPException(400, f"File type not allowed. Allowed: {', '.join(allowed)}")
+
+    # Read and validate size
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(400, "File too large. Maximum 5MB.")
+
+    # Save with unique name
+    unique_name = f"{uuid.uuid4()}{ext}"
+    file_path = UPLOAD_DIR / unique_name
+    file_path.write_bytes(content)
+
+    file_url = f"/api/v1/portfolio/certificates/files/{unique_name}"
+    # Return absolute URL so the frontend can use it directly
+    return {"file_url": f"http://localhost:8000{file_url}", "file_name": file.filename}
+
+
+@router.get("/certificates/files/{filename}")
+async def download_cert_file(filename: str):
+    """Download/serve a certificate file."""
+    file_path = UPLOAD_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(404, "File not found")
+    return FileResponse(file_path)
 
 
 @router.delete("/certificates/{cert_id}", status_code=204)
