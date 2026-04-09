@@ -47,6 +47,24 @@ async def create_certificate(db: AsyncSession, user_id: uuid.UUID, **kwargs) -> 
 
 async def list_activities(db: AsyncSession, user_id: uuid.UUID) -> list[Activity]:
     result = await db.execute(
-        select(Activity).where(Activity.user_id == user_id).order_by(Activity.created_at.desc()).limit(20)
+        select(Activity).where(Activity.user_id == user_id).order_by(Activity.created_at.desc()).limit(50)
     )
     return list(result.scalars().all())
+
+
+async def create_activity(db: AsyncSession, user_id: uuid.UUID, **kwargs) -> Activity:
+    act = Activity(user_id=user_id, **kwargs)
+    db.add(act)
+    await db.flush()
+    return act
+
+
+async def delete_activity(db: AsyncSession, activity_id: uuid.UUID, user_id: uuid.UUID) -> bool:
+    result = await db.execute(
+        select(Activity).where(Activity.id == activity_id, Activity.user_id == user_id)
+    )
+    act = result.scalar_one_or_none()
+    if act is None:
+        return False
+    await db.delete(act)
+    return True

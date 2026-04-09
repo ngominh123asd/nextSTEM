@@ -878,3 +878,244 @@ export async function apiGetDTSActivities(limit?: number): Promise<Array<{
   const qs = limit ? `?limit=${limit}` : '';
   return request(`/dts/activities${qs}`);
 }
+
+/* ── Portfolio API ── */
+
+export interface ProjectItem {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string | null;
+  status: string;
+  progress: number;
+  date_label: string | null;
+  created_at: string;
+}
+
+export interface CertItem {
+  id: string;
+  title: string;
+  score: string | null;
+  date: string | null;
+  organisation: string | null;
+}
+
+export interface ActivityItem {
+  id: string;
+  event: string;
+  icon: string | null;
+  color: string | null;
+  date_label: string | null;
+  created_at: string;
+}
+
+export async function apiListProjects(): Promise<ProjectItem[]> {
+  return request<ProjectItem[]>('/portfolio/projects');
+}
+
+export async function apiCreateProject(data: {
+  title: string; description?: string | null; category?: string | null;
+  status?: string; progress?: number; date_label?: string | null;
+}): Promise<ProjectItem> {
+  return request<ProjectItem>('/portfolio/projects', {
+    method: 'POST', body: JSON.stringify(data),
+  });
+}
+
+export async function apiDeleteProject(id: string): Promise<void> {
+  return request<void>(`/portfolio/projects/${id}`, { method: 'DELETE' });
+}
+
+export async function apiListCertificates(): Promise<CertItem[]> {
+  return request<CertItem[]>('/portfolio/certificates');
+}
+
+export async function apiCreateCertificate(data: {
+  title: string; score?: string | null; date?: string | null; organisation?: string | null;
+}): Promise<CertItem> {
+  return request<CertItem>('/portfolio/certificates', {
+    method: 'POST', body: JSON.stringify(data),
+  });
+}
+
+export async function apiDeleteCertificate(id: string): Promise<void> {
+  return request<void>(`/portfolio/certificates/${id}`, { method: 'DELETE' });
+}
+
+export async function apiListActivities(): Promise<ActivityItem[]> {
+  return request<ActivityItem[]>('/portfolio/activities');
+}
+
+export async function apiCreateActivity(data: {
+  event: string; icon?: string | null; color?: string | null; date_label?: string | null;
+}): Promise<ActivityItem> {
+  return request<ActivityItem>('/portfolio/activities', {
+    method: 'POST', body: JSON.stringify(data),
+  });
+}
+
+export async function apiDeleteActivity(id: string): Promise<void> {
+  return request<void>(`/portfolio/activities/${id}`, { method: 'DELETE' });
+}
+
+/* ── Phase 2: Gemini DTS-Aware Streaming ── */
+
+/**
+ * Generic SSE stream helper for Gemini endpoints.
+ * Accumulates delta text and returns the full result via onDone.
+ */
+function streamGeminiSSE(
+  path: string,
+  body: Record<string, any>,
+  onDelta: (delta: string) => void,
+  onDone: (fullText: string) => void,
+  onError: (err: Error) => void,
+): { abort: () => void } {
+  const controller = new AbortController();
+  const url = `${API_BASE}${path}`;
+  let fullText = '';
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+    body: JSON.stringify(body),
+    signal: controller.signal,
+  })
+    .then(async (res) => {
+      if (!res.ok) {
+        const b = await res.json().catch(() => ({}));
+        throw new Error(b.detail || `Request failed (${res.status})`);
+      }
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error('No response body');
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let currentEvent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) { currentEvent = ''; continue; }
+          if (trimmed.startsWith('event: ')) {
+            currentEvent = trimmed.slice(7).trim();
+          } else if (trimmed.startsWith('data: ')) {
+            const raw = trimmed.slice(6);
+            if (raw === '[DONE]') { onDone(fullText); return; }
+            try {
+              const parsed = JSON.parse(raw);
+              const evt = currentEvent || parsed.event || 'unknown';
+              if (evt === 'done') { onDone(fullText); return; }
+              if (evt === 'error') {
+                onError(new Error(parsed.error || 'Stream error'));
+                return;
+              }
+              const delta = parsed.delta || parsed.text || '';
+              if (delta) {
+                fullText += delta;
+                onDelta(delta);
+              }
+            } catch { /* non-JSON line */ }
+          }
+        }
+      }
+      onDone(fullText);
+    })
+    .catch((err) => {
+      if (err.name !== 'AbortError') onError(err);
+    });
+
+  return { abort: () => controller.abort() };
+}
+
+/** Stream personalized learning recommendations based on DTS profile. */
+export function apiStreamRecommendations(
+  onDelta: (delta: string) => void,
+  onDone: (fullText: string) => void,
+  onError: (err: Error) => void,
+): { abort: () => void } {
+  return streamGeminiSSE('/gemini/recommend', {}, onDelta, onDone, onError);
+}
+
+/** Stream an AI-generated personalized roadmap. */
+export function apiStreamAIRoadmap(
+  onDelta: (delta: string) => void,
+  onDone: (fullText: string) => void,
+  onError: (err: Error) => void,
+): { abort: () => void } {
+  return streamGeminiSSE('/gemini/roadmap', {}, onDelta, onDone, onError);
+}
+
+/** Stream DTS-context-enriched AI chat response. */
+export function apiStreamDTSChat(
+  message: string,
+  mode: string,
+  onDelta: (delta: string) => void,
+  onDone: (fullText: string) => void,
+  onError: (err: Error) => void,
+): { abort: () => void } {
+  return streamGeminiSSE('/gemini/chat-context', { message, mode }, onDelta, onDone, onError);
+}
+
+/* ── Phase 2: Roadmap API ── */
+
+export interface RoadmapTask {
+  id: string;
+  text: string;
+  done: boolean;
+  order: number;
+}
+
+export interface RoadmapStep {
+  id: string;
+  title: string;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  duration: string | null;
+  order: number;
+  tasks: RoadmapTask[];
+}
+
+export interface RoadmapData {
+  id: string;
+  title: string;
+  created_at: string;
+  steps: RoadmapStep[];
+}
+
+/** Get the user's current roadmap. */
+export async function apiGetRoadmap(): Promise<RoadmapData | null> {
+  return request<RoadmapData | null>('/roadmap');
+}
+
+/** Generate a template roadmap (fallback). */
+export async function apiGenerateRoadmap(): Promise<RoadmapData> {
+  return request<RoadmapData>('/roadmap/generate', { method: 'POST' });
+}
+
+/** Save AI-generated roadmap JSON to the backend. */
+export async function apiSaveAIRoadmap(aiJson: string): Promise<RoadmapData> {
+  return request<RoadmapData>('/roadmap/save-ai', {
+    method: 'POST',
+    body: JSON.stringify({ ai_json: aiJson }),
+  });
+}
+
+/** Toggle a roadmap task's done state. */
+export async function apiToggleRoadmapTask(taskId: string, done: boolean): Promise<RoadmapTask> {
+  return request<RoadmapTask>(`/roadmap/tasks/${taskId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ done }),
+  });
+}

@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import GlassSurface from '../../../components/GlassSurface';
 import MarqueeText from '../../../components/MarqueeText';
 import { UserData, TabId, goalLabels } from '../types';
-import { BlobDecor, GlassCard, GlassHeader, PageTitle, ToolCard } from '../components/SharedUI';
+import { BlobDecor, GlassCard, GlassHeader, PageTitle } from '../components/SharedUI';
 import STEMCompetencyPanel from '../components/STEMCompetencyPanel';
 import { apiGetDTSProfile, type DTSProfile } from '../../../lib/api';
 
 export default function DashboardTab({ userData, onNav }: { userData: UserData; onNav: (t: TabId) => void }) {
   const [dtsProfile, setDtsProfile] = useState<DTSProfile | null>(null);
   const [dtsLoading, setDtsLoading] = useState(true);
+  const [showScoreInfo, setShowScoreInfo] = useState(false);
 
   useEffect(() => {
     apiGetDTSProfile()
@@ -57,49 +58,133 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
     <>
       <PageTitle title={`Xin chào, ${userData.name?.split(' ').pop() || 'bạn'}!`} subtitle="Tổng quan năng lực STEM và hành trình học tập" />
 
-      {/* ── DTS Profile Overview ── */}
-      {!dtsLoading && dtsProfile && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <GlassCard className="!p-4 text-center">
-            <p className="text-2xl font-extrabold text-[#1E3A8A]">{Math.round(dtsProfile.profile_completeness)}%</p>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Hồ sơ DTS</p>
-            <div className="w-full h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all"
-                style={{ width: `${dtsProfile.profile_completeness}%` }} />
+      {/* ── Năng lực STEM — đầu trang ── */}
+      <div className="mb-6">
+        <STEMCompetencyPanel onShowScoreInfo={() => setShowScoreInfo(true)} />
+      </div>
+
+      {/* ── Score Info Modal overlay ── */}
+      {showScoreInfo && (
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowScoreInfo(false)}
+        >
+          <div
+            className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header with gradient */}
+            <div className="bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] px-6 py-5 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/20" />
+                <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/15" />
+              </div>
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <span className="material-symbols-outlined text-white text-lg">psychology</span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-sm">Cách tính Điểm năng lực</h3>
+                    <p className="text-[11px] text-blue-100">Khung STEM — Chương trình GDPT 2018</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowScoreInfo(false)} className="p-1.5 rounded-xl hover:bg-white/20 text-white/70 hover:text-white transition-colors">
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              </div>
             </div>
-          </GlassCard>
-          <GlassCard className="!p-4 text-center">
-            <p className="text-2xl font-extrabold text-[#1E3A8A]">{dtsProfile.overall_score || 0}</p>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Điểm năng lực</p>
-            <p className="text-[10px] font-bold text-blue-500 mt-1.5">
-              {dtsProfile.assessed_indicators}/{dtsProfile.total_indicators} chỉ số
-            </p>
-          </GlassCard>
-          <GlassCard className="!p-4 text-center">
-            <p className="text-2xl font-extrabold text-[#1E3A8A]">{dtsProfile.project_count}</p>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Dự án STEM</p>
-          </GlassCard>
-          <GlassCard className="!p-4 text-center">
-            <p className="text-2xl font-extrabold text-[#1E3A8A]">{dtsProfile.certificate_count}</p>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Chứng chỉ</p>
-          </GlassCard>
+
+            <div className="p-6">
+              {/* How it works — 3 steps */}
+              <div className="flex items-start gap-4 mb-5">
+                {[
+                  { num: '1', text: 'Chọn thành tố năng lực', icon: 'category' },
+                  { num: '2', text: 'Đánh giá 1–5 mức', icon: 'tune' },
+                  { num: '3', text: 'AI phân tích kết quả', icon: 'insights' },
+                ].map((step, i) => (
+                  <div key={i} className="flex-1 text-center">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 border-2 border-blue-200 flex items-center justify-center mx-auto mb-1.5">
+                      <span className="material-symbols-outlined text-blue-600 text-sm">{step.icon}</span>
+                    </div>
+                    <p className="text-[10px] font-semibold text-slate-600 leading-tight">{step.text}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Level scale */}
+              <div className="mb-5 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <p className="text-[10px] font-semibold text-slate-500 mb-2 uppercase tracking-wider">Thang đánh giá</p>
+                <div className="flex gap-0.5 h-5 rounded-lg overflow-hidden">
+                  {[
+                    { label: 'Mức 1', bg: '#dbeafe', fg: '#2563eb', w: '20%' },
+                    { label: 'Mức 2', bg: '#bfdbfe', fg: '#1d4ed8', w: '20%' },
+                    { label: 'Mức 3', bg: '#93c5fd', fg: '#1e40af', w: '20%' },
+                    { label: 'Mức 4', bg: '#60a5fa', fg: '#ffffff', w: '20%' },
+                    { label: 'Mức 5', bg: '#3b82f6', fg: '#ffffff', w: '20%' },
+                  ].map((lv, i) => (
+                    <div key={i} className="flex-1 flex items-center justify-center text-[9px] font-bold"
+                      style={{ background: lv.bg, color: lv.fg }}>
+                      {lv.label}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between mt-1 px-0.5">
+                  <span className="text-[9px] text-slate-400">20 điểm</span>
+                  <span className="text-[9px] text-slate-400">100 điểm</span>
+                </div>
+              </div>
+
+              {/* 5 Components */}
+              <p className="text-[10px] font-semibold text-slate-500 mb-2 uppercase tracking-wider">5 Thành tố × 15 Chỉ số</p>
+              <div className="space-y-1.5">
+                {[
+                  { code: 'TT', name: 'Thu thập thông tin', icon: 'search', desc: 'Xác định vấn đề · Định vị · Thu thập' },
+                  { code: 'XL', name: 'Xử lý & Phân tích', icon: 'analytics', desc: 'Phân loại · So sánh · Đánh giá dữ liệu' },
+                  { code: 'GQ', name: 'Giải quyết vấn đề', icon: 'lightbulb', desc: 'Đề xuất · Lập kế hoạch · Thực hiện' },
+                  { code: 'GT', name: 'Giao tiếp khoa học', icon: 'forum', desc: 'Trình bày · Lập luận · Phản biện' },
+                  { code: 'VD', name: 'Vận dụng thực tiễn', icon: 'build', desc: 'Kết nối · Sáng tạo · Ứng dụng' },
+                ].map((t, i) => (
+                  <div key={t.code} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-blue-50/50 transition-colors border border-transparent hover:border-blue-100">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1152d4] to-[#2E6AE6] flex items-center justify-center flex-shrink-0 shadow-sm"
+                      style={{ opacity: 0.7 + (i * 0.075) }}>
+                      <span className="material-symbols-outlined text-white text-sm">{t.icon}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-[#1E3A8A]">{t.name}</p>
+                      <p className="text-[10px] text-slate-400 leading-snug">{t.desc}</p>
+                    </div>
+                    <span className="text-[9px] font-bold text-blue-400 bg-blue-50 px-1.5 py-0.5 rounded flex-shrink-0">×3</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
+                <span className="material-symbols-outlined text-blue-400 text-sm">calculate</span>
+                <p className="text-[10px] text-slate-400 flex-1">
+                  Điểm tổng = trung bình 15 chỉ số · Tối đa <strong className="text-slate-600">100</strong> điểm
+                </p>
+              </div>
+
+              <button
+                onClick={() => { setShowScoreInfo(false); onNav('portfolio'); }}
+                className="mt-4 w-full py-2.5 bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-base">edit_note</span>
+                Bắt đầu đánh giá ngay
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* ── Quick Tool Suggestions ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <ToolCard icon="psychology" iconGrad="from-violet-500 to-purple-500" title="Đánh giá năng lực" desc="Tự đánh giá 15 chỉ số STEM" onClick={() => onNav('portfolio')} />
-        <ToolCard icon="workspace_premium" iconGrad="from-amber-500 to-orange-500" title="Học bổng" desc="Khám phá các cơ hội học bổng" onClick={() => onNav('tools')} />
-        <ToolCard icon="edit_note" iconGrad="from-blue-500 to-blue-600" title="Viết luận" desc="AI hỗ trợ viết bài luận" onClick={() => onNav('editor')} />
-        <ToolCard icon="account_box" iconGrad="from-emerald-500 to-teal-500" title="Hồ sơ DTS" desc="Cập nhật bản sao số" onClick={() => onNav('portfolio')} />
-      </div>
 
-      {/* ── Mentor hướng dẫn (full-width) ── */}
+      {/* ── Mentor hướng dẫn ── */}
       <GlassCard className="mb-6">
         <BlobDecor className="w-40 h-40 -top-12 -right-12 bg-violet-200/20" />
         <GlassHeader icon="supervisor_account" title="Mentor hướng dẫn" />
         <div className="relative z-10">
-          {/* Top: Mentor info + action */}
           <div className="flex items-center justify-between gap-4 mb-4">
             <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
               <img
@@ -135,7 +220,6 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
               </GlassSurface>
             </div>
           </div>
-          {/* Bottom: 3-col detail cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="flex items-start gap-3 p-3.5 rounded-xl bg-gradient-to-br from-blue-50/40 to-blue-50/20 border border-blue-100/50">
               <div className="w-9 h-9 rounded-lg bg-blue-100/80 flex items-center justify-center flex-shrink-0">
@@ -179,31 +263,25 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
         </div>
       </GlassCard>
 
-      {/* ── Hoạt động & Năng lực STEM ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Activity Feed */}
-        <GlassCard>
-          <GlassHeader icon="history" title="Hoạt động gần đây" extra={<button className="text-xs font-semibold text-blue-600 hover:underline">Xem tất cả</button>} />
-          <div className="space-y-3 relative z-10">
-            {recentActivities.map((a, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60 hover:bg-white/60 transition-all">
-                <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${a.color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                  <span className="material-symbols-outlined text-white text-base">{a.icon}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <MarqueeText>
-                    <p className="text-sm font-semibold text-[#1E3A8A]">{a.text}</p>
-                  </MarqueeText>
-                  <p className="text-xs text-slate-400">{a.time}</p>
-                </div>
+      {/* ── Hoạt động gần đây ── */}
+      <GlassCard>
+        <GlassHeader icon="history" title="Hoạt động gần đây" extra={<button className="text-xs font-semibold text-blue-600 hover:underline">Xem tất cả</button>} />
+        <div className="space-y-3 relative z-10">
+          {recentActivities.map((a, i) => (
+            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60 hover:bg-white/60 transition-all">
+              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${a.color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                <span className="material-symbols-outlined text-white text-base">{a.icon}</span>
               </div>
-            ))}
-          </div>
-        </GlassCard>
-
-        {/* STEM Competency Radar — real data! */}
-        <STEMCompetencyPanel compact />
-      </div>
+              <div className="flex-1 min-w-0">
+                <MarqueeText>
+                  <p className="text-sm font-semibold text-[#1E3A8A]">{a.text}</p>
+                </MarqueeText>
+                <p className="text-xs text-slate-400">{a.time}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </GlassCard>
     </>
   );
 }

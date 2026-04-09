@@ -1,31 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  ResponsiveContainer, Tooltip,
+  ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend,
 } from 'recharts';
 import {
   apiGetCompetencyRadar, apiGetCompetencyAnalysis, apiGetCompetencyFramework,
-  apiUpdateCompetencyScore,
-  type CompetencyRadarResponse, type CompetencyAnalysis, type STEMCompetency,
+  apiUpdateCompetencyScore, apiGetDTSTimeline,
+  type CompetencyRadarResponse, type CompetencyAnalysis, type STEMCompetency, type DTSTimeline,
 } from '../../../lib/api';
 import { GlassCard, GlassHeader, BlobDecor } from './SharedUI';
+
+const COMP_COLORS = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444'];
 
 const levelLabels = ['—', 'Mức 1', 'Mức 2', 'Mức 3', 'Mức 4', 'Mức 5'];
 const levelColors = ['#94a3b8', '#ef4444', '#f97316', '#eab308', '#22c55e', '#6366f1'];
 
 interface Props {
-  compact?: boolean; // compact mode for dashboard, full mode for standalone
+  compact?: boolean;
+  onShowScoreInfo?: () => void;
 }
 
-export default function STEMCompetencyPanel({ compact = false }: Props) {
+export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }: Props) {
   const [radar, setRadar] = useState<CompetencyRadarResponse | null>(null);
   const [analysis, setAnalysis] = useState<CompetencyAnalysis | null>(null);
   const [framework, setFramework] = useState<STEMCompetency[]>([]);
+  const [timeline, setTimeline] = useState<DTSTimeline | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAssessment, setShowAssessment] = useState(false);
   const [assessingComp, setAssessingComp] = useState<STEMCompetency | null>(null);
   const [scores, setScores] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
+  const [popoverComp, setPopoverComp] = useState<string | null>(null);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   useEffect(() => {
@@ -41,14 +46,16 @@ export default function STEMCompetencyPanel({ compact = false }: Props) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [r, a, f] = await Promise.all([
+      const [r, a, f, t] = await Promise.all([
         apiGetCompetencyRadar().catch(() => null),
         apiGetCompetencyAnalysis().catch(() => null),
         apiGetCompetencyFramework().catch(() => []),
+        apiGetDTSTimeline().catch(() => null),
       ]);
       if (r) setRadar(r);
       if (a) setAnalysis(a);
       setFramework(f);
+      if (t) setTimeline(t);
     } catch { /* ignore */ }
     setLoading(false);
   };
@@ -175,6 +182,15 @@ export default function STEMCompetencyPanel({ compact = false }: Props) {
         <GlassHeader icon="trending_up" title="Năng lực STEM"
           extra={
             <div className="flex items-center gap-2">
+              {onShowScoreInfo && (
+                <button
+                  onClick={onShowScoreInfo}
+                  className="p-1 rounded-lg hover:bg-blue-50 transition-colors"
+                  title="Cách tính điểm năng lực"
+                >
+                  <span className="material-symbols-outlined text-slate-400 hover:text-blue-500 text-base transition-colors">info</span>
+                </button>
+              )}
               <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                 (radar?.overall_score || 0) >= 60 ? 'bg-emerald-50/60 text-emerald-600' :
                 (radar?.overall_score || 0) >= 30 ? 'bg-amber-50/60 text-amber-600' :
@@ -190,56 +206,197 @@ export default function STEMCompetencyPanel({ compact = false }: Props) {
             </div>
           }
         />
-        <div className="w-full h-[280px] min-h-[280px] relative z-10">
-          <ResponsiveContainer width="100%" height="100%" minHeight={280} minWidth={1} debounce={50}>
-            <RadarChart data={radarData} outerRadius={isMobile ? "50%" : "70%"}>
-              <PolarGrid stroke="#c7d2fe" strokeWidth={0.5} />
-              <PolarAngleAxis dataKey="subject" tick={{ fontSize: isMobile ? 9 : 11, fill: '#475569', fontWeight: 600 }} />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
-              <Radar name="Năng lực" dataKey="value" stroke="#4f46e5" fill="url(#stemRadarGrad)" strokeWidth={2.5} />
-              <Tooltip
-                contentStyle={{
-                  background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255,255,255,0.6)', borderRadius: '12px', fontSize: 12,
-                }}
-                formatter={(val: number) => [`${val}/100`, 'Điểm']}
-              />
-              <defs>
-                <linearGradient id="stemRadarGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#818cf8" stopOpacity={0.05} />
-                </linearGradient>
-              </defs>
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
+        {/* Radar chart with integrated competency badges */}
+        <div className="relative z-10 mx-auto" style={{ maxWidth: 540 }}>
 
-        {/* Competency chips — click to assess */}
-        {!compact && (
-          <div className="flex flex-wrap gap-2 mt-4 relative z-10">
-            {framework.map(comp => {
+          <div className="relative" style={{ height: isMobile ? 260 : 280, padding: isMobile ? '28px 12px' : '28px 20px' }}>
+            {/* Radar chart */}
+            <div className="w-full h-full">
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} debounce={50}>
+                <RadarChart data={radarData} outerRadius={isMobile ? "65%" : "68%"}>
+                  <PolarGrid stroke="#c7d2fe" strokeWidth={0.5} />
+                  <PolarAngleAxis dataKey="subject" tick={false} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
+                  <Radar name="Năng lực" dataKey="value" stroke="#2563eb" fill="url(#stemRadarGrad)" strokeWidth={2.5} />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)',
+                      border: '1px solid rgba(255,255,255,0.6)', borderRadius: '12px', fontSize: 12,
+                    }}
+                    formatter={(val: number) => [`${val}/100`, 'Điểm']}
+                  />
+                  <defs>
+                    <linearGradient id="stemRadarGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#2563eb" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Competency badges — tightly positioned at pentagon vertices */}
+            {framework.length > 0 && framework.map((comp, i) => {
               const rd = radar?.data.find(d => d.competency_code === comp.code);
+              const score = rd?.score || 0;
+              const isActive = popoverComp === comp.id;
+              // Pentagon vertex positions (top, top-right, bottom-right, bottom-left, top-left)
+              const posStyles: React.CSSProperties[] = [
+                { top: 0, left: '50%', transform: 'translate(-50%, -50%)' },
+                { top: '20%', right: 0, transform: 'translate(30%, 0)' },
+                { bottom: '10%', right: '5%', transform: 'translate(20%, 0)' },
+                { bottom: '10%', left: '5%', transform: 'translate(-20%, 0)' },
+                { top: '20%', left: 0, transform: 'translate(-30%, 0)' },
+              ];
               return (
-                <button key={comp.id} onClick={() => { setAssessingComp(comp); setShowAssessment(true); setScores({}); }}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/50 backdrop-blur-sm border border-white/80 text-slate-600 hover:bg-white/80 hover:text-blue-600 transition-all group">
-                  <span className={`material-symbols-outlined text-sm bg-gradient-to-br ${comp.color || 'from-blue-500 to-blue-600'} bg-clip-text text-transparent`}>
+                <button
+                  key={comp.id}
+                  onClick={() => setPopoverComp(isActive ? null : comp.id)}
+                  className={`absolute z-20 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold transition-all border whitespace-nowrap cursor-pointer ${
+                    isActive
+                      ? 'bg-[#1152d4] text-white border-[#1152d4] shadow-md shadow-blue-500/25 scale-105'
+                      : score > 0
+                        ? 'bg-white/95 border-blue-200 text-[#1E3A8A] hover:border-blue-400 hover:bg-blue-50 shadow-sm hover:scale-105'
+                        : 'bg-white/90 border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 shadow-sm hover:scale-105'
+                  }`}
+                  style={posStyles[i % 5]}
+                >
+                  <span className={`material-symbols-outlined text-[13px] ${isActive ? 'text-white' : score > 0 ? 'text-blue-500' : 'text-slate-400'}`}>
                     {comp.icon || 'star'}
                   </span>
-                  <span className="hidden sm:inline">{comp.name}</span>
-                  <span className="sm:hidden">{comp.code.split('_').map(w => w[0].toUpperCase()).join('')}</span>
-                  <span className={`ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-                    (rd?.score || 0) >= 60 ? 'bg-emerald-100 text-emerald-700' :
-                    (rd?.score || 0) >= 30 ? 'bg-amber-100 text-amber-700' :
-                    'bg-slate-100 text-slate-400'
-                  }`}>
-                    {rd?.score || 0}
-                  </span>
+                  <span className="hidden sm:inline max-w-[90px] truncate">{comp.name}</span>
+                  <span className={`text-[9px] font-bold px-1 rounded ${
+                    isActive ? 'bg-white/20 text-white' :
+                    score >= 60 ? 'bg-emerald-50 text-emerald-600' :
+                    score >= 30 ? 'bg-amber-50 text-amber-600' :
+                    'bg-slate-50 text-slate-400'
+                  }`}>{score}</span>
                 </button>
               );
             })}
           </div>
-        )}
+        </div>
       </GlassCard>
+
+
+      {/* ── Competency Popover (fixed overlay, never clipped) ── */}
+      {popoverComp && (() => {
+        const comp = framework.find(c => c.id === popoverComp);
+        if (!comp) return null;
+        const rd = radar?.data.find(d => d.competency_code === comp.code);
+        const score = rd?.score || 0;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setPopoverComp(null)}>
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
+            <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-xs overflow-hidden" onClick={e => e.stopPropagation()}>
+              <div className="bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] px-5 py-4 relative overflow-hidden">
+                <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-white/10" />
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-white">{comp.icon || 'star'}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-bold text-sm">{comp.name}</p>
+                    <p className="text-blue-100 text-[10px]">{comp.indicators?.length || 3} chỉ số hành vi</p>
+                  </div>
+                  <button onClick={() => setPopoverComp(null)} className="p-1 rounded-lg hover:bg-white/20 text-white/70 hover:text-white transition-colors">
+                    <span className="material-symbols-outlined text-lg">close</span>
+                  </button>
+                </div>
+              </div>
+              <div className="p-5">
+                <div className="flex items-end justify-between mb-2">
+                  <span className="text-xs font-semibold text-slate-500">Điểm hiện tại</span>
+                  <span className={`text-xl font-extrabold ${score >= 60 ? 'text-emerald-600' : score >= 30 ? 'text-amber-600' : 'text-slate-300'}`}>
+                    {score}<span className="text-sm font-bold text-slate-300">/100</span>
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-4">
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] transition-all duration-500" style={{ width: `${score}%` }} />
+                </div>
+                {comp.indicators && comp.indicators.length > 0 && (
+                  <div className="space-y-1.5 mb-4">
+                    {comp.indicators.map((ind: any) => (
+                      <div key={ind.id} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50/80">
+                        <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">{ind.code}</span>
+                        <span className="text-[11px] text-slate-600 flex-1">{ind.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => { setAssessingComp(comp); setShowAssessment(true); setScores({}); setPopoverComp(null); }}
+                  className="w-full py-2.5 bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-sm">edit_note</span>
+                  {score > 0 ? 'Đánh giá lại' : 'Đánh giá ngay'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+
+      {/* Timeline Chart — năng lực theo thời gian */}
+      {!compact && timeline && timeline.points.length >= 2 && (
+        <GlassCard className="mt-6">
+          <BlobDecor className="w-40 h-40 -top-12 -right-12 bg-indigo-200/15" />
+          <GlassHeader
+            icon="show_chart"
+            title="Tiến triển năng lực theo thời gian"
+            extra={
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${
+                timeline.score_change >= 0
+                  ? 'bg-emerald-50/60 text-emerald-600'
+                  : 'bg-red-50/60 text-red-500'
+              }`}>
+                <span className="material-symbols-outlined text-sm">
+                  {timeline.score_change >= 0 ? 'trending_up' : 'trending_down'}
+                </span>
+                {timeline.score_change >= 0 ? '+' : ''}{timeline.score_change.toFixed(1)} điểm
+              </span>
+            }
+          />
+          <div className="w-full h-[240px] relative z-10 mt-3">
+            <ResponsiveContainer width="100%" height="100%" minHeight={240} minWidth={1}>
+              <LineChart data={timeline.points.map(p => ({
+                date: new Date(p.date).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' }),
+                'Tổng điểm': Math.round(p.overall_score),
+                ...Object.fromEntries(
+                  Object.entries(p.competency_scores).map(([k, v]) => [k.replace(/_/g, ' '), Math.round(v)])
+                ),
+              }))} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255,255,255,0.6)', borderRadius: '12px', fontSize: 11,
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                <Line
+                  type="monotone" dataKey="Tổng điểm" stroke="#4f46e5"
+                  strokeWidth={2.5} dot={{ r: 4, fill: '#4f46e5' }} activeDot={{ r: 6 }}
+                />
+                {Object.keys(timeline.points[0]?.competency_scores || {}).map((key, idx) => (
+                  <Line
+                    key={key} type="monotone"
+                    dataKey={key.replace(/_/g, ' ')}
+                    stroke={COMP_COLORS[idx % COMP_COLORS.length]}
+                    strokeWidth={1.5} dot={false} strokeDasharray="4 2"
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="text-[10px] text-slate-400 text-center mt-2 relative z-10">
+            Mỗi điểm = 1 lần tạo ảnh chụp DTS · Bấm "Lưu ảnh chụp" để ghi nhận tiến trình hôm nay
+          </p>
+        </GlassCard>
+      )}
 
       {/* Analysis Panel */}
       {!compact && analysis && analysis.profile_status !== 'not_started' && (
