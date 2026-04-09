@@ -629,9 +629,9 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
       {/* ── Certificate Detail Modal ── */}
       {selectedCert && createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm transition-all" onClick={() => setSelectedCert(null)}>
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row overflow-hidden border border-white relative" style={{ animation: 'modalIn .25s ease-out' }} onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col md:flex-row overflow-hidden border border-white relative" style={{ animation: 'modalIn .25s ease-out' }} onClick={e => e.stopPropagation()}>
             {/* Context & Info (Left Panel) */}
-            <div className="w-full md:w-1/3 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)' }}>
+            <div className="w-full md:w-[300px] md:flex-shrink-0 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)' }}>
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
               <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-white/5 rounded-full blur-xl" />
               <button onClick={() => setSelectedCert(null)} className="absolute top-4 right-4 p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full md:hidden">
@@ -668,15 +668,37 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
             </div>
 
             {/* Document Preview (Right Panel) */}
-            <div className="w-full md:w-2/3 bg-slate-100/50 flex flex-col relative h-[400px] md:h-auto">
-              <div className="flex-1 p-4 sm:p-6 overflow-hidden">
+            <div className="flex-1 bg-slate-100/50 flex flex-col relative h-[400px] md:h-auto">
+              <div className="flex-1 p-6 overflow-hidden flex flex-col">
                 {selectedCert.file_url ? (
-                  <div className="w-full h-full bg-slate-200/50 rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative group">
+                  <div className="w-full flex-1 bg-slate-200/50 rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative group">
                     {selectedCert.file_url.toLowerCase().endsWith('.pdf') ? (
-                      <iframe src={selectedCert.file_url} className="w-full h-full" title="PDF Preview" />
+                      <iframe
+                        src={selectedCert.file_url}
+                        className="w-full h-full border-0"
+                        title="PDF Preview"
+                      />
                     ) : (
-                      <img src={selectedCert.file_url} alt="Content" className="w-full h-full object-contain" />
+                      <img
+                        src={selectedCert.file_url}
+                        alt="Content"
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.style.display = 'none';
+                          const fallback = target.parentElement?.querySelector('.img-fallback');
+                          if (fallback) (fallback as HTMLElement).style.display = 'flex';
+                        }}
+                      />
                     )}
+                    {/* Fallback when image fails to load */}
+                    <div className="img-fallback w-full h-full flex-col items-center justify-center text-slate-400 bg-slate-50/80 absolute inset-0" style={{ display: 'none' }}>
+                      <span className="material-symbols-outlined text-[48px] mb-3 opacity-40">broken_image</span>
+                      <p className="font-semibold text-slate-500 mb-2">Không thể tải preview</p>
+                      <a href={selectedCert.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-700 font-bold underline">
+                        Mở file trực tiếp →
+                      </a>
+                    </div>
 
                     {/* Action overlay */}
                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
@@ -686,7 +708,7 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
                     </div>
                   </div>
                 ) : (
-                  <div className="w-full h-full rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50">
+                  <div className="w-full flex-1 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50">
                     <span className="material-symbols-outlined text-[64px] mb-4 opacity-30">description</span>
                     <p className="font-semibold text-slate-500">Người dùng chưa tải lên file đính kèm</p>
                   </div>

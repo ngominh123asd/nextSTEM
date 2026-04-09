@@ -111,11 +111,22 @@ async def upload_cert_file(
 
 @router.get("/certificates/files/{filename}")
 async def download_cert_file(filename: str):
-    """Download/serve a certificate file."""
+    """Serve a certificate file inline (for preview in iframes/img tags)."""
     file_path = UPLOAD_DIR / filename
     if not file_path.exists():
         raise HTTPException(404, "File not found")
-    return FileResponse(file_path)
+
+    # Detect mime type so browser renders the file inline
+    import mimetypes
+    mime, _ = mimetypes.guess_type(str(file_path))
+    if mime is None:
+        mime = "application/octet-stream"
+
+    return FileResponse(
+        file_path,
+        media_type=mime,
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )
 
 
 @router.delete("/certificates/{cert_id}", status_code=204)
