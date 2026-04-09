@@ -21,6 +21,8 @@ from app.api import (
     embeddings,
     gemini,
     university,
+    career,
+    scholarship,
 )
 from app.api.admin_resources import router as admin_resources_router
 from app.api.data_exchange import router as export_router, import_router
@@ -73,6 +75,8 @@ app.include_router(gemini.router, prefix="/api/v1")
 app.include_router(export_router, prefix="/api/v1")
 app.include_router(import_router, prefix="/api/v1")
 app.include_router(university.router, prefix="/api/v1")
+app.include_router(career.router, prefix="/api/v1")
+app.include_router(scholarship.router, prefix="/api/v1")
 
 
 @app.get("/health")

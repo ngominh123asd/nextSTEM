@@ -70,6 +70,11 @@ class Settings(BaseSettings):
     WIKIDATA_USER_AGENT: str = "nextSTEM/1.0 (study abroad assistant)"
     # College Scorecard API (optional - for US university details)
     COLLEGESCORECARD_API_KEY: str = ""
+    # O*NET credentials (optional)
+    ONET_USERNAME: str = ""
+    ONET_PASSWORD: str = ""
+    # ESCO language (optional)
+    ESCO_LANGUAGE: str = "en"
 
     # ── CORS ─────────────────────────────────────────────────
     # Stored as raw string to avoid pydantic-settings JSON parsing issues.

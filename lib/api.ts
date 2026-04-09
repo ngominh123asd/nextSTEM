@@ -706,3 +706,319 @@ export async function apiSearchUniversities(params: {
     method: 'POST',
   });
 }
+
+/* ── Career Search API ── */
+
+export interface MajorRecommendation {
+  major_name: string;
+  fit_score: number;
+  fit_level: string;
+  why_fit: string[];
+  required_skills: string[];
+  skill_gaps: string[];
+  related_fields: string[];
+  related_careers: string[];
+  growth_outlook: string | null;
+  roadmap_hint: string | null;
+  source: string;
+}
+
+export interface CareerSearchResponse {
+  query: string;
+  total: number;
+  recommendations: MajorRecommendation[];
+}
+
+export async function apiSearchCareers(params: {
+  query: string;
+  grade?: string;
+  age?: number;
+  interests?: string;
+  strengths?: string;
+  career_goal?: string;
+  study_preference?: string;
+  learning_style?: string;
+  budget_preference?: string;
+  max_results?: number;
+}): Promise<CareerSearchResponse> {
+  const searchParams = new URLSearchParams();
+  searchParams.append('query', params.query);
+  if (params.grade) searchParams.append('grade', params.grade);
+  if (typeof params.age === 'number') searchParams.append('age', params.age.toString());
+  if (params.interests) searchParams.append('interests', params.interests);
+  if (params.strengths) searchParams.append('strengths', params.strengths);
+  if (params.career_goal) searchParams.append('career_goal', params.career_goal);
+  if (params.study_preference) searchParams.append('study_preference', params.study_preference);
+  if (params.learning_style) searchParams.append('learning_style', params.learning_style);
+  if (params.budget_preference) searchParams.append('budget_preference', params.budget_preference);
+  if (params.max_results) searchParams.append('max_results', params.max_results.toString());
+
+  return request<CareerSearchResponse>(`/career/search?${searchParams.toString()}`, {
+    method: 'POST',
+  });
+}
+
+export async function apiSearchCareersStream(
+  params: {
+    query: string;
+    grade?: string;
+    age?: number;
+    interests?: string;
+    strengths?: string;
+    career_goal?: string;
+    study_preference?: string;
+    learning_style?: string;
+    budget_preference?: string;
+    max_results?: number;
+  },
+  handlers: {
+    onProgress?: (message: string) => void;
+    onTextDelta?: (delta: string) => void;
+    onFinalResult?: (result: CareerSearchResponse) => void;
+    onError?: (message: string) => void;
+  } = {},
+): Promise<CareerSearchResponse | null> {
+  const searchParams = new URLSearchParams();
+  searchParams.append('query', params.query);
+  if (params.grade) searchParams.append('grade', params.grade);
+  if (typeof params.age === 'number') searchParams.append('age', params.age.toString());
+  if (params.interests) searchParams.append('interests', params.interests);
+  if (params.strengths) searchParams.append('strengths', params.strengths);
+  if (params.career_goal) searchParams.append('career_goal', params.career_goal);
+  if (params.study_preference) searchParams.append('study_preference', params.study_preference);
+  if (params.learning_style) searchParams.append('learning_style', params.learning_style);
+  if (params.budget_preference) searchParams.append('budget_preference', params.budget_preference);
+  if (params.max_results) searchParams.append('max_results', params.max_results.toString());
+
+  const headers: Record<string, string> = {};
+  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+
+  const res = await fetch(`${API_BASE}/career/search/stream?${searchParams.toString()}`, {
+    method: 'POST',
+    headers,
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      setToken(null);
+      window.location.href = '/login';
+      throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+    }
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Request failed (${res.status})`);
+  }
+
+  if (!res.body) {
+    throw new Error('Không nhận được dữ liệu stream từ server.');
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+  let finalResult: CareerSearchResponse | null = null;
+
+  const processBlock = (block: string) => {
+    const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+    let eventType = 'message';
+    let dataRaw = '';
+    for (const line of lines) {
+      if (line.startsWith('event:')) eventType = line.slice(6).trim();
+      if (line.startsWith('data:')) dataRaw += line.slice(5).trim();
+    }
+    if (!dataRaw) return;
+
+    let payload: any = null;
+    try {
+      payload = JSON.parse(dataRaw);
+    } catch {
+      return;
+    }
+
+    if (eventType === 'progress' && payload?.message) {
+      handlers.onProgress?.(String(payload.message));
+    } else if (eventType === 'text_delta' && payload?.delta) {
+      handlers.onTextDelta?.(String(payload.delta));
+    } else if (eventType === 'final_result') {
+      finalResult = payload as CareerSearchResponse;
+      handlers.onFinalResult?.(finalResult);
+    } else if (eventType === 'error') {
+      handlers.onError?.(String(payload?.message || 'Đã xảy ra lỗi trong quá trình stream.'));
+    }
+  };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const blocks = buffer.split('\n\n');
+    buffer = blocks.pop() || '';
+    for (const block of blocks) processBlock(block);
+  }
+
+  if (buffer.trim()) processBlock(buffer);
+  return finalResult;
+}
+
+/* ── Scholarship Search API ── */
+
+export interface ScholarshipRecommendation {
+  scholarship_name: string;
+  fit_score: number;
+  fit_level: string;
+  country: string | null;
+  support_value: string | null;
+  support_type: string | null;
+  main_requirements: string[];
+  deadline: string | null;
+  why_fit: string[];
+  profile_improvements: string[];
+  target_levels: string[];
+  link: string | null;
+  source: string;
+}
+
+export interface ScholarshipSearchResponse {
+  query: string;
+  total: number;
+  recommendations: ScholarshipRecommendation[];
+}
+
+export async function apiSearchScholarships(params: {
+  query: string;
+  gpa?: number;
+  english_exam?: string;
+  english_score?: number;
+  academic_achievements?: string;
+  target_major?: string;
+  target_country?: string;
+  target_school?: string;
+  extracurriculars?: string;
+  stem_projects?: string;
+  awards?: string;
+  financial_need?: string;
+  support_preference?: string;
+  study_level?: string;
+  max_results?: number;
+}): Promise<ScholarshipSearchResponse> {
+  const searchParams = new URLSearchParams();
+  searchParams.append('query', params.query);
+  if (typeof params.gpa === 'number') searchParams.append('gpa', params.gpa.toString());
+  if (params.english_exam) searchParams.append('english_exam', params.english_exam);
+  if (typeof params.english_score === 'number') searchParams.append('english_score', params.english_score.toString());
+  if (params.academic_achievements) searchParams.append('academic_achievements', params.academic_achievements);
+  if (params.target_major) searchParams.append('target_major', params.target_major);
+  if (params.target_country) searchParams.append('target_country', params.target_country);
+  if (params.target_school) searchParams.append('target_school', params.target_school);
+  if (params.extracurriculars) searchParams.append('extracurriculars', params.extracurriculars);
+  if (params.stem_projects) searchParams.append('stem_projects', params.stem_projects);
+  if (params.awards) searchParams.append('awards', params.awards);
+  if (params.financial_need) searchParams.append('financial_need', params.financial_need);
+  if (params.support_preference) searchParams.append('support_preference', params.support_preference);
+  if (params.study_level) searchParams.append('study_level', params.study_level);
+  if (params.max_results) searchParams.append('max_results', params.max_results.toString());
+
+  return request<ScholarshipSearchResponse>(`/scholarship/search?${searchParams.toString()}`, {
+    method: 'POST',
+  });
+}
+
+export async function apiSearchScholarshipsStream(
+  params: {
+    query: string;
+    gpa?: number;
+    english_exam?: string;
+    english_score?: number;
+    academic_achievements?: string;
+    target_major?: string;
+    target_country?: string;
+    target_school?: string;
+    extracurriculars?: string;
+    stem_projects?: string;
+    awards?: string;
+    financial_need?: string;
+    support_preference?: string;
+    study_level?: string;
+    max_results?: number;
+  },
+  handlers: {
+    onProgress?: (message: string) => void;
+    onTextDelta?: (delta: string) => void;
+    onFinalResult?: (result: ScholarshipSearchResponse) => void;
+    onError?: (message: string) => void;
+  } = {},
+): Promise<ScholarshipSearchResponse | null> {
+  const searchParams = new URLSearchParams();
+  searchParams.append('query', params.query);
+  if (typeof params.gpa === 'number') searchParams.append('gpa', params.gpa.toString());
+  if (params.english_exam) searchParams.append('english_exam', params.english_exam);
+  if (typeof params.english_score === 'number') searchParams.append('english_score', params.english_score.toString());
+  if (params.academic_achievements) searchParams.append('academic_achievements', params.academic_achievements);
+  if (params.target_major) searchParams.append('target_major', params.target_major);
+  if (params.target_country) searchParams.append('target_country', params.target_country);
+  if (params.target_school) searchParams.append('target_school', params.target_school);
+  if (params.extracurriculars) searchParams.append('extracurriculars', params.extracurriculars);
+  if (params.stem_projects) searchParams.append('stem_projects', params.stem_projects);
+  if (params.awards) searchParams.append('awards', params.awards);
+  if (params.financial_need) searchParams.append('financial_need', params.financial_need);
+  if (params.support_preference) searchParams.append('support_preference', params.support_preference);
+  if (params.study_level) searchParams.append('study_level', params.study_level);
+  if (params.max_results) searchParams.append('max_results', params.max_results.toString());
+
+  const headers: Record<string, string> = {};
+  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+
+  const res = await fetch(`${API_BASE}/scholarship/search/stream?${searchParams.toString()}`, {
+    method: 'POST',
+    headers,
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      setToken(null);
+      window.location.href = '/login';
+      throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+    }
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Request failed (${res.status})`);
+  }
+
+  if (!res.body) throw new Error('Không nhận được dữ liệu stream từ server.');
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+  let finalResult: ScholarshipSearchResponse | null = null;
+
+  const processBlock = (block: string) => {
+    const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+    let eventType = 'message';
+    let dataRaw = '';
+    for (const line of lines) {
+      if (line.startsWith('event:')) eventType = line.slice(6).trim();
+      if (line.startsWith('data:')) dataRaw += line.slice(5).trim();
+    }
+    if (!dataRaw) return;
+
+    let payload: any = null;
+    try { payload = JSON.parse(dataRaw); } catch { return; }
+
+    if (eventType === 'progress' && payload?.message) handlers.onProgress?.(String(payload.message));
+    else if (eventType === 'text_delta' && payload?.delta) handlers.onTextDelta?.(String(payload.delta));
+    else if (eventType === 'final_result') {
+      finalResult = payload as ScholarshipSearchResponse;
+      handlers.onFinalResult?.(finalResult);
+    } else if (eventType === 'error') handlers.onError?.(String(payload?.message || 'Đã xảy ra lỗi trong quá trình stream.'));
+  };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const blocks = buffer.split('\n\n');
+    buffer = blocks.pop() || '';
+    for (const block of blocks) processBlock(block);
+  }
+
+  if (buffer.trim()) processBlock(buffer);
+  return finalResult;
+}
