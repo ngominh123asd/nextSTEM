@@ -5,6 +5,8 @@ from app.models.roadmap import Roadmap, RoadmapStep, RoadmapTask
 from app.models.document import Document
 from app.models.embedding import DocumentChunk
 from app.models.admin import AuditLog, SystemSetting
+from app.models.competency import STEMCompetency, BehavioralIndicator, CompetencyScore
+from app.models.dts import DTSSnapshot, LearnerActivityLog
 
 __all__ = [
     "User",
@@ -21,4 +23,9 @@ __all__ = [
     "DocumentChunk",
     "AuditLog",
     "SystemSetting",
+    "STEMCompetency",
+    "BehavioralIndicator",
+    "CompetencyScore",
+    "DTSSnapshot",
+    "LearnerActivityLog",
 ]

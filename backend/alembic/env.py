@@ -4,6 +4,12 @@ import asyncio
 import ssl as _ssl
 from logging.config import fileConfig
 
+import sys
+import os
+
+# Add the backend directory to sys.path so that 'app' module can be found
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 

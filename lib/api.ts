@@ -1022,3 +1022,204 @@ export async function apiSearchScholarshipsStream(
   if (buffer.trim()) processBlock(buffer);
   return finalResult;
 }
+
+/* ── STEM Competency Framework API ── */
+
+export interface STEMIndicator {
+  id: string;
+  competency_code: string;
+  code: string;
+  name: string;
+  description: string;
+  weight: number;
+}
+
+export interface STEMCompetency {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  weight: number;
+  order_index: number;
+  indicators: STEMIndicator[];
+}
+
+export interface CompetencyScore {
+  id: string;
+  indicator_id: string;
+  indicator_code: string;
+  indicator_name: string;
+  competency_code: string;
+  competency_name: string;
+  score: number;
+  level: number;
+  source: string;
+  evidence_note?: string | null;
+  updated_at: string;
+}
+
+export interface RadarDataPoint {
+  competency_code: string;
+  competency_name: string;
+  avg_score: number;
+  weight: number;
+  scored_count: number;
+}
+
+export interface CompetencyRadarResponse {
+  data: RadarDataPoint[];
+  overall_score: number;
+  assessed_indicators: number;
+  total_indicators: number;
+}
+
+export interface StrengthWeakness {
+  indicator_code: string;
+  indicator_name: string;
+  competency_name: string;
+  score: number;
+  level: number;
+  source: string;
+}
+
+export interface CompetencyAnalysis {
+  strengths: StrengthWeakness[];
+  weaknesses: StrengthWeakness[];
+  overall_score: number;
+  profile_status: 'not_started' | 'in_progress' | 'complete';
+  recommendations: string[];
+}
+
+/** Get the full STEM competency framework (public). */
+export async function apiGetCompetencyFramework(): Promise<STEMCompetency[]> {
+  return request<STEMCompetency[]>('/competencies/framework');
+}
+
+/** Get current user's latest competency scores. */
+export async function apiGetCompetencyScores(): Promise<CompetencyScore[]> {
+  return request<CompetencyScore[]>('/competencies/scores');
+}
+
+/** Submit a score for a behavioral indicator. */
+export async function apiUpdateCompetencyScore(data: {
+  indicator_id: string;
+  score: number;
+  level?: number;
+  source?: string;
+  evidence_note?: string;
+}): Promise<CompetencyScore> {
+  return request<CompetencyScore>('/competencies/scores', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/** Batch update multiple competency scores. */
+export async function apiBatchCompetencyScores(scores: Array<{
+  indicator_id: string;
+  score: number;
+  level?: number;
+  source?: string;
+}>): Promise<{ created: number }> {
+  return request<{ created: number }>('/competencies/scores/batch', {
+    method: 'POST',
+    body: JSON.stringify({ scores }),
+  });
+}
+
+/** Get radar chart data (aggregated scores per competency). */
+export async function apiGetCompetencyRadar(): Promise<CompetencyRadarResponse> {
+  return request<CompetencyRadarResponse>('/competencies/radar');
+}
+
+/** Get strength/weakness analysis. */
+export async function apiGetCompetencyAnalysis(): Promise<CompetencyAnalysis> {
+  return request<CompetencyAnalysis>('/competencies/analysis');
+}
+
+/* ── Digital Twin Student (DTS) API ── */
+
+export interface DTSProfile {
+  user_id: string;
+  name: string;
+  email: string;
+  grade: string | null;
+  school: string | null;
+  competency_summary: Array<{
+    competency_code: string;
+    competency_name: string;
+    avg_score: number;
+    level: number;
+    indicators: any[];
+  }>;
+  overall_score: number;
+  project_count: number;
+  certificate_count: number;
+  activity_count: number;
+  personalization_vars: Record<string, any>;
+  profile_completeness: number;
+  recent_activities: Array<{
+    id: string;
+    action: string;
+    entity_type: string | null;
+    entity_id: string | null;
+    metadata: Record<string, any> | null;
+    created_at: string;
+  }>;
+  assessed_indicators: number;
+  total_indicators: number;
+}
+
+export interface DTSSnapshot {
+  id: string;
+  competency_summary: Record<string, any> | null;
+  profile_completeness: number;
+  overall_score: number;
+  created_at: string;
+}
+
+export interface DTSTimelinePoint {
+  date: string;
+  overall_score: number;
+  competency_scores: Record<string, number>;
+}
+
+export interface DTSTimeline {
+  points: DTSTimelinePoint[];
+  current_score: number;
+  score_change: number;
+}
+
+/** Get aggregated DTS profile. */
+export async function apiGetDTSProfile(): Promise<DTSProfile> {
+  return request<DTSProfile>('/dts/profile');
+}
+
+/** Create a DTS snapshot. */
+export async function apiCreateDTSSnapshot(): Promise<{ id: string; profile_completeness: number; overall_score: number; created_at: string }> {
+  return request('/dts/snapshot', { method: 'POST' });
+}
+
+/** Get historical DTS snapshots. */
+export async function apiGetDTSSnapshots(limit?: number): Promise<DTSSnapshot[]> {
+  const qs = limit ? `?limit=${limit}` : '';
+  return request<DTSSnapshot[]>(`/dts/snapshots${qs}`);
+}
+
+/** Get competency timeline (changes over time). */
+export async function apiGetDTSTimeline(): Promise<DTSTimeline> {
+  return request<DTSTimeline>('/dts/timeline');
+}
+
+/** Get recent learner activity events. */
+export async function apiGetDTSActivities(limit?: number): Promise<Array<{
+  id: string;
+  action: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  metadata: Record<string, any> | null;
+  created_at: string;
+}>> {
+  const qs = limit ? `?limit=${limit}` : '';
+  return request(`/dts/activities${qs}`);
+}

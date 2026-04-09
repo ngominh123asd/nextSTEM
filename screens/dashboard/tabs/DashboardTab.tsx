@@ -1,87 +1,97 @@
-import React from 'react';
-import {
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  ResponsiveContainer,
-} from 'recharts';
+import React, { useState, useEffect } from 'react';
 import GlassSurface from '../../../components/GlassSurface';
 import MarqueeText from '../../../components/MarqueeText';
 import { UserData, TabId, goalLabels } from '../types';
 import { BlobDecor, GlassCard, GlassHeader, PageTitle, ToolCard } from '../components/SharedUI';
-
-const activityData = [
-  { day: 'T2', tasks: 3 }, { day: 'T3', tasks: 5 }, { day: 'T4', tasks: 2 },
-  { day: 'T5', tasks: 7 }, { day: 'T6', tasks: 4 }, { day: 'T7', tasks: 6 }, { day: 'CN', tasks: 1 },
-];
+import STEMCompetencyPanel from '../components/STEMCompetencyPanel';
+import { apiGetDTSProfile, type DTSProfile } from '../../../lib/api';
 
 export default function DashboardTab({ userData, onNav }: { userData: UserData; onNav: (t: TabId) => void }) {
-  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 640);
-  React.useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
+  const [dtsProfile, setDtsProfile] = useState<DTSProfile | null>(null);
+  const [dtsLoading, setDtsLoading] = useState(true);
+
+  useEffect(() => {
+    apiGetDTSProfile()
+      .then(setDtsProfile)
+      .catch(() => {})
+      .finally(() => setDtsLoading(false));
   }, []);
 
-  const radarData = React.useMemo(() => {
-    const skills = isMobile
-      ? ['Lập trình', 'Khoa học', 'GQVĐ', 'Toán', 'Nhóm', 'NC']
-      : ['Lập trình', 'Khoa học', 'Giải quyết vấn đề', 'Toán học', 'Làm việc nhóm', 'Nghiên cứu'];
-    return skills.map(s => ({ subject: s, value: userData.interests.length > 0 ? Math.floor(Math.random() * 40) + 30 : 20, fullMark: 100 }));
-  }, [userData.interests, isMobile]);
+  const recentActivities = dtsProfile?.recent_activities?.length
+    ? dtsProfile.recent_activities.slice(0, 4).map(a => {
+        const iconMap: Record<string, string> = {
+          project_created: 'science', project_updated: 'edit', cert_added: 'verified',
+          skill_assessed: 'psychology', batch_skill_assessed: 'psychology',
+          snapshot_created: 'photo_camera', quiz_completed: 'quiz',
+        };
+        const colorMap: Record<string, string> = {
+          project_created: 'from-blue-500 to-blue-600', cert_added: 'from-amber-500 to-orange-500',
+          skill_assessed: 'from-violet-500 to-purple-500', batch_skill_assessed: 'from-violet-500 to-purple-500',
+          snapshot_created: 'from-emerald-500 to-teal-500',
+        };
+        const actionLabels: Record<string, string> = {
+          project_created: 'Tạo dự án mới', project_updated: 'Cập nhật dự án',
+          cert_added: 'Thêm chứng chỉ', skill_assessed: 'Đánh giá năng lực',
+          batch_skill_assessed: 'Đánh giá năng lực hàng loạt',
+          snapshot_created: 'Tạo ảnh chụp DTS', quiz_completed: 'Hoàn thành bài test',
+        };
+        const timeDiff = Date.now() - new Date(a.created_at).getTime();
+        const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+        const timeStr = hours < 1 ? 'Vừa xong' : hours < 24 ? `${hours} giờ trước` : `${Math.floor(hours / 24)} ngày trước`;
 
-  const recentActivities = [
-    { icon: 'school', text: 'Hoàn thành bài test định hướng nghề nghiệp', time: '2 giờ trước', color: 'from-blue-500 to-blue-600' },
-    { icon: 'science', text: 'Cập nhật dự án: AI Chatbot Tư Vấn', time: '5 giờ trước', color: 'from-indigo-500 to-indigo-600' },
-    { icon: 'emoji_events', text: 'Thêm giải thưởng Olympic Tin học', time: 'Hôm qua', color: 'from-amber-500 to-orange-500' },
-    { icon: 'edit_note', text: 'Bắt đầu viết Personal Statement', time: '2 ngày trước', color: 'from-violet-500 to-purple-500' },
-  ];
-
-  const searchSuggestions = ['MIT', 'Stanford', 'NUS', 'Cambridge', 'ETH Zurich'];
+        return {
+          icon: iconMap[a.action] || 'history',
+          text: actionLabels[a.action] || a.action,
+          time: timeStr,
+          color: colorMap[a.action] || 'from-blue-500 to-blue-600',
+        };
+      })
+    : [
+        { icon: 'school', text: 'Hoàn thành bài test định hướng', time: '2 giờ trước', color: 'from-blue-500 to-blue-600' },
+        { icon: 'science', text: 'Cập nhật dự án: AI Chatbot', time: '5 giờ trước', color: 'from-indigo-500 to-indigo-600' },
+        { icon: 'emoji_events', text: 'Thêm giải thưởng Olympic', time: 'Hôm qua', color: 'from-amber-500 to-orange-500' },
+        { icon: 'edit_note', text: 'Bắt đầu viết Personal Statement', time: '2 ngày trước', color: 'from-violet-500 to-purple-500' },
+      ];
 
   return (
     <>
-      <PageTitle title={`Xin chào, ${userData.name?.split(' ').pop() || 'bạn'}!`} subtitle="Tổng quan hành trình du học của bạn" />
+      <PageTitle title={`Xin chào, ${userData.name?.split(' ').pop() || 'bạn'}!`} subtitle="Tổng quan năng lực STEM và hành trình học tập" />
 
-      {/* ── University Search ── */}
-      <GlassCard className="mb-8">
-        <BlobDecor className="w-48 h-48 -top-16 -right-16 bg-blue-200/30" />
-        <BlobDecor className="w-36 h-36 -bottom-12 -left-12 bg-indigo-200/20" />
-        <div className="relative z-10">
-          <GlassHeader icon="search" title="Tìm kiếm trường đại học" />
-          <div className="flex flex-col sm:flex-row gap-3 mb-4">
-            <div className="flex-1 relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-              <input type="text" placeholder="Nhập tên trường, quốc gia, hoặc ngành học..."
-                className="w-full px-4 py-3 rounded-2xl border border-white/80 bg-white/40 backdrop-blur-md text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/30 focus:border-blue-300/50 focus:bg-white/70 transition-all pl-11" />
+      {/* ── DTS Profile Overview ── */}
+      {!dtsLoading && dtsProfile && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <GlassCard className="!p-4 text-center">
+            <p className="text-2xl font-extrabold text-[#1E3A8A]">{Math.round(dtsProfile.profile_completeness)}%</p>
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Hồ sơ DTS</p>
+            <div className="w-full h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all"
+                style={{ width: `${dtsProfile.profile_completeness}%` }} />
             </div>
-            <GlassSurface
-              width="auto"
-              height={48}
-              borderRadius={16}
-              className="cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)' }}
-            >
-              <span className="text-white font-semibold px-5 flex items-center gap-2">
-                <span className="material-symbols-outlined text-lg">auto_awesome</span>AI Tìm kiếm
-              </span>
-            </GlassSurface>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-slate-400 font-medium">Gợi ý:</span>
-            {searchSuggestions.map(s => (
-              <button key={s} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/50 backdrop-blur-sm border border-white/80 text-slate-600 hover:bg-white/80 hover:text-blue-600 transition-all">
-                {s}
-              </button>
-            ))}
-          </div>
+          </GlassCard>
+          <GlassCard className="!p-4 text-center">
+            <p className="text-2xl font-extrabold text-[#1E3A8A]">{dtsProfile.overall_score || 0}</p>
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Điểm năng lực</p>
+            <p className="text-[10px] font-bold text-blue-500 mt-1.5">
+              {dtsProfile.assessed_indicators}/{dtsProfile.total_indicators} chỉ số
+            </p>
+          </GlassCard>
+          <GlassCard className="!p-4 text-center">
+            <p className="text-2xl font-extrabold text-[#1E3A8A]">{dtsProfile.project_count}</p>
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Dự án STEM</p>
+          </GlassCard>
+          <GlassCard className="!p-4 text-center">
+            <p className="text-2xl font-extrabold text-[#1E3A8A]">{dtsProfile.certificate_count}</p>
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Chứng chỉ</p>
+          </GlassCard>
         </div>
-      </GlassCard>
+      )}
 
       {/* ── Quick Tool Suggestions ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <ToolCard icon="school" iconGrad="from-blue-500 to-blue-600" title="Tìm trường" desc="Tìm trường đại học phù hợp" onClick={() => onNav('tools')} />
+        <ToolCard icon="psychology" iconGrad="from-violet-500 to-purple-500" title="Đánh giá năng lực" desc="Tự đánh giá 15 chỉ số STEM" onClick={() => onNav('portfolio')} />
         <ToolCard icon="workspace_premium" iconGrad="from-amber-500 to-orange-500" title="Học bổng" desc="Khám phá các cơ hội học bổng" onClick={() => onNav('tools')} />
-        <ToolCard icon="edit_note" iconGrad="from-violet-500 to-purple-500" title="Viết luận" desc="AI hỗ trợ viết bài luận" onClick={() => onNav('editor')} />
-        <ToolCard icon="account_box" iconGrad="from-emerald-500 to-teal-500" title="Portfolio" desc="Cập nhật hồ sơ năng lực" onClick={() => onNav('portfolio')} />
+        <ToolCard icon="edit_note" iconGrad="from-blue-500 to-blue-600" title="Viết luận" desc="AI hỗ trợ viết bài luận" onClick={() => onNav('editor')} />
+        <ToolCard icon="account_box" iconGrad="from-emerald-500 to-teal-500" title="Hồ sơ DTS" desc="Cập nhật bản sao số" onClick={() => onNav('portfolio')} />
       </div>
 
       {/* ── Mentor hướng dẫn (full-width) ── */}
@@ -169,7 +179,7 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
         </div>
       </GlassCard>
 
-      {/* ── Hoạt động & Năng lực ── */}
+      {/* ── Hoạt động & Năng lực STEM ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Activity Feed */}
         <GlassCard>
@@ -191,27 +201,8 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
           </div>
         </GlassCard>
 
-        {/* Radar Chart */}
-        <GlassCard>
-          <BlobDecor className="w-48 h-48 -top-20 -right-20 bg-indigo-200/20" />
-          <GlassHeader icon="trending_up" title="Năng lực hiện tại" />
-          <div className="w-full h-[280px] min-h-[280px] relative z-10">
-            <ResponsiveContainer width="100%" height="100%" minHeight={280} minWidth={1} debounce={50}>
-              <RadarChart data={radarData} outerRadius={isMobile ? "50%" : "70%"}>
-                <PolarGrid stroke="#c7d2fe" strokeWidth={0.5} />
-                <PolarAngleAxis dataKey="subject" tick={{ fontSize: isMobile ? 9 : 12, fill: '#475569', fontWeight: 500 }} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
-                <Radar name="Năng lực" dataKey="value" stroke="#4f46e5" fill="url(#radarGrad)" strokeWidth={2} />
-                <defs>
-                  <linearGradient id="radarGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#818cf8" stopOpacity={0.05} />
-                  </linearGradient>
-                </defs>
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </GlassCard>
+        {/* STEM Competency Radar — real data! */}
+        <STEMCompetencyPanel compact />
       </div>
     </>
   );
