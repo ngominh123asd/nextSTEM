@@ -12,6 +12,20 @@ import {
   type ProjectItem, type CertItem, type ActivityItem,
 } from '../../../lib/api';
 
+/* ── Normalize certificate file URL ── */
+const API_ORIGIN = (import.meta.env.VITE_API_URL || 'http://localhost:8000') as string;
+
+function certFileUrl(raw: string | null | undefined): string {
+  if (!raw) return '';
+  // Relative path from new backend → prepend API origin
+  if (raw.startsWith('/api/')) return `${API_ORIGIN}${raw}`;
+  // Old absolute URL stored as http:// but page is https:// → upgrade
+  if (raw.startsWith('http://') && window.location.protocol === 'https:') {
+    return raw.replace('http://', 'https://');
+  }
+  return raw;
+}
+
 /* ── Shared input component ── */
 const Input = ({ label, val, set, type = 'text', ph }: {
   label: string; val: any; set: (v: any) => void; type?: string; ph?: string;
@@ -674,13 +688,13 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
                   <div className="w-full flex-1 bg-slate-200/50 rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative group">
                     {selectedCert.file_url.toLowerCase().endsWith('.pdf') ? (
                       <iframe
-                        src={selectedCert.file_url}
+                        src={certFileUrl(selectedCert.file_url)}
                         className="w-full h-full border-0"
                         title="PDF Preview"
                       />
                     ) : (
                       <img
-                        src={selectedCert.file_url}
+                        src={certFileUrl(selectedCert.file_url)}
                         alt="Content"
                         className="w-full h-full object-contain"
                         onError={(e) => {
@@ -695,14 +709,14 @@ export default function PortfolioTab({ userData, initialTab }: { userData: UserD
                     <div className="img-fallback w-full h-full flex-col items-center justify-center text-slate-400 bg-slate-50/80 absolute inset-0" style={{ display: 'none' }}>
                       <span className="material-symbols-outlined text-[48px] mb-3 opacity-40">broken_image</span>
                       <p className="font-semibold text-slate-500 mb-2">Không thể tải preview</p>
-                      <a href={selectedCert.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-700 font-bold underline">
+                      <a href={certFileUrl(selectedCert.file_url)} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-700 font-bold underline">
                         Mở file trực tiếp →
                       </a>
                     </div>
 
                     {/* Action overlay */}
                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                      <a href={selectedCert.file_url} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-4 py-2 text-sm font-bold rounded-xl shadow-lg hover:bg-blue-700 transition flex items-center gap-2">
+                      <a href={certFileUrl(selectedCert.file_url)} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-4 py-2 text-sm font-bold rounded-xl shadow-lg hover:bg-blue-700 transition flex items-center gap-2">
                         <span className="material-symbols-outlined text-[18px]">open_in_new</span> Phóng to
                       </a>
                     </div>

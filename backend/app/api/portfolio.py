@@ -104,9 +104,8 @@ async def upload_cert_file(
     file_path.write_bytes(content)
 
     file_url = f"/api/v1/portfolio/certificates/files/{unique_name}"
-    # Build base URL dynamically from the incoming request
-    base_url = str(request.base_url).rstrip("/")
-    return {"file_url": f"{base_url}{file_url}", "file_name": file.filename}
+    # Return relative path — frontend will prepend the correct API base URL
+    return {"file_url": file_url, "file_name": file.filename}
 
 
 @router.get("/certificates/files/{filename}")
