@@ -196,9 +196,7 @@ Ngữ cảnh tham khảo từ hệ thống career_knowledge (có thể dùng đ�
                 response_mime_type="application/json",
                 temperature=0.35,
                 max_output_tokens=4096,
-                thinking_config=types.ThinkingConfig(
-                    thinking_level=types.ThinkingLevel.HIGH
-                ),
+                thinking_config=types.ThinkingConfig(thinking_level="high"),
             ),
         )
         return getattr(response, "text", "") or ""
@@ -442,9 +440,7 @@ async def search_careers_stream(
                     response_mime_type="application/json",
                     temperature=0.35,
                     max_output_tokens=4096,
-                    thinking_config=types.ThinkingConfig(
-                        thinking_level=types.ThinkingLevel.HIGH
-                    ),
+                    thinking_config=types.ThinkingConfig(thinking_level="high"),
                 ),
             )
 

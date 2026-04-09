@@ -225,9 +225,7 @@ async def _generate_recommendations(
                 response_mime_type="application/json",
                 temperature=0.35,
                 max_output_tokens=4096,
-                thinking_config=types.ThinkingConfig(
-                    thinking_level=types.ThinkingLevel.HIGH
-                ),
+                thinking_config=types.ThinkingConfig(thinking_level="high"),
             ),
         )
         return getattr(response, "text", "") or ""
@@ -403,9 +401,7 @@ async def search_scholarships_stream(
                     response_mime_type="application/json",
                     temperature=0.35,
                     max_output_tokens=4096,
-                    thinking_config=types.ThinkingConfig(
-                        thinking_level=types.ThinkingLevel.HIGH
-                    ),
+                    thinking_config=types.ThinkingConfig(thinking_level="high"),
                 ),
             )
 
