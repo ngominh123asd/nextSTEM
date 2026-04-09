@@ -16,4 +16,4 @@ openpyxl==3.1.5
 python-dotenv==1.1.0
 httpx==0.28.1
 httptools==0.6.4
-google-genai==1.14.0
+google-genai==1.60.0

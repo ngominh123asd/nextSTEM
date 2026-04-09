@@ -193,9 +193,6 @@ Ngữ cảnh tham khảo từ hệ thống career_knowledge (có thể dùng đ�
             model="gemini-3.1-flash-lite-preview",
             contents=prompt,
             config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.35,
-                max_output_tokens=4096,
                 thinking_config=types.ThinkingConfig(thinking_level="high"),
             ),
         )
@@ -437,9 +434,6 @@ async def search_careers_stream(
                 model="gemini-3.1-flash-lite-preview",
                 contents=prompt,
                 config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    temperature=0.35,
-                    max_output_tokens=4096,
                     thinking_config=types.ThinkingConfig(thinking_level="high"),
                 ),
             )
