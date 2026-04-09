@@ -39,9 +39,15 @@ async function request<T>(
 
   if (!res.ok) {
     if (res.status === 401) {
-      setToken(null);
-      window.location.href = '/login';
-      throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+      const isAuthRoute = path.startsWith('/auth/login') || path.startsWith('/auth/register');
+      if (!isAuthRoute && accessToken) {
+        setToken(null);
+        window.location.href = '/login';
+        throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+      } else {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || 'Xác thực thất bại');
+      }
     }
     const body = await res.json().catch(() => ({}));
     const message = body.detail || `Request failed (${res.status})`;
@@ -326,9 +332,13 @@ async function downloadFile(path: string, fallbackFilename: string): Promise<voi
   const res = await fetch(`${API_BASE}${path}`, { headers });
   if (!res.ok) {
     if (res.status === 401) {
-      setToken(null);
-      window.location.href = '/login';
-      throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+      if (accessToken) {
+        setToken(null);
+        window.location.href = '/login';
+        throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+      } else {
+        throw new Error('Bạn cần đăng nhập để thao tác.');
+      }
     }
     const body = await res.json().catch(() => ({}));
     throw new Error(body.detail || `Export failed (${res.status})`);
@@ -588,9 +598,13 @@ export function apiChatAIStream(
     .then(async (res) => {
       if (!res.ok) {
         if (res.status === 401) {
-          setToken(null);
-          window.location.href = '/login';
-          throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+          if (accessToken) {
+            setToken(null);
+            window.location.href = '/login';
+            throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+          } else {
+            throw new Error('Bạn cần đăng nhập để thao tác.');
+          }
         }
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail || `AI request failed (${res.status})`);
@@ -663,4 +677,204 @@ export async function apiSaveChatAIMessage(sessionId: string, content: string): 
     method: 'POST',
     body: JSON.stringify({ content }),
   });
+}
+
+/* ── STEM Competency API ── */
+
+export interface STEMIndicator {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  level_descriptors: Record<string, string> | null;
+  display_order: number;
+}
+
+export interface STEMCompetency {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  display_order: number;
+  indicators: STEMIndicator[];
+}
+
+export interface CompetencyScore {
+  id: string;
+  user_id: string;
+  indicator_id: string;
+  score: number;
+  level: number;
+  source: string;
+  evidence_note: string | null;
+  assessed_at: string;
+  created_at: string;
+}
+
+export interface RadarDataPoint {
+  competency_code: string;
+  competency_name: string;
+  score: number;
+  indicator_count: number;
+  scored_count: number;
+}
+
+export interface CompetencyRadarResponse {
+  data: RadarDataPoint[];
+  overall_score: number;
+  assessed_indicators: number;
+  total_indicators: number;
+}
+
+export interface StrengthWeakness {
+  indicator_code: string;
+  indicator_name: string;
+  competency_name: string;
+  score: number;
+  level: number;
+  source: string;
+}
+
+export interface CompetencyAnalysis {
+  strengths: StrengthWeakness[];
+  weaknesses: StrengthWeakness[];
+  overall_score: number;
+  profile_status: 'not_started' | 'in_progress' | 'complete';
+  recommendations: string[];
+}
+
+/** Get the full STEM competency framework (public). */
+export async function apiGetCompetencyFramework(): Promise<STEMCompetency[]> {
+  return request<STEMCompetency[]>('/competencies/framework');
+}
+
+/** Get current user's latest competency scores. */
+export async function apiGetCompetencyScores(): Promise<CompetencyScore[]> {
+  return request<CompetencyScore[]>('/competencies/scores');
+}
+
+/** Submit a score for a behavioral indicator. */
+export async function apiUpdateCompetencyScore(data: {
+  indicator_id: string;
+  score: number;
+  level?: number;
+  source?: string;
+  evidence_note?: string;
+}): Promise<CompetencyScore> {
+  return request<CompetencyScore>('/competencies/scores', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/** Batch update multiple competency scores. */
+export async function apiBatchCompetencyScores(scores: Array<{
+  indicator_id: string;
+  score: number;
+  level?: number;
+  source?: string;
+}>): Promise<{ created: number }> {
+  return request<{ created: number }>('/competencies/scores/batch', {
+    method: 'POST',
+    body: JSON.stringify({ scores }),
+  });
+}
+
+/** Get radar chart data (aggregated scores per competency). */
+export async function apiGetCompetencyRadar(): Promise<CompetencyRadarResponse> {
+  return request<CompetencyRadarResponse>('/competencies/radar');
+}
+
+/** Get strength/weakness analysis. */
+export async function apiGetCompetencyAnalysis(): Promise<CompetencyAnalysis> {
+  return request<CompetencyAnalysis>('/competencies/analysis');
+}
+
+/* ── Digital Twin Student (DTS) API ── */
+
+export interface DTSProfile {
+  user_id: string;
+  name: string;
+  email: string;
+  grade: string | null;
+  school: string | null;
+  competency_summary: Array<{
+    competency_code: string;
+    competency_name: string;
+    avg_score: number;
+    level: number;
+    indicators: any[];
+  }>;
+  overall_score: number;
+  project_count: number;
+  certificate_count: number;
+  activity_count: number;
+  personalization_vars: Record<string, any>;
+  profile_completeness: number;
+  recent_activities: Array<{
+    id: string;
+    action: string;
+    entity_type: string | null;
+    entity_id: string | null;
+    metadata: Record<string, any> | null;
+    created_at: string;
+  }>;
+  assessed_indicators: number;
+  total_indicators: number;
+}
+
+export interface DTSSnapshot {
+  id: string;
+  competency_summary: Record<string, any> | null;
+  profile_completeness: number;
+  overall_score: number;
+  created_at: string;
+}
+
+export interface DTSTimelinePoint {
+  date: string;
+  overall_score: number;
+  competency_scores: Record<string, number>;
+}
+
+export interface DTSTimeline {
+  points: DTSTimelinePoint[];
+  current_score: number;
+  score_change: number;
+}
+
+/** Get aggregated DTS profile. */
+export async function apiGetDTSProfile(): Promise<DTSProfile> {
+  return request<DTSProfile>('/dts/profile');
+}
+
+/** Create a DTS snapshot. */
+export async function apiCreateDTSSnapshot(): Promise<{ id: string; profile_completeness: number; overall_score: number; created_at: string }> {
+  return request('/dts/snapshot', { method: 'POST' });
+}
+
+/** Get historical DTS snapshots. */
+export async function apiGetDTSSnapshots(limit?: number): Promise<DTSSnapshot[]> {
+  const qs = limit ? `?limit=${limit}` : '';
+  return request<DTSSnapshot[]>(`/dts/snapshots${qs}`);
+}
+
+/** Get competency timeline (changes over time). */
+export async function apiGetDTSTimeline(): Promise<DTSTimeline> {
+  return request<DTSTimeline>('/dts/timeline');
+}
+
+/** Get recent learner activity events. */
+export async function apiGetDTSActivities(limit?: number): Promise<Array<{
+  id: string;
+  action: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  metadata: Record<string, any> | null;
+  created_at: string;
+}>> {
+  const qs = limit ? `?limit=${limit}` : '';
+  return request(`/dts/activities${qs}`);
 }

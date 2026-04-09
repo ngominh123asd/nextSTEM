@@ -75,7 +75,11 @@ export default function App() {
       .finally(() => setInitializing(false));
   }, []);
 
-  const openOnboarding = () => setScreen('onboarding');
+  const openOnboarding = () => {
+    localStorage.removeItem('mbti_completed');
+    localStorage.removeItem('mbti_answers');
+    setScreen('onboarding');
+  };
   const openAuth = () => { setAuthError(null); setScreen('auth'); };
   const openAbout = () => setScreen('about');
 
@@ -154,6 +158,8 @@ export default function App() {
     try { await apiLogout(); } catch { /* ignore */ }
     setToken(null);
     setUserData(null);
+    localStorage.removeItem('mbti_completed');
+    localStorage.removeItem('mbti_answers');
     setScreen('landing');
   };
 

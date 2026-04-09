@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserData } from '../types';
 import { GlassCard, PageTitle } from '../components/SharedUI';
+import GlassSurface from '../../../components/GlassSurface';
 import { MODES } from './ai-advisor/types';
 import { useChatSessions } from './ai-advisor/useChatSessions';
 import SessionSidebar from './ai-advisor/SessionSidebar';
@@ -12,14 +13,9 @@ export default function AIAdvisorTab({ userData }: { userData: UserData }) {
   const chat = useChatSessions();
   const currentMode = MODES.find(m => m.id === chat.activeMode);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [hasDoneMBTI, setHasDoneMBTI] = useState<boolean>(true); // assume true on render until useEffect confirms
-
-  useEffect(() => {
-    const doneRaw = localStorage.getItem('mbti_completed');
-    if (doneRaw !== 'true') {
-      setHasDoneMBTI(false);
-    }
-  }, []);
+  const [hasDoneMBTI, setHasDoneMBTI] = useState<boolean>(() => {
+    return localStorage.getItem('mbti_completed') === 'true';
+  });
 
   const handleMBTIComplete = (answers: Record<number, string>) => {
     localStorage.setItem('mbti_completed', 'true');
@@ -80,13 +76,37 @@ export default function AIAdvisorTab({ userData }: { userData: UserData }) {
                   {chat.isStreaming ? 'Đang phân tích dữ liệu...' : 'AI đã kết nối thành công'}
                 </p>
               </div>
+
+              <div className="hidden sm:block ml-2">
+                <GlassSurface
+                  width="auto"
+                  height={32}
+                  borderRadius={10}
+                  className="cursor-pointer hover:opacity-90 transition-opacity"
+                  style={{ background: 'linear-gradient(135deg, #1152d4, #2E6AE6)' }}
+                  onClick={() => setHasDoneMBTI(false)}
+                >
+                  <div className="flex items-center gap-1.5 px-3 h-full text-white text-xs font-bold whitespace-nowrap">
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>psychology</span>
+                    Làm lại MBTI
+                  </div>
+                </GlassSurface>
+              </div>
+              <button
+                onClick={() => setHasDoneMBTI(false)}
+                className="sm:hidden p-1.5 ml-1 rounded-lg text-blue-600 bg-blue-50 border border-blue-100 transition-all flex-shrink-0"
+                title="Làm lại MBTI"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>psychology</span>
+              </button>
+
               {chat.activeSessionId && (
                 <button
                   onClick={() => chat.createNewSession()}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-700 bg-white border border-blue-100 hover:text-[#1E3A8A] hover:bg-[#EAF3FF] hover:border-[#BFD9FF] hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(30,58,138,0.05)]"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-700 bg-white border border-blue-100 hover:text-[#1E3A8A] hover:bg-[#EAF3FF] transition-all ml-2 flex-shrink-0"
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
-                  Chat mới
+                  <span className="hidden sm:inline">Chat mới</span>
                 </button>
               )}
             </div>
