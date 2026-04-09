@@ -9,12 +9,14 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
-_DEFAULT_CORS = ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"]
+_DEFAULT_CORS = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:3000",
+]
 
 # Regex that catches all common postgres URL prefixes that are NOT asyncpg
-_PG_PREFIX_RE = _re.compile(
-    r"^(?:postgres|postgresql(?:\+psycopg2(?:binary)?)?)://"
-)
+_PG_PREFIX_RE = _re.compile(r"^(?:postgres|postgresql(?:\+psycopg2(?:binary)?)?)://")
 
 
 def _normalize_pg_url(url: str) -> str:
@@ -58,6 +60,16 @@ class Settings(BaseSettings):
     # ── Gemini (Google AI) ────────────────────────────────
     # Used for Academic Editor, Roadmap, and AI Study Coach Widget
     GEMINI_API_KEY: str = ""
+
+    # ── External AI Tools ─────────────────────────────
+    # OpenAlex (free, no key needed but recommended for higher rate limits)
+    OPENALEX_MAILTO: str = ""
+    # Tavily Search API (optional - for enhanced search results)
+    TAVILY_API_KEY: str = ""
+    # Wikidata User-Agent (required for Wikidata SPARQL queries)
+    WIKIDATA_USER_AGENT: str = "nextSTEM/1.0 (study abroad assistant)"
+    # College Scorecard API (optional - for US university details)
+    COLLEGESCORECARD_API_KEY: str = ""
 
     # ── CORS ─────────────────────────────────────────────────
     # Stored as raw string to avoid pydantic-settings JSON parsing issues.

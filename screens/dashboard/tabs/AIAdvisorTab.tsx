@@ -34,8 +34,14 @@ export default function AIAdvisorTab({ userData }: { userData: UserData }) {
       {/* Main Layout Area */}
       {!hasDoneMBTI ? (
         // Quiz View
-        <div className="w-full flex justify-center py-4">
+        <div className="w-full flex flex-col items-center py-4">
           <MBTIQuiz onComplete={handleMBTIComplete} />
+          <button
+            onClick={() => setHasDoneMBTI(true)}
+            className="mt-4 px-6 py-2 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            Bỏ qua quiz MBTI →
+          </button>
         </div>
       ) : (
         // Chat View

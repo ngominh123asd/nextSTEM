@@ -664,3 +664,45 @@ export async function apiSaveChatAIMessage(sessionId: string, content: string): 
     body: JSON.stringify({ content }),
   });
 }
+
+/* ── University Search API ── */
+
+export interface UniversityResult {
+  name: string;
+  country: string;
+  ranking: number | null;
+  fields: string[];
+  website: string | null;
+  gpa_min: number | null;
+  sat_min: number | null;
+  ielts_min: number | null;
+  tuition_usd: number | null;
+  acceptance_rate: number | null;
+  scholarships: boolean;
+  source: string;
+}
+
+export interface UniversitySearchResponse {
+  results: UniversityResult[];
+  total: number;
+  query: string;
+}
+
+export async function apiSearchUniversities(params: {
+  query: string;
+  country?: string;
+  field?: string;
+  gpa?: number;
+  max_results?: number;
+}): Promise<UniversitySearchResponse> {
+  const searchParams = new URLSearchParams();
+  searchParams.append('query', params.query);
+  if (params.country) searchParams.append('country', params.country);
+  if (params.field) searchParams.append('field', params.field);
+  if (params.gpa) searchParams.append('gpa', params.gpa.toString());
+  if (params.max_results) searchParams.append('max_results', params.max_results.toString());
+  
+  return request<UniversitySearchResponse>(`/university/search?${searchParams.toString()}`, {
+    method: 'POST',
+  });
+}
