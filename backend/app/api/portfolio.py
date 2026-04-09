@@ -4,7 +4,7 @@ import uuid
 import os
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -79,6 +79,7 @@ async def create_cert(
 
 @router.post("/certificates/upload")
 async def upload_cert_file(
+    request: Request,
     file: UploadFile = File(...),
     user: User = Depends(get_current_user),
 ):
@@ -103,8 +104,9 @@ async def upload_cert_file(
     file_path.write_bytes(content)
 
     file_url = f"/api/v1/portfolio/certificates/files/{unique_name}"
-    # Return absolute URL so the frontend can use it directly
-    return {"file_url": f"http://localhost:8000{file_url}", "file_name": file.filename}
+    # Build base URL dynamically from the incoming request
+    base_url = str(request.base_url).rstrip("/")
+    return {"file_url": f"{base_url}{file_url}", "file_name": file.filename}
 
 
 @router.get("/certificates/files/{filename}")
