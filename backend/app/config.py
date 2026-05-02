@@ -76,6 +76,11 @@ class Settings(BaseSettings):
     # ESCO language (optional)
     ESCO_LANGUAGE: str = "en"
 
+    # ── OAuth ────────────────────────────────────────────────
+    GOOGLE_CLIENT_ID: str = ""
+    FACEBOOK_APP_ID: str = ""
+    FACEBOOK_APP_SECRET: str = ""
+
     # ── CORS ─────────────────────────────────────────────────
     # Stored as raw string to avoid pydantic-settings JSON parsing issues.
     # Accepts: JSON array string, comma-separated URLs, or a single URL.

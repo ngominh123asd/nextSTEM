@@ -1,7 +1,12 @@
-"""Auth endpoints: register, login, logout, me."""
+"""Auth endpoints: register, login, logout, me, OAuth (Google/Facebook)."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+import asyncio
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from app.database import get_db
 from app.deps import get_current_user
@@ -11,10 +16,14 @@ from app.schemas.user import UserRead
 from app.services import auth_service
 from app.utils.session import create_session, revoke_session
 from app.utils.oauth import verify_google_token, verify_facebook_token
-from pydantic import BaseModel
+
+limiter = Limiter(key_func=get_remote_address)
+
 
 class OAuthRequest(BaseModel):
     token: str
+    state: str = ""  # CSRF state from frontend
+
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -28,7 +37,6 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     # Fire-and-forget: don't block response waiting for Redis
-    import asyncio
     asyncio.create_task(create_session(user.id))
     return TokenResponse(access_token=token)
 
@@ -42,37 +50,38 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
     # Fire-and-forget: don't block response waiting for Redis
-    import asyncio
     asyncio.create_task(create_session(user.id))
     return TokenResponse(access_token=token)
 
 
 @router.post("/google", response_model=TokenResponse)
-async def google_login(body: OAuthRequest, db: AsyncSession = Depends(get_db)):
-    # Verify token
+@limiter.limit("10/minute")
+async def google_login(body: OAuthRequest, request: Request, db: AsyncSession = Depends(get_db)):
+    """Google OAuth login — rate limited to 10 requests/minute per IP."""
+    # Verify token with Google (signature + audience + email_verified)
     user_info = await verify_google_token(body.token)
-    
+
     # Login or register
     user, token = await auth_service.oauth_login_user(
         db, email=user_info["email"], name=user_info["name"], provider="google"
     )
-    
-    import asyncio
+
     asyncio.create_task(create_session(user.id))
     return TokenResponse(access_token=token)
 
 
 @router.post("/facebook", response_model=TokenResponse)
-async def facebook_login(body: OAuthRequest, db: AsyncSession = Depends(get_db)):
-    # Verify token
+@limiter.limit("10/minute")
+async def facebook_login(body: OAuthRequest, request: Request, db: AsyncSession = Depends(get_db)):
+    """Facebook OAuth login — rate limited to 10 requests/minute per IP."""
+    # Verify token with Facebook (debug_token + /me)
     user_info = await verify_facebook_token(body.token)
-    
+
     # Login or register
     user, token = await auth_service.oauth_login_user(
         db, email=user_info["email"], name=user_info["name"], provider="facebook"
     )
-    
-    import asyncio
+
     asyncio.create_task(create_session(user.id))
     return TokenResponse(access_token=token)
 

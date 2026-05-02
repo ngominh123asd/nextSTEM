@@ -3,37 +3,62 @@ import { useGoogleLogin } from '@react-oauth/google';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 
 interface SocialAuthButtonsProps {
-  onOAuthLogin: (provider: 'google' | 'facebook', token: string) => void;
+  onOAuthLogin: (provider: 'google' | 'facebook', token: string, state: string) => void;
   loading?: boolean;
 }
 
 const FACEBOOK_APP_ID = import.meta.env.VITE_FACEBOOK_APP_ID || '';
 
+/**
+ * Generate a cryptographically random state string for CSRF protection.
+ * Stored in sessionStorage and sent alongside the token for backend validation.
+ */
+function generateState(): string {
+  const state = crypto.randomUUID();
+  sessionStorage.setItem('oauth_state', state);
+  return state;
+}
+
+function validateAndConsumeState(state: string): boolean {
+  const saved = sessionStorage.getItem('oauth_state');
+  sessionStorage.removeItem('oauth_state');
+  return saved === state;
+}
+
 export default function SocialAuthButtons({ onOAuthLogin, loading }: SocialAuthButtonsProps) {
   const loginWithGoogle = useGoogleLogin({
     onSuccess: (tokenResponse) => {
-      // The token response contains access_token, but we need id_token for standard verify or we can use access_token to fetch user info.
-      // Wait, useGoogleLogin (implicit flow) returns access_token. We need to verify it.
-      // Wait, for standard backend verification, we usually use implicit flow to get access_token, or use code flow to get id_token.
-      // Actually, if we send access_token to backend, backend can verify it by calling Google API.
-      // But our backend uses `id_token.verify_oauth2_token`. To get id_token from useGoogleLogin, we must use `flow: 'auth-code'` or use the `<GoogleLogin />` component.
-      // Let's use `useGoogleLogin` with `flow: 'implicit'` but request `id_token`?
-      // No, `useGoogleLogin` does not return id_token.
-      // Let's modify to use `access_token` and verify it via google userinfo endpoint on backend, OR just pass access_token.
-      // Wait, let's just pass `tokenResponse.access_token` and handle it in the backend, OR change backend to verify access_token.
-      // Actually, `@react-oauth/google` provides `useGoogleLogin` which by default returns an `access_token`.
-      // Let's pass the access_token.
-      onOAuthLogin('google', tokenResponse.access_token);
+      const state = sessionStorage.getItem('oauth_state') || '';
+      if (!validateAndConsumeState(state)) {
+        console.error('OAuth state mismatch — possible CSRF');
+        return;
+      }
+      onOAuthLogin('google', tokenResponse.access_token, state);
     },
     onError: (error) => console.error('Google Login Failed', error),
   });
 
+  const handleGoogleClick = () => {
+    generateState();
+    loginWithGoogle();
+  };
+
   const responseFacebook = (response: any) => {
     if (response.accessToken) {
-      onOAuthLogin('facebook', response.accessToken);
+      const state = sessionStorage.getItem('oauth_state') || '';
+      if (!validateAndConsumeState(state)) {
+        console.error('OAuth state mismatch — possible CSRF');
+        return;
+      }
+      onOAuthLogin('facebook', response.accessToken, state);
     } else {
       console.error('Facebook Login Failed', response);
     }
+  };
+
+  const handleFacebookClick = (renderOnClick: () => void) => {
+    generateState();
+    renderOnClick();
   };
 
   return (
@@ -41,7 +66,7 @@ export default function SocialAuthButtons({ onOAuthLogin, loading }: SocialAuthB
       <button
         type="button"
         disabled={loading}
-        onClick={() => loginWithGoogle()}
+        onClick={handleGoogleClick}
         className="flex-1 flex items-center justify-center gap-2.5 py-3 rounded-2xl border border-slate-200/80 bg-white/60 backdrop-blur-sm
           hover:bg-white/80 hover:border-slate-300 transition-all font-semibold text-slate-700 text-sm disabled:opacity-50"
       >
@@ -57,7 +82,7 @@ export default function SocialAuthButtons({ onOAuthLogin, loading }: SocialAuthB
           <button
             type="button"
             disabled={loading || renderProps.isDisabled}
-            onClick={renderProps.onClick}
+            onClick={() => handleFacebookClick(renderProps.onClick)}
             className="flex-1 flex items-center justify-center gap-2.5 py-3 rounded-2xl border border-slate-200/80 bg-white/60 backdrop-blur-sm
               hover:bg-white/80 hover:border-slate-300 transition-all font-semibold text-slate-700 text-sm disabled:opacity-50"
           >

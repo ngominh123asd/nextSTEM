@@ -1,4 +1,6 @@
-"""Authentication service (register / login)."""
+"""Authentication service (register / login / OAuth)."""
+
+import secrets
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,21 +51,20 @@ async def oauth_login_user(
     db: AsyncSession, *, email: str, name: str, provider: str
 ) -> tuple[User, str]:
     """
-    Handle OAuth login.
-    If email exists, return user and token (linking account).
-    If email does not exist, create a new user with a highly secure random password.
-    Returns (user, access_token).
-    """
-    import secrets
-    import string
+    Handle OAuth login/registration.
 
+    Security rules:
+    - Email already exists → link account and issue token (email verified by provider).
+    - Email does not exist → create new user.
+    - Random 64-char password → blocks traditional login
+      (user must use "Forgot Password" to set a password later).
+    """
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
 
     if not user:
-        # Generate a random 32-character password for OAuth users
-        alphabet = string.ascii_letters + string.digits + string.punctuation
-        random_password = "".join(secrets.choice(alphabet) for i in range(32))
+        # Generate a cryptographically secure random password (64 chars)
+        random_password = secrets.token_urlsafe(64)
 
         user = User(
             name=name,

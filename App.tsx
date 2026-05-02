@@ -192,12 +192,12 @@ export default function App() {
     }
   };
 
-  const handleOAuthLogin = async (provider: 'google' | 'facebook', token: string) => {
+  const handleOAuthLogin = async (provider: 'google' | 'facebook', token: string, state: string = '') => {
     setAuthError(null);
     setAuthLoading(true);
     try {
       const loginMethod = provider === 'google' ? apiGoogleLogin : apiFacebookLogin;
-      const { access_token } = await loginMethod(token);
+      const { access_token } = await loginMethod(token, state);
       setToken(access_token);
       const user = await apiGetMe();
       const local = apiUserToLocal(user);

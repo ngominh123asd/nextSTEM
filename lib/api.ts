@@ -105,17 +105,17 @@ export async function apiLogin(email: string, password: string): Promise<TokenRe
   });
 }
 
-export async function apiGoogleLogin(token: string): Promise<TokenResponse> {
+export async function apiGoogleLogin(token: string, state: string = ''): Promise<TokenResponse> {
   return request<TokenResponse>('/auth/google', {
     method: 'POST',
-    body: JSON.stringify({ token }),
+    body: JSON.stringify({ token, state }),
   });
 }
 
-export async function apiFacebookLogin(token: string): Promise<TokenResponse> {
+export async function apiFacebookLogin(token: string, state: string = ''): Promise<TokenResponse> {
   return request<TokenResponse>('/auth/facebook', {
     method: 'POST',
-    body: JSON.stringify({ token }),
+    body: JSON.stringify({ token, state }),
   });
 }
 
