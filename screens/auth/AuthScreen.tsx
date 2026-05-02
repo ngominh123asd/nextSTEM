@@ -33,7 +33,7 @@ export default function AuthScreen({ onLogin, onRegister, onOAuthLogin, onClose,
       setLocalError('Vui lòng nhập email và mật khẩu');
       return;
     }
-    onLogin(loginEmail, loginPass);
+    onLogin(loginEmail, loginPass, rememberMe);
   };
 
   const handleRegister = (e: React.FormEvent) => {
@@ -49,6 +49,10 @@ export default function AuthScreen({ onLogin, onRegister, onOAuthLogin, onClose,
     }
     if (regPass.length < 6) {
       setLocalError('Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+    if (!agreeTerms) {
+      setLocalError('Bạn phải đồng ý với điều khoản sử dụng');
       return;
     }
     onRegister({ name: regName, email: regEmail, password: regPass });

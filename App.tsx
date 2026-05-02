@@ -144,12 +144,12 @@ export default function App() {
     }
   };
 
-  const handleLogin = async (email: string, password: string) => {
+  const handleLogin = async (email: string, password: string, rememberMe: boolean = true) => {
     setAuthError(null);
     setAuthLoading(true);
     try {
       const { access_token } = await apiLogin(email, password);
-      setToken(access_token);
+      setToken(access_token, rememberMe);
       const user = await apiGetMe();
       const local = apiUserToLocal(user);
       setUserData(local);

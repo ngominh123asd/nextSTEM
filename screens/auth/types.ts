@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface AuthProps {
-  onLogin: (email: string, password: string) => void;
+  onLogin: (email: string, password: string, rememberMe: boolean) => void;
   onRegister: (data: { name: string; email: string; password: string }) => void;
   onOAuthLogin: (provider: 'google' | 'facebook', token: string) => void;
   onClose: () => void;

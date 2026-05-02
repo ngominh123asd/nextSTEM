@@ -6,16 +6,26 @@
 const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/v1';
 
 /* ── Token management ── */
-let accessToken: string | null = localStorage.getItem('access_token');
+let accessToken: string | null = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
 
-export function setToken(token: string | null) {
+export function setToken(token: string | null, persist: boolean = true) {
   accessToken = token;
-  if (token) localStorage.setItem('access_token', token);
-  else localStorage.removeItem('access_token');
+  if (token) {
+    if (persist) {
+      localStorage.setItem('access_token', token);
+      sessionStorage.removeItem('access_token');
+    } else {
+      sessionStorage.setItem('access_token', token);
+      localStorage.removeItem('access_token');
+    }
+  } else {
+    localStorage.removeItem('access_token');
+    sessionStorage.removeItem('access_token');
+  }
 }
 
 export function getToken() {
-  return accessToken;
+  return accessToken || localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
 }
 
 /* ── Generic fetch wrapper ── */
