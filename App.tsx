@@ -7,6 +7,7 @@ import AboutScreen from './screens/AboutScreen';
 import AdminDashboard from './screens/admin/AdminDashboard';
 import {
   apiLogin, apiRegister, apiLogout, apiGetMe, apiOnboarding,
+  apiGoogleLogin, apiFacebookLogin,
   setToken, getToken,
   type UserData as ApiUser,
 } from './lib/api';
@@ -191,6 +192,32 @@ export default function App() {
     }
   };
 
+  const handleOAuthLogin = async (provider: 'google' | 'facebook', token: string) => {
+    setAuthError(null);
+    setAuthLoading(true);
+    try {
+      const loginMethod = provider === 'google' ? apiGoogleLogin : apiFacebookLogin;
+      const { access_token } = await loginMethod(token);
+      setToken(access_token);
+      const user = await apiGetMe();
+      const local = apiUserToLocal(user);
+      setUserData(local);
+      setUserRole(user.role || 'user');
+      
+      if (user.role === 'admin' || user.role === 'super_admin') {
+        setScreen('admin');
+      } else if (!local.grade && local.goals.length === 0) {
+        setScreen('onboarding');
+      } else {
+        setScreen('dashboard');
+      }
+    } catch (err: any) {
+      setAuthError(err.message || `Đăng nhập ${provider} thất bại`);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     try { await apiLogout(); } catch { /* ignore */ }
     setToken(null);
@@ -249,6 +276,7 @@ export default function App() {
         <AuthScreen
           onLogin={handleLogin}
           onRegister={handleRegister}
+          onOAuthLogin={handleOAuthLogin}
           onClose={() => setScreen('landing')}
           error={authError}
           loading={authLoading}

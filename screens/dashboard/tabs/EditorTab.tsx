@@ -234,16 +234,16 @@ export default function EditorTab() {
     <>
       <PageTitle icon="edit_document" title="Academic Editor" subtitle="Soạn thảo văn bản học thuật với AI Writing Assistant" />
 
-      <div className="flex items-start relative w-full overflow-hidden pb-4">
+      <div className="flex flex-col lg:flex-row items-start relative w-full lg:overflow-hidden pb-4">
         {/* ── Editor ── */}
-        <div className="flex-1 min-w-0 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
+        <div className="w-full lg:flex-1 min-w-0 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
           <GlassCard className="!p-0 overflow-hidden">
             {/* Top bar */}
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/40 bg-white/30">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="relative" onMouseLeave={() => setShowDocList(false)}>
-                  <button onClick={() => setShowDocList(!showDocList)} className="p-1.5 rounded-lg hover:bg-white/50" title="Tài liệu">
-                    <span className="material-symbols-outlined text-slate-500 text-lg">folder_open</span>
+                  <button onClick={() => setShowDocList(!showDocList)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/50 transition-all text-slate-500" title="Tài liệu">
+                    <span className="material-symbols-outlined text-[20px]">folder_open</span>
                   </button>
                   {showDocList && (
                     <div className="absolute top-full left-0 mt-1 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50">
@@ -275,7 +275,9 @@ export default function EditorTab() {
                 <span className="text-xs text-slate-400">{charCount} ký tự</span>
                 {/* Export */}
                 <div className="relative ml-2" onMouseLeave={() => setShowExport(false)}>
-                  <button onClick={() => setShowExport(!showExport)} className="p-1.5 rounded-lg hover:bg-white/50" title="Xuất"><span className="material-symbols-outlined text-slate-500 text-lg">download</span></button>
+                  <button onClick={() => setShowExport(!showExport)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/50 transition-all text-slate-500" title="Xuất">
+                    <span className="material-symbols-outlined text-[20px]">download</span>
+                  </button>
                   {showExport && (
                     <div className="absolute top-full right-0 mt-1 w-44 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 py-1">
                       <button onClick={() => { expDoc(); setShowExport(false); }} className="w-full flex items-center gap-2 px-3 py-2 hover:bg-blue-50 text-sm text-slate-700"><span className="material-symbols-outlined text-blue-600 text-base">description</span>Word (.doc)</button>
@@ -284,8 +286,8 @@ export default function EditorTab() {
                   )}
                 </div>
                 {/* AI toggle */}
-                <button onClick={() => setAiOpen(!aiOpen)} className={`p-1.5 rounded-lg transition-all ml-1 ${aiOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-white/50 text-slate-500'}`} title="AI Assistant">
-                  <span className="material-symbols-outlined text-lg">auto_awesome</span>
+                <button onClick={() => setAiOpen(!aiOpen)} className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ml-1 ${aiOpen ? 'bg-blue-100 text-blue-600 shadow-sm' : 'hover:bg-white/50 text-slate-500'}`} title="AI Assistant">
+                  <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
                 </button>
               </div>
             </div>
@@ -295,7 +297,7 @@ export default function EditorTab() {
               {fmtActions.map((a, i) => {
                 if ('divider' in a && a.divider) return <div key={i} className="w-px h-5 bg-slate-200/60 mx-1 flex-shrink-0" />;
                 const on = isFmtActive(a);
-                return <button key={i} onClick={() => handleFmt(a)} title={a.tip} className={`p-1.5 rounded-lg transition-all flex-shrink-0 ${on ? 'bg-blue-100/80 text-blue-700 shadow-sm' : 'hover:bg-white/50 text-slate-500 hover:text-blue-600'}`}><span className="material-symbols-outlined text-[17px]">{a.icon}</span></button>;
+                return <button key={i} onClick={() => handleFmt(a)} title={a.tip} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all flex-shrink-0 ${on ? 'bg-blue-100/80 text-blue-700 shadow-sm' : 'hover:bg-white/50 text-slate-500 hover:text-blue-600'}`}><span className="material-symbols-outlined text-[18px]">{a.icon}</span></button>;
               })}
             </div>
 
@@ -310,13 +312,24 @@ export default function EditorTab() {
         </div>
 
         {/* ── AI Sidebar (Google Docs style) ── */}
+        {aiOpen && (
+          <div 
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[90] lg:hidden" 
+            onClick={() => setAiOpen(false)} 
+          />
+        )}
         <div 
-          className={`flex-shrink-0 sticky top-4 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] overflow-hidden ${
-            aiOpen ? 'w-[340px] opacity-100 ml-4 translate-x-0' : 'w-0 opacity-0 ml-0 translate-x-8'
-          }`}
+          className={`
+            lg:flex-shrink-0 lg:sticky lg:top-4 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+            fixed inset-x-0 bottom-0 z-[100] lg:z-auto
+            ${aiOpen 
+              ? 'translate-y-0 lg:translate-y-0 opacity-100 lg:w-[340px] lg:ml-4 lg:translate-x-0 h-[85vh] lg:h-auto' 
+              : 'translate-y-full lg:translate-y-0 opacity-0 lg:w-0 lg:ml-0 lg:translate-x-8 h-[85vh] lg:h-auto pointer-events-none'
+            }
+          `}
         >
-          <div className="w-[340px]">
-            <div className="bg-white/70 backdrop-blur-2xl rounded-[2.5rem] border border-white/90 shadow-[0_20px_50px_rgba(37,99,235,0.12),0_4px_12px_rgba(37,99,235,0.04)] flex flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 140px)' }}>
+          <div className="w-full lg:w-[340px] h-full lg:h-auto bg-white lg:bg-transparent rounded-t-[2.5rem] lg:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
+            <div className="bg-white/90 lg:bg-white/70 backdrop-blur-2xl rounded-t-[2.5rem] lg:rounded-[2.5rem] border-t lg:border border-white/90 lg:shadow-[0_20px_50px_rgba(37,99,235,0.12),0_4px_12px_rgba(37,99,235,0.04)] flex flex-col h-full lg:h-auto overflow-hidden" style={{ maxHeight: 'calc(100vh - 100px)' }}>
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-white/60">
                 <div className="flex items-center gap-2.5">
@@ -326,11 +339,11 @@ export default function EditorTab() {
                   <span className="text-base font-extrabold text-[#1E3A8A] tracking-tight">AI Assistant</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => { setAiMessages([]); }} className="p-1.5 rounded-xl hover:bg-blue-50 text-slate-400 hover:text-blue-500 transition-all" title="Xóa lịch sử">
-                    <span className="material-symbols-outlined text-[17px]">delete_sweep</span>
+                  <button onClick={() => { setAiMessages([]); }} className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-blue-50 text-slate-400 hover:text-blue-500 transition-all" title="Xóa lịch sử">
+                    <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
                   </button>
-                  <button onClick={() => setAiOpen(false)} className="p-1.5 rounded-xl hover:bg-blue-50 text-slate-400 hover:text-blue-500 transition-all" title="Đóng">
-                    <span className="material-symbols-outlined text-[17px]">close</span>
+                  <button onClick={() => setAiOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-blue-50 text-slate-400 hover:text-blue-500 transition-all" title="Đóng">
+                    <span className="material-symbols-outlined text-[18px]">close</span>
                   </button>
                 </div>
               </div>

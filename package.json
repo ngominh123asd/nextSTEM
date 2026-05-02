@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.13.5",
     "@tailwindcss/typography": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -17,6 +18,8 @@
     "radix-ui": "^1.4.3",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-facebook-login": "^4.1.1",
+    "react-is": "^19.2.5",
     "react-markdown": "^10.1.0",
     "recharts": "^3.6.0",
     "tailwind-merge": "^3.4.0"
@@ -24,6 +27,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^22.14.0",
+    "@types/react-facebook-login": "^4.1.11",
     "@vitejs/plugin-react": "^5.0.0",
     "shadcn": "^3.8.4",
     "tailwindcss": "^4.1.18",

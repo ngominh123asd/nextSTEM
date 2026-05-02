@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import GlassSurface from '../../../components/GlassSurface';
 import { UserData, glass } from '../types';
 import { BlobDecor, GlassCard, GlassHeader, PageTitle, ToolCard } from '../components/SharedUI';
@@ -15,11 +16,11 @@ type ToolSubPage = 'home' | 'university' | 'major' | 'scholarship' | 'extracurri
 
 const toolItems: { id: ToolSubPage; icon: string; grad: string; title: string; desc: string; tags: string[] }[] = [
   { id: 'major',           icon: 'category',          grad: 'from-blue-500 to-blue-600',    title: 'Chọn Chuyên Ngành',                desc: 'AI gợi ý ngành học phù hợp dựa trên sở thích & năng lực',          tags: ['AI', 'AI hỗ trợ'] },
-  { id: 'university',      icon: 'school',            grad: 'from-indigo-500 to-indigo-600',title: 'Tìm Trường Đại Học',               desc: 'Tìm kiếm & so sánh trường đại học trên toàn thế giới',              tags: ['AI', 'AI hỗ trợ'] },
+  { id: 'university',      icon: 'school',            grad: 'from-sky-500 to-blue-600',     title: 'Tìm Trường Đại Học',               desc: 'Tìm kiếm & so sánh trường đại học trên toàn thế giới',              tags: ['AI', 'AI hỗ trợ'] },
   { id: 'scholarship',     icon: 'workspace_premium', grad: 'from-amber-500 to-orange-500', title: 'Tìm Kiếm Học Bổng',                desc: 'Khám phá cơ hội học bổng phù hợp với hồ sơ của bạn',               tags: ['AI', 'AI hỗ trợ'] },
   { id: 'extracurricular', icon: 'groups',            grad: 'from-emerald-500 to-teal-500', title: 'Kế Hoạch Ngoại Khoá',              desc: 'Lên kế hoạch hoạt động ngoại khoá & đánh giá AI',                  tags: ['Lập kế hoạch', 'AI'] },
   { id: 'testprep',        icon: 'quiz',              grad: 'from-rose-500 to-pink-500',    title: 'Chuẩn Bị Bài Kiểm Tra',            desc: 'Luyện thi IELTS, TOEFL, SAT, AP với hỗ trợ AI',                    tags: ['IELTS', 'SAT', 'AP'] },
-  { id: 'essay',           icon: 'edit_note',         grad: 'from-violet-500 to-purple-500',title: 'Viết Bài Luận Cá Nhân',            desc: 'AI Coach hỗ trợ viết Personal Statement & Essay',                  tags: ['AI Writing', 'CommonApp'] },
+  { id: 'essay',           icon: 'edit_note',         grad: 'from-blue-500 to-sky-600',     title: 'Viết Bài Luận Cá Nhân',            desc: 'AI Coach hỗ trợ viết Personal Statement & Essay',                  tags: ['AI Writing', 'CommonApp'] },
   { id: 'visa',            icon: 'flight_takeoff',    grad: 'from-cyan-500 to-sky-500',     title: 'Nộp Đơn Xin Visa',                 desc: 'Hướng dẫn từng bước quy trình xin visa du học',                    tags: ['Checklist', 'Hướng dẫn'] },
 ];
 
@@ -298,7 +299,7 @@ function MajorSearch({ userData }: { userData: UserData }) {
           <button
             onClick={handleSearch}
             disabled={loading || !query.trim()}
-            className="w-full py-3 rounded-2xl font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-2xl font-bold text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
@@ -395,7 +396,7 @@ function MajorSearch({ userData }: { userData: UserData }) {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-3 rounded-xl bg-indigo-50/70">
+                  <div className="p-3 rounded-xl bg-blue-50/70">
                     <p className="text-xs font-semibold text-slate-500 mb-2">Nhóm nghề nghiệp liên quan</p>
                     <div className="space-y-1">
                       {item.related_careers.slice(0, 4).map((career, i) => (
@@ -428,13 +429,13 @@ function MajorSearch({ userData }: { userData: UserData }) {
 
             <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-700"
+                className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-700"
                 style={{ width: `${streamPreview.length > 0 ? 85 : 55}%` }}
               />
             </div>
 
             {streamPreview && (
-              <div className="p-3 rounded-xl bg-indigo-50/60 border border-indigo-100">
+              <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-100">
                 <p className="text-xs font-semibold text-slate-500 mb-1">Nội dung AI đang tạo (streaming):</p>
                 <p className="text-xs text-slate-700 whitespace-pre-wrap">{streamPreview}</p>
               </div>
@@ -483,7 +484,7 @@ function MajorSearch({ userData }: { userData: UserData }) {
             ))}
 
             {selectedSaved && (
-              <div className="p-4 rounded-xl bg-indigo-50/60 border border-indigo-100">
+              <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100">
                 <p className="font-semibold text-[#1E3A8A] mb-2">Xem nhanh kết quả đã lưu: {selectedSaved.query}</p>
                 <div className="space-y-2">
                   {selectedSaved.recommendations.slice(0, 3).map((item, idx) => (
@@ -995,54 +996,92 @@ function UniversityDetailModal({
   university: UniversityResult; 
   onClose: () => void; 
 }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  const statCards = [
+    university.gpa_min ? { icon: 'school', label: 'GPA tối thiểu', value: String(university.gpa_min), color: 'from-blue-500 to-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' } : null,
+    university.sat_min ? { icon: 'grade', label: 'SAT tối thiểu', value: String(university.sat_min), color: 'from-sky-500 to-blue-500', bg: 'bg-sky-50', border: 'border-sky-100' } : null,
+    university.ielts_min ? { icon: 'translate', label: 'IELTS tối thiểu', value: String(university.ielts_min), color: 'from-cyan-500 to-blue-500', bg: 'bg-cyan-50', border: 'border-cyan-100' } : null,
+    university.acceptance_rate ? { icon: 'how_to_reg', label: 'Tỷ lệ chấp nhận', value: `${university.acceptance_rate}%`, color: 'from-amber-500 to-orange-500', bg: 'bg-amber-50', border: 'border-amber-100' } : null,
+    university.tuition_usd ? { icon: 'payments', label: 'Học phí/năm', value: `$${university.tuition_usd.toLocaleString()}`, color: 'from-emerald-500 to-green-500', bg: 'bg-emerald-50', border: 'border-emerald-100' } : null,
+  ].filter(Boolean) as { icon: string; label: string; value: string; color: string; bg: string; border: string }[];
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      onClick={onClose}
+    >
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
       
       {/* Modal */}
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl">
+      <div 
+        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl shadow-blue-900/15 border border-slate-100 overflow-hidden"
+        onClick={e => e.stopPropagation()}
+        style={{ maxHeight: 'min(85vh, 720px)' }}
+      >
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-indigo-500 to-blue-500 p-6 text-white">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="material-symbols-outlined text-4xl">school</span>
-                <h2 className="text-2xl font-bold">{university.name}</h2>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="px-3 py-1 bg-white/20 rounded-full text-sm flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">public</span>
-                  {university.country}
-                </span>
-                {university.ranking && (
-                  <span className="px-3 py-1 bg-white/20 rounded-full text-sm font-bold">
-                    #{university.ranking} thế giới
+        <div className="relative bg-gradient-to-br from-[#0d47a1] via-[#1565c0] to-[#2196f3] px-6 pt-6 pb-8 text-white overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/8" />
+            <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/5" />
+            <div className="absolute top-4 right-20 w-16 h-16 rounded-full bg-white/5" />
+          </div>
+
+          <div className="relative z-10">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
+                    <span className="material-symbols-outlined text-xl">school</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg font-bold leading-snug">{university.name}</h2>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-3 py-1 bg-white/15 backdrop-blur-sm rounded-lg text-xs flex items-center gap-1.5 border border-white/10 font-medium">
+                    <span className="material-symbols-outlined text-xs">public</span>
+                    {university.country}
                   </span>
-                )}
+                  {university.ranking && (
+                    <span className="px-3 py-1 bg-amber-400/20 backdrop-blur-sm rounded-lg text-xs font-bold border border-amber-300/20 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">emoji_events</span>
+                      #{university.ranking} thế giới
+                    </span>
+                  )}
+                  {university.scholarships && (
+                    <span className="px-3 py-1 bg-emerald-400/20 backdrop-blur-sm rounded-lg text-xs font-medium border border-emerald-300/20 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">workspace_premium</span>
+                      Có học bổng
+                    </span>
+                  )}
+                </div>
               </div>
+              <button
+                onClick={onClose}
+                className="w-9 h-9 flex items-center justify-center hover:bg-white/15 rounded-xl transition-colors flex-shrink-0"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
-            >
-              <span className="material-symbols-outlined text-2xl">close</span>
-            </button>
           </div>
         </div>
-        
+
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="overflow-y-auto px-6 py-5 space-y-5" style={{ maxHeight: 'calc(min(85vh, 720px) - 160px)' }}>
           {/* Fields */}
           {university.fields.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-500 mb-2">Ngành học mạnh</h3>
+              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Ngành học mạnh</h3>
               <div className="flex flex-wrap gap-2">
                 {university.fields.map((field, i) => (
-                  <span key={i} className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-medium">
+                  <span key={i} className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium border border-blue-100/60">
                     {field}
                   </span>
                 ))}
@@ -1050,85 +1089,48 @@ function UniversityDetailModal({
             </div>
           )}
           
-          {/* Admission Requirements */}
-          <div>
-            <h3 className="text-sm font-semibold text-slate-500 mb-3">Yêu cầu tuyển sinh</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {university.gpa_min && (
-                <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl text-center">
-                  <span className="material-symbols-outlined text-2xl text-blue-500 mb-1">school</span>
-                  <p className="text-xs text-slate-500">GPA tối thiểu</p>
-                  <p className="text-xl font-bold text-[#1E3A8A]">{university.gpa_min}</p>
-                </div>
-              )}
-              {university.sat_min && (
-                <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl text-center">
-                  <span className="material-symbols-outlined text-2xl text-blue-500 mb-1">grade</span>
-                  <p className="text-xs text-slate-500">SAT tối thiểu</p>
-                  <p className="text-xl font-bold text-[#1E3A8A]">{university.sat_min}</p>
-                </div>
-              )}
-              {university.ielts_min && (
-                <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl text-center">
-                  <span className="material-symbols-outlined text-2xl text-blue-500 mb-1">translate</span>
-                  <p className="text-xs text-slate-500">IELTS tối thiểu</p>
-                  <p className="text-xl font-bold text-[#1E3A8A]">{university.ielts_min}</p>
-                </div>
-              )}
-              {university.acceptance_rate && (
-                <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl text-center">
-                  <span className="material-symbols-outlined text-2xl text-amber-500 mb-1">how_to_reg</span>
-                  <p className="text-xs text-slate-500">Tỷ lệ chấp nhận</p>
-                  <p className="text-xl font-bold text-[#1E3A8A]">{university.acceptance_rate}%</p>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Cost */}
-          {university.tuition_usd && (
+          {/* Stats Grid */}
+          {statCards.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-500 mb-3">Học phí & Tài chính</h3>
-              <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-500">Học phí/năm</p>
-                    <p className="text-3xl font-bold text-green-600">${university.tuition_usd.toLocaleString()}</p>
-                  </div>
-                  {university.scholarships && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-green-100 rounded-xl">
-                      <span className="material-symbols-outlined text-green-600">workspace_premium</span>
-                      <span className="font-semibold text-green-700">Có học bổng</span>
+              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Thông tin tuyển sinh</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {statCards.map((card, i) => (
+                  <div key={i} className={`p-4 rounded-2xl ${card.bg} border ${card.border} text-center group hover:shadow-md transition-all duration-200`}>
+                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mx-auto mb-2.5 shadow-sm group-hover:scale-110 transition-transform duration-200`}>
+                      <span className="material-symbols-outlined text-white text-base">{card.icon}</span>
                     </div>
-                  )}
-                </div>
+                    <p className="text-[11px] text-slate-500 mb-0.5">{card.label}</p>
+                    <p className="text-xl font-bold text-slate-800">{card.value}</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
-          
+
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-1">
             {university.website && (
               <a
                 href={university.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 py-3 rounded-2xl font-bold text-white bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+                className="flex-1 py-3 rounded-2xl font-bold text-white bg-gradient-to-r from-[#1565c0] to-[#2196f3] hover:shadow-lg hover:shadow-blue-500/25 transition-all flex items-center justify-center gap-2 text-sm"
               >
-                <span className="material-symbols-outlined">open_in_new</span>
-                Website trường
+                <span className="material-symbols-outlined text-lg">open_in_new</span>
+                Truy cập Website
               </a>
             )}
             <button
               onClick={onClose}
-              className="px-6 py-3 rounded-2xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all"
+              className="px-6 py-3 rounded-2xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all text-sm"
             >
               Đóng
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -1216,7 +1218,7 @@ function UniversitySearch({ userData }: { userData: UserData }) {
           <button
             onClick={handleSearch}
             disabled={loading || !query.trim()}
-            className="w-full py-3 rounded-2xl font-bold text-white bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-2xl font-bold text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
@@ -1236,7 +1238,7 @@ function UniversitySearch({ userData }: { userData: UserData }) {
       {/* Results */}
       {loading && (
         <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
         </div>
       )}
 
@@ -1265,7 +1267,7 @@ function UniversitySearch({ userData }: { userData: UserData }) {
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <h3 className="font-bold text-[#1E3A8A] text-lg">{uni.name}</h3>
                       {uni.ranking && (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
                           #{uni.ranking}
                         </span>
                       )}
@@ -1283,7 +1285,7 @@ function UniversitySearch({ userData }: { userData: UserData }) {
                         </span>
                       )}
                       {uni.source === 'ror' && (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 flex items-center gap-0.5">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-700 flex items-center gap-0.5">
                           <span className="material-symbols-outlined text-xs">account_tree</span>
                           ROR
                         </span>
@@ -1373,7 +1375,7 @@ function UniversitySearch({ userData }: { userData: UserData }) {
                       href={uni.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-shrink-0 p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 text-white hover:shadow-lg hover:scale-105 transition-all"
+                      className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-lg hover:scale-105 transition-all"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <span className="material-symbols-outlined">open_in_new</span>
@@ -1404,15 +1406,15 @@ function AIGenericMode({ item, userData }: { item: typeof toolItems[0]; userData
 
   return (
     <GlassCard>
-      <BlobDecor className="w-48 h-48 -top-16 -right-16 bg-violet-200/20" />
+      <BlobDecor className="w-48 h-48 -top-16 -right-16 bg-blue-200/20" />
       <GlassHeader icon="auto_awesome" title="AI Hỗ trợ tìm kiếm" />
       <div className="relative z-10 space-y-4">
         {/* Chat History */}
         <div className="space-y-3 max-h-64 overflow-y-auto">
           {chatHistory.length === 0 && (
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/50 to-indigo-50/50 backdrop-blur-sm border border-white/60">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/50 to-sky-50/50 backdrop-blur-sm border border-white/60">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-md">
                   <span className="material-symbols-outlined text-white text-base">smart_toy</span>
                 </div>
                 <div>
@@ -1425,7 +1427,7 @@ function AIGenericMode({ item, userData }: { item: typeof toolItems[0]; userData
             </div>
           )}
           {chatHistory.map((msg, i) => (
-            <div key={i} className={`p-3 rounded-2xl ${msg.role === 'user' ? 'bg-indigo-50 ml-8' : 'bg-slate-50 mr-8'}`}>
+            <div key={i} className={`p-3 rounded-2xl ${msg.role === 'user' ? 'bg-blue-50 ml-8' : 'bg-slate-50 mr-8'}`}>
               <p className="text-sm text-slate-700">{msg.text}</p>
             </div>
           ))}
@@ -1446,7 +1448,7 @@ function AIGenericMode({ item, userData }: { item: typeof toolItems[0]; userData
           </div>
           <button
             onClick={() => message.trim() && setChatHistory([...chatHistory, {role: 'user', text: message}])}
-            className="px-6 rounded-2xl font-bold text-white bg-gradient-to-r from-indigo-500 to-blue-500 hover:shadow-lg transition-all"
+            className="px-6 rounded-2xl font-bold text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:shadow-lg transition-all"
           >
             <span className="material-symbols-outlined">send</span>
           </button>
@@ -1505,7 +1507,7 @@ function ToolDetail({ item, onBack, userData }: { item: typeof toolItems[0]; onB
               { step: '04', title: 'Xem kết quả & lưu lại', desc: 'Xem kết quả gợi ý và lưu vào Portfolio của bạn.' },
             ].map(s => (
               <div key={s.step} className="flex items-start gap-4 p-4 rounded-2xl bg-white/40 backdrop-blur-sm border border-white/60">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-md flex-shrink-0">{s.step}</div>
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md flex-shrink-0">{s.step}</div>
                 <div>
                   <h4 className="font-bold text-[#1E3A8A] mb-0.5">{s.title}</h4>
                   <p className="text-sm text-slate-500">{s.desc}</p>

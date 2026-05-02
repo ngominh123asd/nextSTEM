@@ -3,6 +3,7 @@ import React from 'react';
 export interface AuthProps {
   onLogin: (email: string, password: string) => void;
   onRegister: (data: { name: string; email: string; password: string }) => void;
+  onOAuthLogin: (provider: 'google' | 'facebook', token: string) => void;
   onClose: () => void;
   error?: string | null;
   loading?: boolean;
@@ -25,6 +26,7 @@ export interface LoginFormProps {
   isRegister: boolean;
   loading?: boolean;
   toggle: () => void;
+  onOAuthLogin: (provider: 'google' | 'facebook', token: string) => void;
 }
 
 export interface RegisterFormProps {
@@ -47,6 +49,7 @@ export interface RegisterFormProps {
   isRegister: boolean;
   loading?: boolean;
   toggle: () => void;
+  onOAuthLogin: (provider: 'google' | 'facebook', token: string) => void;
 }
 
 export interface SlidingPanelProps {

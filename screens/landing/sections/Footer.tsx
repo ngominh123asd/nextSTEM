@@ -89,15 +89,15 @@ export default function Footer({ onOpenAbout }: FooterProps) {
                 </a>
               </li>
               <li>
-                <a href="mailto:contact@nextstem.ai" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <a href="mailto:nextstemvietnam@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors">
                   <span className="material-symbols-outlined text-sm text-primary">mail</span>
-                  contact@nextstem.ai
+                  nextstemvietnam@gmail.com
                 </a>
               </li>
               <li>
-                <a href="https://www.nextSTEM.ai" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <a href="https://nextstemvietnam.vercel.app" className="flex items-center gap-2 hover:text-primary transition-colors">
                   <span className="material-symbols-outlined text-sm text-primary">language</span>
-                  www.nextSTEM.ai
+                  nextstemvietnam.vercel.app
                 </a>
               </li>
             </ul>

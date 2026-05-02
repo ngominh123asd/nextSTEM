@@ -6,7 +6,7 @@ import SlidingPanel from './components/SlidingPanel';
 import MobileAuth from './components/MobileAuth';
 import SuccessPopup from './components/SuccessPopup';
 
-export default function AuthScreen({ onLogin, onRegister, onClose, error, loading, onClearError, successMessage }: AuthProps) {
+export default function AuthScreen({ onLogin, onRegister, onOAuthLogin, onClose, error, loading, onClearError, successMessage }: AuthProps) {
   const [isRegister, setIsRegister] = useState(false);
 
   /* ── Login form state ── */
@@ -66,6 +66,7 @@ export default function AuthScreen({ onLogin, onRegister, onClose, error, loadin
     loginEmail, setLoginEmail, loginPass, setLoginPass,
     showLoginPass, setShowLoginPass, rememberMe, setRememberMe,
     handleLogin, displayError, isRegister, loading, toggle,
+    onOAuthLogin,
   };
 
   const registerFormProps = {
@@ -74,6 +75,7 @@ export default function AuthScreen({ onLogin, onRegister, onClose, error, loadin
     showRegPass, setShowRegPass, showRegConfirm, setShowRegConfirm,
     agreeTerms, setAgreeTerms,
     handleRegister, displayError, isRegister, loading, toggle,
+    onOAuthLogin,
   };
 
   return (

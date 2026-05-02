@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import GlassSurface from '../../../components/GlassSurface';
 import CardSwap, { Card } from '../../../components/CardSwap';
 
@@ -7,6 +7,14 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ onStartDemo }: HeroSectionProps) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 1024);
+    handler(); // initial check
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
   return (
     <header className="relative overflow-x-clip bg-slate-50 pt-12 pb-16 lg:pt-24 lg:pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -46,14 +54,14 @@ export default function HeroSection({ onStartDemo }: HeroSectionProps) {
           </div>
           
           {/* Visual – CardSwap */}
-          <div className="relative w-full min-h-[420px] lg:min-h-[500px]" style={{ height: 500 }}>
+          <div className={`relative w-full ${isMobile ? 'min-h-[300px] -translate-x-2' : 'min-h-[500px]'}`}>
             <CardSwap
-              cardDistance={50}
-              verticalDistance={30}
+              cardDistance={isMobile ? 15 : 50}
+              verticalDistance={isMobile ? 15 : 30}
               delay={5000}
               pauseOnHover={true}
-              width={480}
-              height={340}
+              width={isMobile ? 260 : 480}
+              height={isMobile ? 190 : 340}
             >
               <Card className="overflow-hidden">
                 <img

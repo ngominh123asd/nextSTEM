@@ -78,11 +78,11 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
           onClick={() => setShowScoreInfo(false)}
         >
           <div
-            className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full overflow-hidden"
+            className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full overflow-hidden flex flex-col max-h-[90vh]"
             onClick={e => e.stopPropagation()}
           >
             {/* Header with gradient */}
-            <div className="bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] px-6 py-5 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-[#1152d4] to-[#2E6AE6] px-6 py-5 relative overflow-hidden flex-shrink-0">
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/20" />
                 <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/15" />
@@ -103,7 +103,7 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
               </div>
             </div>
 
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto">
               {/* How it works — 3 steps */}
               <div className="flex items-start gap-4 mb-5">
                 {[

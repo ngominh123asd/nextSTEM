@@ -97,7 +97,15 @@ interface Props {
 
 export default function AIChatPanel({ onClose, userName, userData, onNavigate }: Props) {
   const [messages, setMessages] = useState<ChatMsg[]>([
-    { role: 'ai', text: `Xin chào ${userName?.split(' ').pop()}! 👋\n\nMình là **AI Study Coach** của nextSTEM. Mình có thể giúp bạn:\n\n🧭 **Điều hướng** — "Mở lộ trình" hoặc "Vào Hồ sơ năng lực"\n📊 **Tra cứu** — "Timeline gần nhất" hoặc "Dự án của tôi"\n💡 **Tư vấn** — Hỏi bất kỳ điều gì về du học, học tập\n\nBạn muốn bắt đầu từ đâu?`, time: 'Vừa xong' },
+    { role: 'ai', text: `Xin chào ${userName?.split(' ').pop()}! 👋
+
+Mình là **AI Study Coach** của nextSTEM. Mình có thể giúp bạn:
+
+- 🧭 **Điều hướng** — "Mở lộ trình" hoặc "Vào Hồ sơ năng lực"
+- 📊 **Tra cứu** — "Timeline gần nhất" hoặc "Dự án của tôi"
+- 💡 **Tư vấn** — Hỏi bất kỳ điều gì về du học, học tập
+
+Bạn muốn bắt đầu từ đâu?`, time: 'Vừa xong' },
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -213,7 +221,7 @@ export default function AIChatPanel({ onClose, userName, userData, onNavigate }:
   return (
     <div className="fixed bottom-0 right-0 sm:bottom-6 sm:right-6 z-[120] w-full sm:w-[440px] h-full sm:h-[640px] sm:max-h-[85vh] flex flex-col bg-white/80 backdrop-blur-3xl sm:rounded-3xl border border-white/60 shadow-2xl shadow-blue-900/15 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1152d4 0%, #2E6AE6 50%, #4F46E5 100%)' }}>
+      <div className="flex items-center justify-between px-5 py-4 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0f4bc7 0%, #1a5cde 50%, #2563EB 100%)' }}>
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(255,255,255,0.3) 0%, transparent 50%)' }} />
         <div className="flex items-center gap-3 relative z-10">
           <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner">
@@ -227,12 +235,12 @@ export default function AIChatPanel({ onClose, userName, userData, onNavigate }:
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 relative z-10">
-          <button onClick={() => { setMessages(m => [m[0]]); }} className="p-2 rounded-xl hover:bg-white/15 transition-all" title="Xóa lịch sử">
-            <span className="material-symbols-outlined text-lg">delete_sweep</span>
+        <div className="flex items-center gap-1.5 relative z-10">
+          <button onClick={() => { setMessages(m => [m[0]]); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/15 transition-all" title="Xóa lịch sử">
+            <span className="material-symbols-outlined text-[20px]">delete_sweep</span>
           </button>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/15 transition-all">
-            <span className="material-symbols-outlined text-lg">close</span>
+          <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/15 transition-all">
+            <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
       </div>
@@ -242,18 +250,18 @@ export default function AIChatPanel({ onClose, userName, userData, onNavigate }:
         {messages.map((m, i) => (
           <div key={i} className={`flex gap-2 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {m.role === 'ai' && (
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
                 <span className="material-symbols-outlined text-white text-sm">auto_awesome</span>
               </div>
             )}
             <div className="max-w-[82%]">
               <div className={`p-3.5 text-[13px] leading-relaxed ${
                 m.role === 'user'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl rounded-br-md shadow-md shadow-blue-500/20'
-                  : 'bg-white/90 backdrop-blur-sm border border-white/80 text-slate-700 rounded-2xl rounded-bl-md shadow-sm'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl rounded-br-md shadow-md shadow-blue-500/20'
+                  : 'bg-white/90 backdrop-blur-sm border border-slate-100 text-slate-700 rounded-2xl rounded-bl-md shadow-sm'
               }`}>
                 {m.role === 'ai' && m.text ? (
-                  <div className="prose prose-sm prose-slate max-w-none prose-p:my-1 prose-p:text-[13px] prose-p:leading-relaxed prose-strong:text-[#1E3A8A] prose-li:text-[13px] prose-li:my-0.5 prose-headings:text-[#1E3A8A] prose-headings:text-sm prose-code:text-xs prose-code:bg-blue-50 prose-code:text-blue-700 prose-code:px-1 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+                  <div className="prose prose-sm prose-slate max-w-none [&>p]:my-1.5 [&>p]:text-[13px] [&>p]:leading-relaxed [&>ul]:my-1.5 [&>ul]:space-y-1 [&>ul>li]:text-[13px] [&>ul>li]:leading-relaxed prose-strong:text-blue-800 prose-strong:font-semibold prose-headings:text-blue-800 prose-headings:text-sm prose-code:text-xs prose-code:bg-blue-50 prose-code:text-blue-700 prose-code:px-1 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
                     <ReactMarkdown>{m.text}</ReactMarkdown>
                   </div>
                 ) : m.role === 'ai' && !m.text ? (
@@ -294,7 +302,7 @@ export default function AIChatPanel({ onClose, userName, userData, onNavigate }:
         ))}
         {isLoading && messages[messages.length - 1]?.role !== 'ai' && (
           <div className="flex gap-2 items-end">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
               <span className="material-symbols-outlined text-white text-sm">auto_awesome</span>
             </div>
             <div className="bg-white/90 border border-white/80 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">

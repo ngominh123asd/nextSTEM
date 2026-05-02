@@ -95,6 +95,20 @@ export async function apiLogin(email: string, password: string): Promise<TokenRe
   });
 }
 
+export async function apiGoogleLogin(token: string): Promise<TokenResponse> {
+  return request<TokenResponse>('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function apiFacebookLogin(token: string): Promise<TokenResponse> {
+  return request<TokenResponse>('/auth/facebook', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+}
+
 export async function apiLogout(): Promise<void> {
   return request<void>('/auth/logout', { method: 'POST' });
 }
