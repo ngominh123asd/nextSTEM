@@ -203,7 +203,7 @@ export default function App() {
       const local = apiUserToLocal(user);
       setUserData(local);
       setUserRole(user.role || 'user');
-      
+
       if (user.role === 'admin' || user.role === 'super_admin') {
         setScreen('admin');
       } else if (!local.grade && local.goals.length === 0) {
