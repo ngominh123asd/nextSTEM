@@ -80,7 +80,6 @@ async def verify_facebook_token(access_token: str) -> dict:
     APP_SECRET = settings.FACEBOOK_APP_SECRET.strip() if settings.FACEBOOK_APP_SECRET else ""
 
     if not APP_ID or not APP_SECRET:
-        print("Facebook OAuth Error: APP_ID or APP_SECRET is missing or empty.")
         raise HTTPException(status_code=500, detail="Facebook OAuth not configured")
 
     APP_TOKEN = f"{APP_ID}|{APP_SECRET}"
@@ -94,9 +93,6 @@ async def verify_facebook_token(access_token: str) -> dict:
         debug_data = debug_res.json().get("data", {})
 
         if not debug_data.get("is_valid") or str(debug_data.get("app_id")) != APP_ID:
-            print(f"Facebook OAuth Error: Token invalid or App ID mismatch. Expected: {APP_ID}, Got: {debug_data.get('app_id')}, isValid: {debug_data.get('is_valid')}")
-            if debug_res.json().get("error"):
-                print(f"Facebook Graph API Error: {debug_res.json().get('error')}")
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         # Bước 2: Lấy thông tin người dùng trực tiếp từ Facebook
@@ -107,7 +103,6 @@ async def verify_facebook_token(access_token: str) -> dict:
         me_data = me_res.json()
 
     if "email" not in me_data:
-        print(f"Facebook OAuth Error: No email returned from /me endpoint. Response: {me_data}")
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     return {"email": me_data["email"], "name": me_data.get("name", "")}
