@@ -81,8 +81,8 @@ const MentorModal: React.FC<{ mentor: Mentor | null; onClose: () => void }> = ({
           <div className="space-y-8">
             <section>
               <h4 className="flex items-center gap-3 text-sm uppercase tracking-widest text-[#1E3A8A] font-bold mb-3">
-                 <span className="w-5 h-[3px] bg-[#1E3A8A] rounded-full"></span>
-                 Về Mentor
+                <span className="w-5 h-[3px] bg-[#1E3A8A] rounded-full"></span>
+                Về Mentor
               </h4>
               <p className="text-gray-700 font-medium leading-relaxed text-[15px] bg-white p-5 rounded-2xl shadow-sm border border-gray-200 transition-shadow hover:shadow-md hover:border-[#BFD9FF]">
                 {mentor.bio}
@@ -91,8 +91,8 @@ const MentorModal: React.FC<{ mentor: Mentor | null; onClose: () => void }> = ({
 
             <section>
               <h4 className="flex items-center gap-3 text-sm uppercase tracking-widest text-[#1E3A8A] font-bold mb-4">
-                 <span className="w-5 h-[3px] bg-[#1E3A8A] rounded-full"></span>
-                 Thành tựu nổi bật
+                <span className="w-5 h-[3px] bg-[#1E3A8A] rounded-full"></span>
+                Thành tựu nổi bật
               </h4>
               <ul className="space-y-3">
                 {mentor.achievements.map((ach, idx) => (
@@ -171,7 +171,7 @@ const MentorSection: React.FC = () => {
           Đội ngũ Mentor chất lượng
         </p>
         <p className="mentor-anim opacity-0 mt-4 max-w-2xl text-lg text-gray-600 font-medium mx-auto border-t border-blue-900/10 pt-4">
-          Kết nối trực tiếp với các anh chị đã có mặt tại những trường đại học hàng đầu thế giới để nhận lộ trình chuẩn và lời khuyên cá nhân.
+          Kết nối trực tiếp với các Mentor đã có mặt tại những trường đại học hàng đầu thế giới để nhận lộ trình chuẩn và lời khuyên cá nhân.
         </p>
       </div>
 
