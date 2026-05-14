@@ -97,8 +97,8 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
                     <p className="text-[11px] text-blue-100">Khung STEM — Chương trình GDPT 2018</p>
                   </div>
                 </div>
-                <button onClick={() => setShowScoreInfo(false)} className="p-1.5 rounded-xl hover:bg-white/20 text-white/70 hover:text-white transition-colors">
-                  <span className="material-symbols-outlined text-lg">close</span>
+                <button onClick={() => setShowScoreInfo(false)} className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/20 text-white/70 hover:text-white transition-colors">
+                  <span className="material-symbols-outlined text-lg leading-none">close</span>
                 </button>
               </div>
             </div>
@@ -113,7 +113,7 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
                 ].map((step, i) => (
                   <div key={i} className="flex-1 text-center">
                     <div className="w-8 h-8 rounded-full bg-blue-50 border-2 border-blue-200 flex items-center justify-center mx-auto mb-1.5">
-                      <span className="material-symbols-outlined text-blue-600 text-sm">{step.icon}</span>
+                      <span className="material-symbols-outlined text-blue-600 text-base leading-none">{step.icon}</span>
                     </div>
                     <p className="text-[10px] font-semibold text-slate-600 leading-tight">{step.text}</p>
                   </div>
@@ -131,7 +131,7 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
                     { label: 'Mức 4', bg: '#60a5fa', fg: '#ffffff', w: '20%' },
                     { label: 'Mức 5', bg: '#3b82f6', fg: '#ffffff', w: '20%' },
                   ].map((lv, i) => (
-                    <div key={i} className="flex-1 flex items-center justify-center text-[9px] font-bold"
+                    <div key={i} className="flex-1 flex items-center justify-center text-[9px] font-bold leading-none"
                       style={{ background: lv.bg, color: lv.fg }}>
                       {lv.label}
                     </div>
@@ -156,7 +156,7 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
                   <div key={t.code} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-blue-50/50 transition-colors border border-transparent hover:border-blue-100">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1152d4] to-[#2E6AE6] flex items-center justify-center flex-shrink-0 shadow-sm"
                       style={{ opacity: 0.7 + (i * 0.075) }}>
-                      <span className="material-symbols-outlined text-white text-sm">{t.icon}</span>
+                      <span className="material-symbols-outlined text-white text-base leading-none">{t.icon}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-[#1E3A8A]">{t.name}</p>
@@ -168,8 +168,10 @@ export default function DashboardTab({ userData, onNav }: { userData: UserData; 
               </div>
 
               {/* Footer */}
-              <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
-                <span className="material-symbols-outlined text-blue-400 text-sm">calculate</span>
+              <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+                <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-blue-500 text-sm leading-none">calculate</span>
+                </div>
                 <p className="text-[10px] text-slate-400 flex-1">
                   Điểm tổng = trung bình 15 chỉ số · Tối đa <strong className="text-slate-600">100</strong> điểm
                 </p>

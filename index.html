@@ -14,6 +14,7 @@
         console.error = function(...args) {
           const msg = args[0]?.toString?.() || '';
           if (msg.includes('runtime.lastError') || msg.includes('Receiving end does not exist')) return;
+          if (msg.includes('addListener') && msg.includes('undefined')) return;
           return originalError.apply(console, args);
         };
         const originalWarn = console.warn;
@@ -22,19 +23,17 @@
           if (msg.includes('runtime.lastError') || msg.includes('Receiving end does not exist')) return;
           return originalWarn.apply(console, args);
         };
+        // Global error handler for uncaught TypeErrors from extensions
+        window.addEventListener('error', function(event) {
+          if (event.message && event.message.includes("reading 'addListener'") && event.message.includes("undefined")) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+            return true;
+          }
+        }, true);
       })();
     </script>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "recharts": "https://esm.sh/recharts@^3.6.0"
-  }
-}
-</script>
-</head>
+  </head>
   <body class="bg-background-light text-slate-900 antialiased selection:bg-primary/20">
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>

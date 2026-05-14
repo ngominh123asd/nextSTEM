@@ -2,13 +2,44 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 import { gsap } from 'gsap';
 
 export const useMedia = (queries: string[], values: number[], defaultValue: number): number => {
-  const get = () => values[queries.findIndex(q => matchMedia(q).matches)] ?? defaultValue;
+  const get = () => {
+    if (typeof window === 'undefined' || !window.matchMedia) return defaultValue;
+    const index = queries.findIndex(q => {
+      const mql = window.matchMedia(q);
+      return mql ? mql.matches : false;
+    });
+    return index !== -1 ? values[index] : defaultValue;
+  };
+  
   const [value, setValue] = useState<number>(get);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    
     const handler = () => setValue(get);
-    queries.forEach(q => matchMedia(q).addEventListener('change', handler));
-    return () => queries.forEach(q => matchMedia(q).removeEventListener('change', handler));
+    const mqls = queries.map(q => window.matchMedia(q));
+    
+    mqls.forEach(mql => {
+      if (mql) {
+        if (mql.addEventListener) {
+          mql.addEventListener('change', handler);
+        } else if ((mql as any).addListener) {
+          (mql as any).addListener(handler);
+        }
+      }
+    });
+
+    return () => {
+      mqls.forEach(mql => {
+        if (mql) {
+          if (mql.removeEventListener) {
+            mql.removeEventListener('change', handler);
+          } else if ((mql as any).removeListener) {
+            (mql as any).removeListener(handler);
+          }
+        }
+      });
+    };
   }, [queries]);
 
   return value;

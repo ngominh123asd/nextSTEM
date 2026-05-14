@@ -123,8 +123,8 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
               </div>
             </div>
             <button onClick={() => { setShowAssessment(false); setAssessingComp(null); }}
-              className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors">
-              <span className="material-symbols-outlined">close</span>
+              className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors">
+              <span className="material-symbols-outlined text-lg leading-none">close</span>
             </button>
           </div>
 
@@ -306,8 +306,8 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
                     <p className="text-white font-bold text-sm">{comp.name}</p>
                     <p className="text-blue-100 text-[10px]">{comp.indicators?.length || 3} chỉ số hành vi</p>
                   </div>
-                  <button onClick={() => setPopoverComp(null)} className="p-1 rounded-lg hover:bg-white/20 text-white/70 hover:text-white transition-colors">
-                    <span className="material-symbols-outlined text-lg">close</span>
+                  <button onClick={() => setPopoverComp(null)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 text-white/70 hover:text-white transition-colors">
+                    <span className="material-symbols-outlined text-lg leading-none">close</span>
                   </button>
                 </div>
               </div>
@@ -337,7 +337,9 @@ export default function STEMCompetencyPanel({ compact = false, onShowScoreInfo }
                       const indScore = indScoreObj?.score ?? 0;
                       return (
                         <div key={ind.id} className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50/80">
-                          <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">{ind.code}</span>
+                          <div className="flex-shrink-0 flex items-center justify-center">
+                            <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded leading-none">{ind.code}</span>
+                          </div>
                           <span className="text-[11px] text-slate-600 flex-1">{ind.name}</span>
                           <span className={`text-[10px] font-bold min-w-[28px] text-right ${
                             indScore >= 60 ? 'text-emerald-600' : 
