@@ -92,6 +92,8 @@ class Settings(BaseSettings):
         """Parse CORS_ORIGINS env var into a list of origin strings."""
         v = self.CORS_ORIGINS
         if not v or not v.strip():
+            if self.ENVIRONMENT == "production":
+                return []  # No default CORS array in production if not explicitly set
             return _DEFAULT_CORS
         v = v.strip()
         # Try JSON array first

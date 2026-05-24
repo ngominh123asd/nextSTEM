@@ -47,6 +47,8 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
         user, token = await auth_service.authenticate_user(
             db, email=body.email, password=body.password
         )
+        if user.must_change_password:
+             raise HTTPException(status_code=403, detail="must_change_password")
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
     # Fire-and-forget: don't block response waiting for Redis
@@ -94,3 +96,27 @@ async def logout(user: User = Depends(get_current_user)):
 @router.get("/me", response_model=UserRead)
 async def me(user: User = Depends(get_current_user)):
     return user
+class ChangePasswordRequest(BaseModel):
+    email: str
+    old_password: str
+    new_password: str
+
+@router.post("/change-password", response_model=TokenResponse)
+async def change_password(body: ChangePasswordRequest, db: AsyncSession = Depends(get_db)):
+    try:
+        user, _ = await auth_service.authenticate_user(
+            db, email=body.email, password=body.old_password
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+        
+    from app.utils.security import async_hash_password
+    user.hashed_password = await async_hash_password(body.new_password)
+    user.must_change_password = False
+    await db.commit()
+    
+    # reissue token
+    from app.utils.security import create_access_token
+    token = create_access_token({"sub": str(user.id)})
+    asyncio.create_task(create_session(user.id))
+    return TokenResponse(access_token=token)

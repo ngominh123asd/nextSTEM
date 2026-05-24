@@ -47,7 +47,11 @@ def _serialize(value):
         return json.dumps(value, ensure_ascii=False)
     if isinstance(value, (dict,)):
         return json.dumps(value, ensure_ascii=False)
-    return str(value)
+        
+    val_str = str(value)
+    if val_str.startswith(('=', '+', '-', '@')):
+        val_str = "'" + val_str
+    return val_str
 
 
 def _user_row(u: User) -> dict:
@@ -466,6 +470,7 @@ async def import_users_csv(
             status="active",
             grade=(row.get("grade") or "").strip() or None,
             school=(row.get("school") or "").strip() or None,
+            must_change_password=True,
         )
         db.add(user)
         results["created"] += 1

@@ -17,6 +17,7 @@ class UserRead(BaseModel):
     goals: list[str] | None = None
     interests: list[str] | None = None
     is_active: bool = True
+    must_change_password: bool = False
     created_at: datetime
 
     model_config = {"from_attributes": True}

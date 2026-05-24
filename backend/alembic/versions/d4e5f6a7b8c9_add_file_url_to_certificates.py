@@ -16,10 +16,8 @@ down_revision: Union[str, tuple, None] = ('a0968a4a25a9', '7d6c5b4a3921')
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-
 def upgrade() -> None:
-    op.add_column('certificates', sa.Column('file_url', sa.String(500), nullable=True))
-
+    pass
 
 def downgrade() -> None:
-    op.drop_column('certificates', 'file_url')
+    pass
