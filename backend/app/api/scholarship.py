@@ -215,7 +215,7 @@ Schema JSON phải trả:
 async def _generate_recommendations(
     prompt: str, query: str, max_results: int
 ) -> list[ScholarshipRecommendation]:
-    client = genai.Client(api_key=settings.GEMINI_API_KEY.get_secret_value())
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
     def _call_model() -> str:
         response = client.models.generate_content(
@@ -292,7 +292,7 @@ async def search_scholarships(
     study_level: Optional[str] = Query(None, description="Bậc học dự kiến"),
     max_results: int = Query(6, description="Số lượng học bổng tối đa"),
 ):
-    if not settings.GEMINI_API_KEY.get_secret_value():
+    if not settings.GEMINI_API_KEY:
         raise HTTPException(status_code=503, detail="GEMINI_API_KEY chưa được cấu hình")
 
     effective_max = max(3, min(max_results, 10))
@@ -365,7 +365,7 @@ async def search_scholarships_stream(
     study_level: Optional[str] = Query(None, description="Bậc học dự kiến"),
     max_results: int = Query(6, description="Số lượng học bổng tối đa"),
 ):
-    if not settings.GEMINI_API_KEY.get_secret_value():
+    if not settings.GEMINI_API_KEY:
         raise HTTPException(status_code=503, detail="GEMINI_API_KEY chưa được cấu hình")
 
     effective_max = max(3, min(max_results, 10))
@@ -390,7 +390,7 @@ async def search_scholarships_stream(
     async def event_stream():
         yield _sse_event("progress", {"message": "Đang phân tích hồ sơ học bổng..."})
         try:
-            client = genai.Client(api_key=settings.GEMINI_API_KEY.get_secret_value())
+            client = genai.Client(api_key=settings.GEMINI_API_KEY)
             stream = client.models.generate_content_stream(
                 model="gemini-3.1-flash-lite-preview",
                 contents=prompt,

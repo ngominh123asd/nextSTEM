@@ -31,7 +31,7 @@ router = APIRouter(prefix="/gemini", tags=["gemini"])
 
 
 def _check_gemini():
-    if not settings.GEMINI_API_KEY.get_secret_value():
+    if not settings.GEMINI_API_KEY:
         raise HTTPException(status_code=503, detail="Gemini API not configured")
 
 
