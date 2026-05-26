@@ -13,6 +13,7 @@ _DEFAULT_CORS = [
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:3000",
+    "https://nextstemvietnam.vercel.app",
 ]
 
 # Regex that catches all common postgres URL prefixes that are NOT asyncpg
@@ -92,8 +93,6 @@ class Settings(BaseSettings):
         """Parse CORS_ORIGINS env var into a list of origin strings."""
         v = self.CORS_ORIGINS
         if not v or not v.strip():
-            if self.ENVIRONMENT == "production":
-                return []  # No default CORS array in production if not explicitly set
             return _DEFAULT_CORS
         v = v.strip()
         # Try JSON array first
