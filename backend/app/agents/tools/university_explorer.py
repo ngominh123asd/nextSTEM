@@ -391,7 +391,7 @@ async def _tavily_university_candidates(
     max_results: int,
     exclude_names: set[str],
 ) -> list[dict]:
-    api_key = (settings.TAVILY_API_KEY or "").strip()
+    api_key = (settings.TAVILY_API_KEY.get_secret_value() or "").strip()
     if not api_key or max_results <= 0:
         return []
 
@@ -466,7 +466,7 @@ async def _tavily_school_links(
     homepage_url: str | None = None,
     max_results: int = 2,
 ) -> list[dict]:
-    api_key = (settings.TAVILY_API_KEY or "").strip()
+    api_key = (settings.TAVILY_API_KEY.get_secret_value() or "").strip()
     if not api_key:
         return []
 
@@ -614,7 +614,7 @@ async def _hipo_lookup(
 
 
 async def _scorecard_enrich_us(school_name: str) -> dict | None:
-    api_key = (settings.COLLEGESCORECARD_API_KEY or "").strip()
+    api_key = (settings.COLLEGESCORECARD_API_KEY.get_secret_value() or "").strip()
     if not api_key:
         return None
 

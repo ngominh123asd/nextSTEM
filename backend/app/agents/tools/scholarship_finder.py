@@ -20,7 +20,7 @@ async def _tavily_scholarship_links(
     country: str | None,
     max_results: int = 5,
 ) -> list[dict]:
-    api_key = (settings.TAVILY_API_KEY or "").strip()
+    api_key = (settings.TAVILY_API_KEY.get_secret_value() or "").strip()
     if not api_key:
         return []
 

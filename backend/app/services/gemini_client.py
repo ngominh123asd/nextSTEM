@@ -22,9 +22,9 @@ _client: genai.Client | None = None
 def _get_client() -> genai.Client:
     global _client
     if _client is None:
-        if not settings.GEMINI_API_KEY:
+        if not settings.GEMINI_API_KEY.get_secret_value():
             raise RuntimeError("GEMINI_API_KEY not configured")
-        _client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        _client = genai.Client(api_key=settings.GEMINI_API_KEY.get_secret_value())
     return _client
 
 

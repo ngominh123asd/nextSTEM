@@ -5,7 +5,7 @@ from __future__ import annotations
 import json as _json
 import re as _re
 
-from pydantic import field_validator
+from pydantic import field_validator, SecretStr
 from pydantic_settings import BaseSettings
 
 
@@ -49,7 +49,7 @@ class Settings(BaseSettings):
 
     # ── JWT ──────────────────────────────────────────────────
     # REQUIRED — generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"
-    SECRET_KEY: str
+    SECRET_KEY: SecretStr
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ALGORITHM: str = "HS256"
 
@@ -59,17 +59,17 @@ class Settings(BaseSettings):
 
     # ── Gemini (Google AI) ────────────────────────────────
     # Used for Academic Editor, Roadmap, and AI Study Coach Widget
-    GEMINI_API_KEY: str = ""
+    GEMINI_API_KEY: SecretStr = ""
 
     # ── External AI Tools ─────────────────────────────
     # OpenAlex (free, no key needed but recommended for higher rate limits)
     OPENALEX_MAILTO: str = ""
     # Tavily Search API (optional - for enhanced search results)
-    TAVILY_API_KEY: str = ""
+    TAVILY_API_KEY: SecretStr = ""
     # Wikidata User-Agent (required for Wikidata SPARQL queries)
     WIKIDATA_USER_AGENT: str = "nextSTEM/1.0 (study abroad assistant)"
     # College Scorecard API (optional - for US university details)
-    COLLEGESCORECARD_API_KEY: str = ""
+    COLLEGESCORECARD_API_KEY: SecretStr = ""
     # O*NET credentials (optional)
     ONET_USERNAME: str = ""
     ONET_PASSWORD: str = ""

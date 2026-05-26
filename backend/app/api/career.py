@@ -121,7 +121,7 @@ async def _generate_ai_recommendations(
     max_results: int,
     grounding_text: str,
 ) -> list[MajorRecommendation]:
-    if not settings.GEMINI_API_KEY:
+    if not settings.GEMINI_API_KEY.get_secret_value():
         return []
 
     payload = {
@@ -186,7 +186,7 @@ Ngữ cảnh tham khảo từ hệ thống career_knowledge (có thể dùng đ�
 }}
 """.strip()
 
-    client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    client = genai.Client(api_key=settings.GEMINI_API_KEY.get_secret_value())
 
     def _call_model() -> str:
         response = client.models.generate_content(
@@ -337,7 +337,7 @@ async def search_careers(
     strengths_list = _split_csv(strengths)
     effective_max = max(3, min(max_results, 10))
 
-    if not settings.GEMINI_API_KEY:
+    if not settings.GEMINI_API_KEY.get_secret_value():
         raise HTTPException(status_code=503, detail="GEMINI_API_KEY chưa được cấu hình")
 
     try:
@@ -396,7 +396,7 @@ async def search_careers_stream(
     ),
     max_results: int = Query(5, description="So nganh de xuat toi da"),
 ):
-    if not settings.GEMINI_API_KEY:
+    if not settings.GEMINI_API_KEY.get_secret_value():
         raise HTTPException(status_code=503, detail="GEMINI_API_KEY chưa được cấu hình")
 
     interests_list = _split_csv(interests)
@@ -428,7 +428,7 @@ async def search_careers_stream(
                     "message": "AI đang suy luận và đề xuất chuyên ngành...",
                 },
             )
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            client = genai.Client(api_key=settings.GEMINI_API_KEY.get_secret_value())
             chunks: list[str] = []
             response = client.models.generate_content_stream(
                 model="gemini-3.1-flash-lite-preview",
