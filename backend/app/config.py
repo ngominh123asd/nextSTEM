@@ -50,7 +50,7 @@ class Settings(BaseSettings):
 
     # ── JWT ──────────────────────────────────────────────────
     # REQUIRED — generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"
-    SECRET_KEY: SecretStr
+    SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ALGORITHM: str = "HS256"
 
