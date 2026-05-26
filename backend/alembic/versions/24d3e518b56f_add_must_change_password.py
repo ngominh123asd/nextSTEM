@@ -16,7 +16,7 @@ branch_labels = None
 depends_on = None
 
 def upgrade():
-    pass
+    op.add_column('users', sa.Column('must_change_password', sa.Boolean(), server_default='false', nullable=False))
 
 def downgrade():
-    pass
+    op.drop_column('users', 'must_change_password')
