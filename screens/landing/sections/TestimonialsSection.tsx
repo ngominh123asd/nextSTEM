@@ -3,11 +3,7 @@ import { testimonials, type Testimonial } from '../types';
 
 const TestimonialCard: React.FC<{ t: Testimonial }> = ({ t }) => (
   <div
-    className={`p-6 rounded-[2rem] shadow-[0_15px_40px_rgba(30,58,138,0.08)] border w-full max-w-[320px] transition-all duration-300 hover:shadow-[0_25px_60px_rgba(30,58,138,0.15)] hover:-translate-y-1 ${
-      t.highlighted
-        ? 'bg-[#DDEBFF] border-white shadow-[0_20px_50px_rgba(30,58,138,0.15)]'
-        : 'bg-white/95 backdrop-blur-md border-white'
-    }`}
+    className="p-6 rounded-[2rem] bg-white border border-white/80 shadow-[0_10px_30px_rgba(30,58,138,0.05)] w-full max-w-[320px] transition-all duration-300 hover:shadow-[0_20px_45px_rgba(30,58,138,0.1)] hover:-translate-y-1"
   >
     <p className="text-gray-700 text-[14px] leading-relaxed mb-4 font-medium">
       "{t.quote}"
@@ -76,10 +72,10 @@ const TestimonialsSection = () => {
     <section className="py-0 bg-white">
       <div className="relative max-w-[1280px] mx-auto px-4 md:px-6 min-h-[600px] lg:h-[600px]">
         {/* Desktop: absolute background card (original layout) */}
-        <div className="hidden lg:block absolute inset-x-6 top-1/2 -translate-y-1/2 h-[500px] bg-gradient-to-br from-[#EAF3FF] via-[#DDEBFF] to-[#BFD9FF] rounded-[3.5rem] shadow-[0_40px_80px_rgba(30,58,138,0.15)] border border-white z-0"></div>
+        <div className="hidden lg:block absolute inset-x-6 top-1/2 -translate-y-1/2 h-[500px] bg-[#EAF3FF] rounded-[3.5rem] shadow-[0_40px_80px_rgba(30,58,138,0.15)] border border-white z-0"></div>
 
         {/* Mobile: card wraps content for guaranteed inner spacing */}
-        <div className="lg:hidden bg-gradient-to-br from-[#EAF3FF] via-[#DDEBFF] to-[#BFD9FF] rounded-[2.5rem] shadow-[0_30px_60px_rgba(30,58,138,0.12)] border border-white p-6 sm:p-8">
+        <div className="lg:hidden bg-[#EAF3FF] rounded-[2.5rem] shadow-[0_30px_60px_rgba(30,58,138,0.12)] border border-white p-6 sm:p-8">
           <div className="flex flex-col justify-center max-w-lg">
             <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1E3A8A] leading-[1.25] mb-4">
               Được đánh giá{' '}
